@@ -85,6 +85,14 @@ textarea{font-family:ui-monospace,Menlo,Consolas,monospace;min-height:210px;resi
 .big .bar{font-size:30px;min-height:52px}.big .beat-grid{min-height:34px}.big .beat-dots{margin-top:4px}.big .beat-dot{width:8px;height:8px}
 .mut{color:var(--mut);font-size:14px}
 .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+.acc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:2px 0;background:transparent;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.acc-chev{width:10px;height:10px;border-right:2.25px solid currentColor;border-bottom:2.25px solid currentColor;transform:rotate(45deg) translate(-2px,-2px);transition:transform .25s ease;flex:0 0 auto}
+.acc.open .acc-chev{transform:rotate(-135deg) translate(-2px,-2px)}
+.acc-body{display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;transition:grid-template-rows .28s ease,opacity .2s ease,visibility 0s linear .28s}
+.acc.open .acc-body{grid-template-rows:1fr;opacity:1;visibility:visible;transition:grid-template-rows .28s ease,opacity .22s ease .04s,visibility 0s}
+.acc-inner{overflow:hidden;min-height:0}
+.acc.open .acc-inner{padding-top:10px}
+@media(prefers-reduced-motion:reduce){.acc-body,.acc.open .acc-body,.acc-chev{transition:none}}
 .collapsible summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none}.collapsible summary::-webkit-details-marker{display:none}.collapsible summary:after{content:"+";font-size:20px}.collapsible[open] summary:after{content:"−"}.collapse-content{padding-top:10px}.modal-footer{justify-content:flex-end;padding-top:4px}button:disabled{opacity:.45;cursor:not-allowed}
 .hide{display:none}
 .sheetpanel{border:1px solid var(--acc);background:var(--card);border-radius:12px;padding:12px;margin:10px 0}.sheetpanel h3{margin:0 0 6px;font-size:17px}.sheetstatus{font-size:14px;color:var(--mut);margin:8px 0}.sheetpreview{white-space:pre-wrap;font:14px/1.55 ui-monospace,Menlo,Consolas,monospace;background:var(--bar);border:1px solid var(--line);border-radius:8px;padding:10px;max-height:260px;overflow:auto}.sheetmeta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.sheet-mode-select{display:block;width:100%;margin:8px 0 12px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit}.sheet-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:32px 14px;min-height:260px}.sheet-spinner{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:sheetspin .8s linear infinite}@keyframes sheetspin{to{transform:rotate(360deg)}}.sheet-loading p{margin:0;max-width:360px}.sheetmeta span{background:var(--bg);border:1px solid var(--line);padding:3px 8px;border-radius:7px;font-size:13px}
@@ -1031,8 +1039,11 @@ var PB_STY={
 "Waltz (3/4)":{sw:0,d:4,k:"x...........",s:"............",h:"x.x.x.x.x.x.",b:"0...........",c:"....x...x..."},
 "Latin":{sw:0,d:2,k:"x...x...x...x...",s:"x..x..x...x.x...",h:"x.x.x.x.x.x.x.x.",b:"..0...5...0...5.",c:"..x..x..x..x.x.."},
 "Disco":{sw:0,d:2,k:"x...x...x...x...",s:"....x.......x...",h:"..x...x...x...x.",b:"0.8.0.8.0.8.0.8.",c:"..x...x...x...x."}};
-var PB_KEYS=["d","b","c","m","k","s","h"],pbMix={v:[80,85,70,50,100,100,100],mu:[0,0,0,0],style:"Ballad"},pbEqOn=false,pbG={},pbCur={},pbLastC=null,pbLastCk=null,pbNoise=null;
+var PB_KEYS=["d","b","c","m","k","s","h"],pbMix={v:[80,85,70,50,100,100,100],mu:[0,0,0,0],style:"Rock"},pbEqOn=false,pbG={},pbCur={},pbLastC=null,pbLastCk=null,pbNoise=null;
 try{var _pm=JSON.parse(localStorage.getItem(LS+":practiceMix"));if(_pm&&_pm.v&&_pm.v.length===7&&_pm.mu&&PB_STY[_pm.style])pbMix=_pm}catch(e){}
+function pbStyleMap(){try{return JSON.parse(localStorage.getItem(LS+":practiceStyle")||"{}")||{}}catch(e){return {}}}
+function pbStyleFor(id){var v=pbStyleMap()[id];return PB_STY[v]?v:"Rock"}
+function pbSaveStyle(id,v){var m=pbStyleMap();m[id]=v;try{localStorage.setItem(LS+":practiceStyle",JSON.stringify(m))}catch(e){}}
 function pbSaveMix(){try{localStorage.setItem(LS+":practiceMix",JSON.stringify(pbMix))}catch(e){}}
 function pbApplyMix(){PB_KEYS.forEach(function(k,i){if(pbG[k])pbG[k].gain.value=(i<4&&pbMix.mu[i])?0:pbMix.v[i]/100})}
 function pbMod(a,b){return((a%b)+b)%b}
@@ -1083,7 +1094,7 @@ function pbTick(time,bi,beat,sub){
   var id=setTimeout(function(){pbVis=pbVis.filter(function(x){return x!==id});if(!pbPlaying)return;if(sub===0){pbShown=bi;pbShownBeat=beat;pbMark(bi,beat);pbSquares(beat,n)}},Math.max(0,(time-pbCtx.currentTime)*1000));
   pbVis.push(id);
 }
-var pbTaken={};
+var pbTaken={},pbCount=0,pbCountTotal=0;
 function pbSecStart(w){
   var sec=null,idx=-1,all=document.querySelectorAll("#cc .sec, #cc .bar");
   for(var k=0;k<all.length;k++){var x=all[k];if(x.classList.contains("sec"))sec=x.textContent.trim().toLowerCase();else{idx++;if(sec===w)return idx}}
@@ -1119,7 +1130,14 @@ function pbNextBar(bi,n){
 function pbRun(){
   if(!pbCtx)return;
   while(pbNext<pbCtx.currentTime+.12){
-    var bars=pbBars(),n=bars.length;if(n&&pbBar>=n){pbBar=0;pbBeat=0;pbSub=0}
+    var bars=pbBars(),n=bars.length;
+    if(pbCount>0){
+      var ck=pbCountTotal-pbCount,ct=pbNext,cn=pbCountTotal;
+      pbClick(ct,ck===0?1600:1000,ck===0?.5:.35);
+      (function(k,t,nb){var id=setTimeout(function(){pbVis=pbVis.filter(function(x){return x!==id});if(pbPlaying)pbSquares(k,nb)},Math.max(0,(t-pbCtx.currentTime)*1000));pbVis.push(id)})(ck,ct,cn);
+      pbNext+=60/pbBpm;pbCount--;continue;
+    }
+    if(n&&pbBar>=n){pbBar=0;pbBeat=0;pbSub=0}
     pbTick(pbNext,pbBar,pbBeat,pbSub);pbNext+=15/pbBpm;
     if(++pbSub>=4){pbSub=0;if(++pbBeat>=pbBeatsOf(bars[pbBar])){pbBeat=0;pbBar=pbNextBar(pbBar,n)}}
   }
@@ -1131,12 +1149,10 @@ function pbRenderMix(){
   var opts=Object.keys(PB_STY).map(function(k){return '<option'+(k===pbMix.style?" selected":"")+'>'+k+'</option>'}).join("");
   s.innerHTML='<div class="metro-card pb-card" role="dialog" aria-modal="true" aria-label="Mixer"><button type="button" id="pbX" class="pb-x" aria-label="Close">\u2715</button>'
    +'<label class="mut" for="pbStyle">Style</label><select id="pbStyle" style="width:100%;margin:4px 0 8px">'+opts+'</select>'
-   +'<div class="pb-mrow"><span>Tempo</span><input type="range" id="pbSlider2" min="30" max="300" value="'+pbBpm+'" aria-label="Tempo"><b id="pbBpm2" style="min-width:34px;text-align:right">'+pbBpm+'</b></div>'
    +row("Drums",0,'<button type="button" id="pbEqBtn" class="'+(pbEqOn?"p":"")+'">EQ</button>')+(pbEqOn?row("Kick",4)+row("Snare",5)+row("Hi-hat",6):"")+row("Bass",1)+row("Chords",2)+row("Metronome",3)+'</div>';
   var $=function(id){return document.getElementById(id)};
   s.onclick=function(e){if(e.target===s)pbCloseSheet()};$("pbX").onclick=pbCloseSheet;
-  $("pbStyle").onchange=function(){pbMix.style=this.value;pbSaveMix()};
-  $("pbSlider2").oninput=function(){pbSetBpm(this.value)};
+  $("pbStyle").onchange=function(){pbMix.style=this.value;pbSaveMix();pbSaveStyle(cur,this.value)};
   $("pbEqBtn").onclick=function(){pbEqOn=!pbEqOn;pbRenderMix()};
   s.querySelectorAll("[data-pbv]").forEach(function(r){r.oninput=function(){pbMix.v[+r.getAttribute("data-pbv")]=+r.value;pbApplyMix();pbSaveMix()}});
   s.querySelectorAll("[data-pbm]").forEach(function(b){b.onclick=function(){var i=+b.getAttribute("data-pbm");pbMix.mu[i]=pbMix.mu[i]?0:1;pbApplyMix();pbSaveMix();pbRenderMix()}});
@@ -1145,10 +1161,10 @@ async function pbToggle(){
   if(pbPlaying){pbPause();return}
   var AC=window.AudioContext||window.webkitAudioContext;if(!AC){toast("Your browser does not support Web Audio.",3000);return}
   try{pbCtx=new AC();if(pbCtx.state==="suspended")await pbCtx.resume()}catch(e){pbCtx=null;toast("Could not start audio. Check your browser audio settings.",3500);return}
-  pbBus();pbPlaying=true;pbBeat=0;pbSub=0;pbNext=pbCtx.currentTime+.08;pbTimer=setInterval(pbRun,25);pbRun();pbUI();
+  pbBus();pbPlaying=true;pbBeat=0;pbSub=0;pbCountTotal=pbCount=pbBeatsOf(pbBars()[pbBar]);pbNext=pbCtx.currentTime+.08;pbTimer=setInterval(pbRun,25);pbRun();pbUI();
 }
 function pbPause(){
-  var was=pbPlaying;pbPlaying=false;
+  var was=pbPlaying;pbPlaying=false;pbCount=0;
   if(pbTimer){clearInterval(pbTimer);pbTimer=null}
   pbVis.forEach(function(t){clearTimeout(t)});pbVis=[];
   if(pbCtx){try{pbCtx.close()}catch(e){}pbCtx=null}
@@ -1162,7 +1178,7 @@ function pbShutdown(){
 function syncPracticeBar(){
   var show=practiceMode&&view==="song"&&mode==="view"&&!isCreatingSong&&!toolsPage,bar=document.getElementById("pbBar");
   if(!show){if(bar||pbPlaying||pbSheet||pbSong)pbShutdown();pbSong=null;return}
-  if(pbSong!==cur){if(pbSong!==null)pbPause();pbSong=cur;pbLoadTempo();pbBar=pbShown=0;pbCued=false}
+  if(pbSong!==cur){if(pbSong!==null)pbPause();pbSong=cur;pbLoadTempo();pbMix.style=pbStyleFor(cur);pbBar=pbShown=0;pbCued=false}
   if(!bar){
     bar=document.createElement("div");bar.id="pbBar";bar.className="pb-bar";
     bar.innerHTML='<button type="button" id="pbMixBtn" class="pb-eq" aria-label="Mixer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M12 4v16M18 4v16"/><path d="M3.5 14h5M9.5 8h5M15.5 16h5" stroke-width="3.5"/></svg></button><button type="button" id="pbPlay" class="pb-play"></button><button type="button" id="pbTempo" class="pb-tempo" aria-label="Metronome settings"><b id="pbNum"></b><span>bpm</span></button>';
@@ -1302,6 +1318,29 @@ function getDisplayPrefs(s){
   return displayPrefs[s.id];
 }
 function saveDisplayPrefs(){try{localStorage.setItem(LS+":display",JSON.stringify(displayPrefs))}catch(e){}}
+/* Practice mode keeps its own chord detail + bars per line (default: Detailed, 2 bars), saved on this device.
+   The normal Chord View settings are left untouched and come back as soon as Practice Mode is exited. */
+var practiceDisp=null;
+function practiceDispLoad(){
+  if(practiceDisp)return practiceDisp;
+  try{practiceDisp=JSON.parse(localStorage.getItem(LS+":practiceDisplay")||"null")}catch(e){practiceDisp=null}
+  if(!practiceDisp||typeof practiceDisp!=="object")practiceDisp={};
+  return practiceDisp;
+}
+function savePracticeDisp(){try{localStorage.setItem(LS+":practiceDisplay",JSON.stringify(practiceDispLoad()))}catch(e){}}
+function practiceView(){return !!practiceMode&&view==="song"&&mode!=="edit"&&!isCreatingSong}
+function effChordStyle(s){
+  if(practiceView())return practiceDispLoad().chordStyle==="standard"?"standard":"detailed";
+  return getDisplayPrefs(s).chordStyle||"standard";
+}
+function setChordStyle(s,v){
+  if(practiceView()){practiceDispLoad().chordStyle=v;savePracticeDisp()}
+  else{getDisplayPrefs(s).chordStyle=v;saveDisplayPrefs()}
+}
+function setBarsPerLine(s,v){
+  if(practiceView()){practiceDispLoad().pl=v;savePracticeDisp()}
+  else{getDisplayPrefs(s).pl=v;saveDisplayPrefs()}
+}
 function displayKey(s){var p=getDisplayPrefs(s);return p.key||s.key||"C"}
 function displayTranspose(s){var a=parseKey(s.key||"C"),b=parseKey(displayKey(s));return idx(b.r)-idx(a.r)}
 function displayChart(s){var st=displayTranspose(s);return st?transposeText(s.chart||"",st,useFlat(displayKey(s))):(s.chart||"")}
@@ -1355,7 +1394,10 @@ function standardTextForView(s){
   while(out.length&&!out[out.length-1].trim())out.pop();
   return out.join("\n");
 }
-function displayBars(s){var p=getDisplayPrefs(s);return p.pl==="auto"?"auto":(Number(p.pl)||4)}
+function displayBars(s){
+  if(practiceView()){var q=practiceDispLoad().pl;return q==="auto"?"auto":(Number(q)||2)}
+  var p=getDisplayPrefs(s);return p.pl==="auto"?"auto":(Number(p.pl)||4)
+}
 function curBar(s){if(!sel)return null;var x=parseChart(displayChart(s))[sel.ii];return x&&x.bars?x.bars[sel.bi]:null}
 function panelHTML(s){
   var b=curBar(s);
@@ -1589,10 +1631,10 @@ function fontOptHTML(val,name,fam,cur,del){
 function fontBoxHTML(){
   var cur=chordFontSel();
   var opts=BUILTIN_FONTS.map(function(o){return fontOptHTML("b:"+o.k,o.n,o.f,cur,false)}).concat(userFonts.map(function(u){return fontOptHTML("u:"+u.id,u.name,'"CBUser'+u.id+'",system-ui,sans-serif',cur,true)}));
-  return'<div class="box" id="fontbox"><b>Chord font</b><p class="mut">Changes only the chords on bar charts. Lyrics, titles and the rest of the app keep their normal font.</p><div class="font-list">'+opts.join("")+'</div><div class="row"><button type="button" id="fontUp">Upload font\u2026</button><input type="file" id="fontFile" class="hide" accept=".ttf,.otf,.woff,.woff2"></div><p class="mut" id="fontMsg">Uploaded fonts (.ttf, .otf, .woff, .woff2, up to 4 MB) are kept on this device only. They are never synced or sent to the database.</p></div>';
+  return accBox("font","Chord font",'<p class="mut">Changes only the chords on bar charts. Lyrics, titles and the rest of the app keep their normal font.</p><div class="font-list">'+opts.join("")+'</div><div class="row"><button type="button" id="fontUp">Upload font\u2026</button><input type="file" id="fontFile" class="hide" accept=".ttf,.otf,.woff,.woff2"></div><p class="mut" id="fontMsg">Uploaded fonts (.ttf, .otf, .woff, .woff2, up to 4 MB) are kept on this device only. They are never synced or sent to the database.</p>',"fontbox");
 }
 function setFontMsg(t){var m=document.getElementById("fontMsg");if(m)m.textContent=t}
-function refreshFontBox(){var box=document.getElementById("fontbox");if(!box)return;box.outerHTML=fontBoxHTML();bindFontBox()}
+function refreshFontBox(){var box=document.getElementById("fontbox");if(!box)return;box.outerHTML=fontBoxHTML();bindFontBox();bindAccordion()}
 function bindFontBox(){
   var box=document.getElementById("fontbox");if(!box)return;
   box.querySelectorAll(".font-pick").forEach(function(b){b.onclick=function(){setChordFont(b.dataset.f);refreshFontBox()}});
@@ -1625,6 +1667,11 @@ var CLI='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="cur
 function cloudBtn(){
   return '<button id="cloud" class="sidebar-cloud-button" aria-label="Open settings"><span class="sidebar-cloud-icon">'+CLI+'</span><span class="sidebar-cloud-label">Settings</span>'+(sbOn()?'<span class="sidebar-cloud-status" title="Connected"></span>':'')+'</button>';
 }
+var settingsAcc=null;
+function accBox(id,title,inner,boxId){
+  var open=settingsAcc===id;
+  return '<div class="box acc'+(open?' open':'')+'"'+(boxId?' id="'+boxId+'"':'')+' data-accbox="'+id+'"><button type="button" class="acc-head" data-acc="'+id+'" aria-expanded="'+(open?'true':'false')+'"><b>'+title+'</b><span class="acc-chev" aria-hidden="true"></span></button><div class="acc-body"><div class="acc-inner">'+inner+'</div></div></div>';
+}
 function modalHTML(){
   return '<div class="ov" id="ov"><div class="modal" role="dialog" aria-modal="true" aria-label="Settings"><div class="mh"><b>Settings</b></div>'+loginBox()+fontBoxHTML()+installBox()+backupBox()+'</div></div>';
 }
@@ -1640,20 +1687,31 @@ function bindModal(){
   // the sidebar is open. Guard the lookup to avoid aborting draw() before the
   // hamburger, Add button, and other controls receive their event handlers.
   var cloudTrigger=$("cloud");
-  if(cloudTrigger)cloudTrigger.onclick=function(){sidebarOpen=false;cloudOpen=true;draw()};
+  if(cloudTrigger)cloudTrigger.onclick=function(){sidebarOpen=false;settingsAcc=null;cloudOpen=true;draw()};
   if(!cloudOpen)return;
   var close=function(){cloudOpen=false;draw()};
   $("ov").onclick=function(e){if(e.target===this)close()};
   bindBackup();
   bindFontBox();
+  bindAccordion();
+}
+function bindAccordion(){
+  var ov=document.getElementById("ov");if(!ov)return;
+  ov.querySelectorAll(".acc-head").forEach(function(h){h.onclick=function(){
+    var id=h.getAttribute("data-acc"),was=settingsAcc===id;settingsAcc=was?null:id;
+    ov.querySelectorAll("[data-accbox]").forEach(function(b){
+      var on=b.getAttribute("data-accbox")===settingsAcc;
+      b.classList.toggle("open",on);b.querySelector(".acc-head").setAttribute("aria-expanded",on?"true":"false");
+    });
+  }});
 }
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&cloudOpen){cloudOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&scaleToolOpen){scaleToolOpen=false;draw()}else if(e.key==="Escape"&&sidebarOpen){sidebarOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&tunerOpen){stopTuner(false);tunerOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&metronomeOpen){stopMetronome(false);metronomeOpen=false;metroBeatsMenuOpen=false;metroClicksMenuOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&chordToolStage!=="home"){chordToolStage=(chordToolStage==="guitar"||chordToolStage==="piano")?"choose":"home";draw()}});
 function loginBox(){
-  if(isSignedIn()) return '<div class="box"><b>Account login</b><p class="mut">Signed in as '+esc(SB.email||'')+'. '+(isAdmin()?"Administrator access.":"View and practice access.")+'</p><p class="mut" id="dst">'+esc(syncMsg)+'</p><div class="row"><button id="dsync" class="p">Sync Now</button><button id="dout" class="d">Log out</button></div></div>';
-  return '<div class="box"><b>Account login</b><input id="sbem" type="email" placeholder="Email address" autocomplete="username" value="'+esc(SB.email||'')+'"><input id="sbpw" type="password" placeholder="Password" autocomplete="current-password"><div class="row"><button id="sin" class="p">Sign in</button><button id="sup" disabled aria-disabled="true" title="Account creation is disabled">Create account</button></div><p class="mut">Not signed in.</p><p class="mut" id="loginmsg"></p></div>';
+  if(isSignedIn()) return accBox("login","Account login",'<p class="mut">Signed in as '+esc(SB.email||'')+'. '+(isAdmin()?"Administrator access.":"View and practice access.")+'</p><p class="mut" id="dst">'+esc(syncMsg)+'</p><div class="row"><button id="dsync" class="p">Sync Now</button><button id="dout" class="d">Log out</button></div>');
+  return accBox("login","Account login",'<input id="sbem" type="email" placeholder="Email address" autocomplete="username" value="'+esc(SB.email||'')+'"><input id="sbpw" type="password" placeholder="Password" autocomplete="current-password"><div class="row"><button id="sin" class="p">Sign in</button><button id="sup" disabled aria-disabled="true" title="Account creation is disabled">Create account</button></div><p class="mut">Not signed in.</p><p class="mut" id="loginmsg"></p>');
 }
 function backupBox(){
-  return '<details class="box collapsible"><summary><b>Backup to file</b><span class="mut">Tap to expand</span></summary><div class="collapse-content"><p class="mut">Export your songs as a file and keep it anywhere. Import merges by song, so newer edits replace older copies.</p><div class="row"><button id="exp" class="p">Export to file</button><button id="imp">Import file</button></div><input type="file" id="file" accept=".json,application/json" class="hide"><textarea id="paste" class="hide" style="min-height:90px" placeholder="Or paste exported text here"></textarea><div class="row hide" id="pasterow"><button id="doPaste">Import pasted text</button></div><p class="mut" id="msg">'+esc(msg)+'</p></div></details>';
+  return accBox("backup","Backup to file",'<p class="mut">Export your songs as a file and keep it anywhere. Import merges by song, so newer edits replace older copies.</p><div class="row"><button id="exp" class="p">Export to file</button><button id="imp">Import file</button></div><input type="file" id="file" accept=".json,application/json" class="hide"><textarea id="paste" class="hide" style="min-height:90px" placeholder="Or paste exported text here"></textarea><div class="row hide" id="pasterow"><button id="doPaste">Import pasted text</button></div><p class="mut" id="msg">'+esc(msg)+'</p>');
 }
 
 /* ---------- Install app (PWA) ---------- */
@@ -1667,7 +1725,7 @@ function installHelp(){
   return "If nothing pops up: open your browser menu (⋮) and choose Install app or Add to Home screen. Use Chrome and make sure the page is fully loaded first.";
 }
 function installBox(){
-  return '<div class="box"><b>Install app</b><p class="mut">Add Chordbook to your phone like a normal app, with its own icon and full-screen view.</p><div class="row"><button id="installApp" class="p"'+(isStandalone()?' disabled':'')+'>'+(isStandalone()?'Installed':'Install app')+'</button></div><p class="mut" id="installMsg">'+esc(installHelp())+'</p></div>';
+  return accBox("install","Install app",'<p class="mut">Add Chordbook to your phone like a normal app, with its own icon and full-screen view.</p><div class="row"><button id="installApp" class="p"'+(isStandalone()?' disabled':'')+'>'+(isStandalone()?'Installed':'Install app')+'</button></div><p class="mut" id="installMsg">'+esc(installHelp())+'</p>');
 }
 function updateInstallUI(){
   var m=document.getElementById("installMsg");if(m)m.textContent=installHelp();
@@ -3080,7 +3138,7 @@ function drawMain(){
   var s=song();if(!s){view="list";return draw()}
   if(window.__lastSongRendered!==s.id){settingsOpen=false;window.__lastSongRendered=s.id}
   if(!isAdmin()&&mode==="edit")mode="view";
-  var h=isCreatingSong?'<div class="top create-song-top"><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>':mode==="edit"?'<div class="top create-song-top"><h1>'+esc(s.title||"Untitled")+'</h1><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>':"<div class=\"top\"><button id=\"back\">\u2190</button><h1>"+esc(s.title||"Untitled")+"</h1><button id=\"settog\" class=\"settings-icon\" aria-label=\"Display settings\" aria-expanded=\""+(settingsOpen?"true":"false")+"\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" aria-hidden=\"true\"><path d=\"M5 9 L12 16 L19 9\"/></svg></button>"+practiceBtnHTML(s)+fsBtn()+(isAdmin()?"<button id=\"tog\" class=\"p\">Edit</button>":"")+"</div>";
+  var h=isCreatingSong?'<div class="top create-song-top"><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>':mode==="edit"?'<div class="top create-song-top"><h1>'+esc(s.title||"Untitled")+'</h1><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>':"<div class=\"top\"><button id=\"back\">\u2190</button><h1>"+esc(s.title||"Untitled")+"</h1><button id=\"settog\" class=\"settings-icon\" aria-label=\"Display settings\" aria-expanded=\""+(settingsOpen?"true":"false")+"\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" aria-hidden=\"true\"><path d=\"M5 9 L12 16 L19 9\"/></svg></button>"+practiceBtnHTML(s)+fsBtn()+(isAdmin()&&!practiceMode?"<button id=\"tog\" class=\"p\">Edit</button>":"")+"</div>";
   h+=tempoHTML(s);
   var prefs=getDisplayPrefs(s),shownKey=displayKey(s),p=parseKey(shownKey),shownBars=displayBars(s);
   var viewSwitchLocked=!(songHasChord(s)&&songHasStandard(s));
@@ -3102,21 +3160,17 @@ function drawMain(){
     h+='</section>';
     h+='<section class="setting-section setting-edit-display"><div class="setting-section-title">Display preferences</div>';
     h+='<div class="setting-layout-controls">';
-    h+='<div class="setting-field"><label>Chord detail</label><div class="chord-style-switch" role="group" aria-label="Chord view detail"><button type="button" id="chordStyleStandard" class="'+((prefs.chordStyle||"standard")==="standard"?"active":"")+'" aria-pressed="'+((prefs.chordStyle||"standard")==="standard"?'true':'false')+'">Standard</button><button type="button" id="chordStyleDetailed" class="'+((prefs.chordStyle||"standard")==="detailed"?"active":"")+'" aria-pressed="'+((prefs.chordStyle||"standard")==="detailed"?'true':'false')+'">Detailed</button></div></div>';
+    h+='<div class="setting-field"><label>Chord detail</label><div class="chord-style-switch" role="group" aria-label="Chord view detail"><button type="button" id="chordStyleStandard" class="'+(effChordStyle(s)==="standard"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="standard"?'true':'false')+'">Standard</button><button type="button" id="chordStyleDetailed" class="'+(effChordStyle(s)==="detailed"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="detailed"?'true':'false')+'">Detailed</button></div></div>';
     h+='</div></section></div>';
   }else{
     // Reader-only quick settings intentionally omit Time Signature and View Mode.
     // Always rendered inside a collapsible wrapper so opening and closing can be animated.
     h+='<div class="settings-collapse'+(settingsOpen?' open':'')+'" id="settingsCollapse"'+(settingsOpen?'':' inert aria-hidden="true"')+'><div class="settings-collapse-inner">';
     h+='<div class="setting-panel" id="settings">';
-    h+='<section class="setting-section setting-key-section"><div class="setting-section-title">Key</div><div class="setting-key-controls">';
-    h+='<div class="setting-field"><label for="kr">Key</label><select id="kr">'+keyOpts(shownKey)+'</select></div>';
-    h+='<div class="setting-field"><label for="km">Scale</label><select id="km"><option value=""'+(p.m?'':' selected')+'>Major</option><option value="m"'+(p.m?' selected':'')+'>Minor</option></select></div>';
-    h+='</div></section>';
     h+='<section class="setting-section setting-chart-section"><div class="setting-section-title">Chart Layout</div><div class="setting-layout-controls">';
     h+='<div class="setting-field"><label for="pl">Bars per line</label><select id="pl"><option value="auto"'+(shownBars==="auto"?' selected':'')+'>Auto</option>'+[1,2,3,4,5,6,8].map(function(k){return '<option'+(k===shownBars?' selected':'')+'>'+k+'</option>'}).join('')+'</select></div>';
     h+='<div class="setting-field"><label>View</label><div class="chord-style-switch'+(viewSwitchLocked?' disabled':'')+'" role="group" aria-label="Song view"><button type="button" id="viewModeStandard" class="'+(standardMode?"active":"")+'" aria-pressed="'+(standardMode?'true':'false')+'"'+(viewSwitchLocked?' disabled':'')+'>Standard</button><button type="button" id="viewModeChord" class="'+(!standardMode?"active":"")+'" aria-pressed="'+(!standardMode?'true':'false')+'"'+(viewSwitchLocked?' disabled':'')+'>Chord</button></div>'+(viewSwitchLocked?'<p class="setting-help">'+(songHasChord(s)?'Only a Chord chart is saved for this song.':songHasStandard(s)?'Only a Standard chart is saved for this song.':'No chart is saved for this song yet.')+'</p>':'')+'</div>';
-    if(!standardMode)h+='<div class="setting-field"><label>Chord detail</label><div class="chord-style-switch" role="group" aria-label="Chord view detail"><button type="button" id="chordStyleStandard" class="'+((prefs.chordStyle||"standard")==="standard"?"active":"")+'" aria-pressed="'+((prefs.chordStyle||"standard")==="standard"?'true':'false')+'">Standard</button><button type="button" id="chordStyleDetailed" class="'+((prefs.chordStyle||"standard")==="detailed"?"active":"")+'" aria-pressed="'+((prefs.chordStyle||"standard")==="detailed"?'true':'false')+'">Detailed</button></div></div>';
+    if(!standardMode)h+='<div class="setting-field"><label>Chord detail</label><div class="chord-style-switch" role="group" aria-label="Chord view detail"><button type="button" id="chordStyleStandard" class="'+(effChordStyle(s)==="standard"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="standard"?'true':'false')+'">Standard</button><button type="button" id="chordStyleDetailed" class="'+(effChordStyle(s)==="detailed"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="detailed"?'true':'false')+'">Detailed</button></div></div>';
     if(standardMode){var lo=!!prefs.lyricsOnly;h+='<div class="setting-field"><label>Show</label><div class="chord-style-switch" role="group" aria-label="Standard view content"><button type="button" id="showLyricsChords" class="'+(!lo?"active":"")+'" aria-pressed="'+(!lo?'true':'false')+'">Lyrics + chords</button><button type="button" id="showLyricsOnly" class="'+(lo?"active":"")+'" aria-pressed="'+(lo?'true':'false')+'">Lyrics only</button></div></div>';}
     h+='</div></section></div>';
     h+='</div></div>';
@@ -3131,7 +3185,7 @@ function drawMain(){
     }
     h+='</div></div>';
   }
-  var preview=standardMode?standardHTML((mode==="edit"||isCreatingSong)?displayStandard(s):standardTextForView(s),getDisplayPrefs(s).lyricsOnly&&songHasStandard(s)?"No lyrics found in this chart. Switch to Lyrics + chords to see it.":""):(((prefs.chordStyle||"standard")==="standard")?chartHTMLStandard(displayChart(s),mode!=="edit",mode==="edit",displayBars(s),s.ts):chartHTML(displayChart(s),mode!=="edit",mode==="edit",displayBars(s),s.ts));
+  var preview=standardMode?standardHTML((mode==="edit"||isCreatingSong)?displayStandard(s):standardTextForView(s),getDisplayPrefs(s).lyricsOnly&&songHasStandard(s)?"No lyrics found in this chart. Switch to Lyrics + chords to see it.":""):((effChordStyle(s)==="standard")?chartHTMLStandard(displayChart(s),mode!=="edit",mode==="edit",displayBars(s),s.ts):chartHTML(displayChart(s),mode!=="edit",mode==="edit",displayBars(s),s.ts));
   h+='<div id="cw"><div id="cc"'+(practiceMode&&mode!=="edit"&&!isCreatingSong?' class="practice-on"':'')+'>'+preview+'</div><div id="bp">'+(mode==="edit"?(standardMode?'<div class="mut">Standard mode keeps chord and lyric lines together as editable text.</div>':panelHTML(s)):"")+'</div></div>';
   if(mode==="edit"&&!isCreatingSong)h+='<div class="row" style="margin-top:24px;padding-top:14px;border-top:1px solid var(--line)"><button class="d" id="del" style="margin-left:auto">Delete Song</button></div>';
   a.innerHTML=h;
@@ -3163,16 +3217,15 @@ function drawMain(){
   var settog=document.getElementById("settog");if(settog)settog.onclick=function(){setSettingsOpen(!settingsOpen)};
   var prBtn=document.getElementById("practiceBtn");if(prBtn)prBtn.onclick=function(){
     practiceMode=!practiceMode;cancelPracticeHold();
-    prBtn.classList.toggle("active",practiceMode);prBtn.setAttribute("aria-pressed",practiceMode?"true":"false");
-    var cc=document.getElementById("cc");if(cc)cc.classList.toggle("practice-on",practiceMode);
-    practiceNotice(practiceMode);syncPracticeBar();
+    draw();
+    practiceNotice(practiceMode);
   };
   var vmS=document.getElementById("viewModeStandard");if(vmS)vmS.onclick=function(){getDisplayPrefs(s).viewMode="standard";saveDisplayPrefs();draw()};
   var vmC=document.getElementById("viewModeChord");if(vmC)vmC.onclick=function(){getDisplayPrefs(s).viewMode="chord";saveDisplayPrefs();draw()};
   var slc=document.getElementById("showLyricsChords");if(slc)slc.onclick=function(){getDisplayPrefs(s).lyricsOnly=false;saveDisplayPrefs();draw()};
   var slo=document.getElementById("showLyricsOnly");if(slo)slo.onclick=function(){getDisplayPrefs(s).lyricsOnly=true;saveDisplayPrefs();draw()};
-  var cs0=document.getElementById("chordStyleStandard");if(cs0)cs0.onclick=function(){getDisplayPrefs(s).chordStyle="standard";saveDisplayPrefs();draw()};
-  var cs1=document.getElementById("chordStyleDetailed");if(cs1)cs1.onclick=function(){getDisplayPrefs(s).chordStyle="detailed";saveDisplayPrefs();draw()};
+  var cs0=document.getElementById("chordStyleStandard");if(cs0)cs0.onclick=function(){setChordStyle(s,"standard");draw()};
+  var cs1=document.getElementById("chordStyleDetailed");if(cs1)cs1.onclick=function(){setChordStyle(s,"detailed");draw()};
   var backBtn=document.getElementById("back");if(backBtn)backBtn.onclick=function(){view="list";draw()};
   var tog=document.getElementById("tog");if(tog)tog.onclick=function(){if(!isAdmin())return;if(mode==="view"){editSnapshot=JSON.parse(JSON.stringify(s));mode="edit";if(s.viewMode==="standard"&&!songHasStandard(s)&&songHasChord(s))s.viewMode="chord";else if(s.viewMode!=="standard"&&!songHasChord(s)&&songHasStandard(s))s.viewMode="standard";}else{mode="view";editSnapshot=null;}draw()};
   function setKey(r,m){var prefs=getDisplayPrefs(s);prefs.key=r+(m?"m":"");saveDisplayPrefs();draw()}
@@ -3180,7 +3233,7 @@ function drawMain(){
   if(1){
     var krEl=document.getElementById("kr");if(krEl)krEl.onchange=function(e){setKey(e.target.value,parseKey(displayKey(s)).m)};
     var kmEl=document.getElementById("km");if(kmEl)kmEl.onchange=function(e){setKey(parseKey(displayKey(s)).r,e.target.value==="m")};
-    var plEl=document.getElementById("pl");if(plEl)plEl.onchange=function(e){getDisplayPrefs(s).pl=e.target.value==="auto"?"auto":+e.target.value;saveDisplayPrefs();draw()};
+    var plEl=document.getElementById("pl");if(plEl)plEl.onchange=function(e){setBarsPerLine(s,e.target.value==="auto"?"auto":+e.target.value);draw()};
     var dnEl=document.getElementById("dn");if(dnEl)dnEl.onclick=function(){shift(-1)};
     var upEl=document.getElementById("up");if(upEl)upEl.onclick=function(){shift(1)};
   }
@@ -3281,13 +3334,13 @@ function swipePreviewHTML(s){
   // Render the incoming song with its own display settings and the same header
   // geometry as the active song, so the content doesn't jump during the swipe.
   var body=std?standardHTML(standardTextForView(s),getDisplayPrefs(s).lyricsOnly&&songHasStandard(s)?"No lyrics found in this chart. Switch to Lyrics + chords to see it.":""):
-    ((prefs.chordStyle||"standard")==="standard"
+    (effChordStyle(s)==="standard"
       ?chartHTMLStandard(displayChart(s),true,false,bars,s.ts)
       :chartHTML(displayChart(s),true,false,bars,s.ts));
   var head='<div class="top swipe-preview-head"><button type="button" aria-hidden="true">←</button><h1>'+esc(s.title||"Untitled")+'</h1>';
   head+='<button type="button" class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M5 9 L12 16 L19 9"/></svg></button>';
   head+=practiceBtnHTML(s,true);head+='<button type="button" aria-hidden="true" style="padding:7px 9px;line-height:0">'+(fsOn()?FSO:FSI)+'</button>';
-  if(isAdmin())head+='<button type="button" class="p" aria-hidden="true">Edit</button>';
+  if(isAdmin()&&!practiceMode)head+='<button type="button" class="p" aria-hidden="true">Edit</button>';
   head+='</div>'+tempoHTML(s);
   return '<div class="wrap">'+head+'<div class="swipe-preview-chart" style="--z:'+songZoom(s)+'">'+body+'</div></div>';
 }
