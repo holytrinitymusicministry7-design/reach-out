@@ -85,6 +85,11 @@ textarea{font-family:ui-monospace,Menlo,Consolas,monospace;min-height:210px;resi
 .big .bar{font-size:30px;min-height:52px}.big .beat-grid{min-height:34px}.big .beat-dots{margin-top:4px}.big .beat-dot{width:8px;height:8px}
 .mut{color:var(--mut);font-size:14px}
 .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+.pb-count{position:fixed;top:0;right:0;bottom:0;left:0;z-index:75;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.pb-count-bg{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.35);opacity:0}
+.pb-count-num{position:relative;font-size:min(42vw,220px);font-weight:800;line-height:1;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.45);opacity:0;animation:pbCountNum 1s ease-out forwards}
+@keyframes pbCountBg{0%{opacity:1}100%{opacity:0}}
+@keyframes pbCountNum{0%{opacity:1;transform:scale(1.15)}100%{opacity:0;transform:scale(.88)}}
 .acc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:2px 0;background:transparent;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .acc-chev{width:10px;height:10px;border-right:2.25px solid currentColor;border-bottom:2.25px solid currentColor;transform:rotate(45deg) translate(-2px,-2px);transition:transform .25s ease;flex:0 0 auto}
 .acc.open .acc-chev{transform:rotate(-135deg) translate(-2px,-2px)}
@@ -1059,7 +1064,7 @@ function pbInfo(sym){
 }
 function pbChords(bi){var bars=pbBars(),j=bi,t;while(j>=0&&bars[j]){t=(bars[j].getAttribute("data-c")||"").split(/\s+/).filter(Boolean);if(t.length===1&&t[0]==="%"){j--;continue}return t}return[]}
 function pbBus(){
-  var m=pbCtx.createGain();m.gain.value=.85;m.connect(pbCtx.destination);pbG={};
+  var m=pbCtx.createGain();m.gain.value=.85;m.connect(pbCtx.destination);pbMaster=m;pbG={};
   PB_KEYS.forEach(function(x){pbG[x]=pbCtx.createGain()});
   ["d","b","c","m"].forEach(function(x){pbG[x].connect(m)});["k","s","h"].forEach(function(x){pbG[x].connect(pbG.d)});
   pbNoise=pbCtx.createBuffer(1,pbCtx.sampleRate,pbCtx.sampleRate);var d=pbNoise.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;
@@ -1094,7 +1099,23 @@ function pbTick(time,bi,beat,sub){
   var id=setTimeout(function(){pbVis=pbVis.filter(function(x){return x!==id});if(!pbPlaying)return;if(sub===0){pbShown=bi;pbShownBeat=beat;pbMark(bi,beat);pbSquares(beat,n)}},Math.max(0,(time-pbCtx.currentTime)*1000));
   pbVis.push(id);
 }
-var pbTaken={},pbCount=0,pbCountTotal=0;
+var pbTaken={},pbCount=0,pbCountTotal=0,pbMaster=null,pbCountTimer=0;
+/* Count-in click: follows the Metronome volume normally, but is still heard when the Metronome is muted */
+function pbCountClick(t,f,v){
+  var o=pbCtx.createOscillator(),g=pbCtx.createGain();o.type="square";o.frequency.value=f;
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.04);
+  o.connect(g);g.connect(pbMix.mu[3]&&pbMaster?pbMaster:pbG.m);o.start(t);o.stop(t+.05);
+}
+/* On-screen count-in: dim backdrop fades over the whole measure, each beat number fades out */
+function pbCountClear(){clearTimeout(pbCountTimer);var o=document.getElementById("pbCountIn");if(o)o.remove()}
+function pbCountShow(k,nb,sec){
+  var o=document.getElementById("pbCountIn");
+  if(!o){o=document.createElement("div");o.id="pbCountIn";o.className="pb-count";o.setAttribute("aria-hidden","true");o.innerHTML='<div class="pb-count-bg"></div><div class="pb-count-num"></div>';document.body.appendChild(o)}
+  if(k===0){var bg=o.firstChild;bg.style.animation="none";void bg.offsetWidth;bg.style.animation="pbCountBg "+(nb*sec)+"s linear forwards"}
+  var nn=document.createElement("div");nn.className="pb-count-num";nn.textContent=String(k+1);nn.style.animationDuration=sec+"s";
+  o.replaceChild(nn,o.lastChild);
+  if(k===nb-1){clearTimeout(pbCountTimer);pbCountTimer=setTimeout(pbCountClear,sec*1000+80)}
+}
 function pbSecStart(w){
   var sec=null,idx=-1,all=document.querySelectorAll("#cc .sec, #cc .bar");
   for(var k=0;k<all.length;k++){var x=all[k];if(x.classList.contains("sec"))sec=x.textContent.trim().toLowerCase();else{idx++;if(sec===w)return idx}}
@@ -1133,8 +1154,8 @@ function pbRun(){
     var bars=pbBars(),n=bars.length;
     if(pbCount>0){
       var ck=pbCountTotal-pbCount,ct=pbNext,cn=pbCountTotal;
-      pbClick(ct,ck===0?1600:1000,ck===0?.5:.35);
-      (function(k,t,nb){var id=setTimeout(function(){pbVis=pbVis.filter(function(x){return x!==id});if(pbPlaying)pbSquares(k,nb)},Math.max(0,(t-pbCtx.currentTime)*1000));pbVis.push(id)})(ck,ct,cn);
+      pbCountClick(ct,ck===0?1600:1000,ck===0?.5:.35);
+      (function(k,t,nb){var id=setTimeout(function(){pbVis=pbVis.filter(function(x){return x!==id});if(pbPlaying){pbSquares(k,nb);pbCountShow(k,nb,60/pbBpm)}},Math.max(0,(t-pbCtx.currentTime)*1000));pbVis.push(id)})(ck,ct,cn);
       pbNext+=60/pbBpm;pbCount--;continue;
     }
     if(n&&pbBar>=n){pbBar=0;pbBeat=0;pbSub=0}
@@ -1164,7 +1185,7 @@ async function pbToggle(){
   pbBus();pbPlaying=true;pbBeat=0;pbSub=0;pbCountTotal=pbCount=pbBeatsOf(pbBars()[pbBar]);pbNext=pbCtx.currentTime+.08;pbTimer=setInterval(pbRun,25);pbRun();pbUI();
 }
 function pbPause(){
-  var was=pbPlaying;pbPlaying=false;pbCount=0;
+  var was=pbPlaying;pbPlaying=false;pbCount=0;pbCountClear();
   if(pbTimer){clearInterval(pbTimer);pbTimer=null}
   pbVis.forEach(function(t){clearTimeout(t)});pbVis=[];
   if(pbCtx){try{pbCtx.close()}catch(e){}pbCtx=null}
