@@ -373,6 +373,20 @@ body.swiping{overflow-x:hidden}
 .sidebar-tools-button{display:flex;align-items:center;gap:13px;width:100%;min-height:48px;padding:10px 12px;margin:0 0 12px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--ink);font-size:16px;font-weight:650;text-align:left}
 .sidebar-tools-button svg{width:24px;height:24px;flex:0 0 24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .sidebar-tools-button.active{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+
+/* App menu: 4-box button at the top right opens a popup of tools, settings and the theme slider. */
+.appmenu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.32);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:70}
+.appmenu{position:fixed;z-index:71;top:calc(env(safe-area-inset-top,0px) + 64px);right:max(12px,env(safe-area-inset-right,0px));width:min(390px,calc(100vw - 24px));max-height:calc(100vh - 90px);overflow-y:auto;padding:14px;border:1px solid var(--line);border-radius:22px;background:var(--card);color:var(--ink);box-shadow:0 14px 44px rgba(0,0,0,.22);transform-origin:top right;animation:appmenuIn .18s ease-out}
+@keyframes appmenuIn{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:none}}
+.appmenu-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.appmenu-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:96px;padding:12px 6px;border:1px solid transparent;border-radius:16px;background:var(--fill);color:var(--ink);font-size:13px;font-weight:650;line-height:1.2;text-align:center}
+.appmenu-card svg{width:32px;height:32px;stroke:var(--acc);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.appmenu-card.active{background:var(--acc);color:var(--accink)}
+.appmenu-card.active svg{stroke:var(--accink)}
+.appmenu-dot{position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.appmenu-theme{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:12px 4px 0;border-top:1px solid var(--line)}
+.appmenu-theme-label{font-size:14px;font-weight:600;color:var(--mut)}
+#toolsExit{flex:0 0 40px;width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-size:20px;line-height:1}
 .tools-home{max-width:1020px;margin:clamp(22px,6vh,64px) auto 0;min-height:55vh;display:grid;grid-template-columns:repeat(3,minmax(0,320px));align-items:start;justify-content:center;gap:18px;padding:16px 0}
 .tools-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;width:min(100%,320px);min-height:188px;padding:24px;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:0 6px 24px rgba(0,0,0,.045);font-size:22px;font-weight:750}
 .tools-card svg{width:54px;height:54px;stroke:var(--acc);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -3072,19 +3086,55 @@ function bindMusicSheet(){
   };
 }
 
+/* The old left sidebar is gone. "sidebarOpen" now means "the app menu popup is open",
+   so history/Back, Escape, scroll-lock and FAB hiding keep working unchanged. */
+var APPMENU_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg>';
+function appMenuBtn(){
+  return '<button type="button" id="navOpen" aria-label="Open menu" title="Tools and settings" aria-haspopup="dialog" aria-expanded="'+(sidebarOpen?'true':'false')+'">'+APPMENU_ICON+'</button>';
+}
+function appMenuCard(id,svg,label,extra){
+  return '<button type="button" id="'+id+'" class="appmenu-card'+((extra&&extra.active)?' active':'')+'">'+svg+'<span>'+label+'</span>'+((extra&&extra.html)||'')+'</button>';
+}
 function sidebarHTML(){
   if(!sidebarOpen)return '';
-  return '<div class="sidebar-backdrop" id="sidebarBackdrop"></div><aside class="sidebar-drawer" id="sidebarDrawer" aria-label="Chordbook navigation"><div class="sidebar-head"><span class="sidebar-head-label">Library</span><button type="button" class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">×</button></div><nav id="gb" class="pal sidebar-group-list" aria-label="Song groups">'+chipsHTML()+'</nav><div class="sidebar-bottom"><button type="button" id="toolsNav" class="sidebar-tools-button'+(toolsPage?' active':'')+'" aria-current="'+(toolsPage?'page':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4.3 4.3 0 0 0-5.5 5.5L3.5 17.5a2.1 2.1 0 0 0 3 3l5.7-5.7a4.3 4.3 0 0 0 5.5-5.5l-2.5 2.5-3-3z"/><path d="m15 5 4-2 2 2-2 4"/></svg><span>Tools</span></button><div class="sidebar-bottom-row">'+cloudBtn()+themeBtn()+'</div><div class="sidebar-sync-status">'+esc(syncMsg)+'</div></div></aside>';
+  var tunerSvg='<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 19v10M15 14v20M21 20v8M27 9v30M33 15v18M39 19v10"/><circle cx="24" cy="24" r="21"/></svg>';
+  var chordSvg='<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 8h34v32H7zM7 19h34M18 8v11M29 8v11M12 26h24M12 32h24"/><circle cx="14" cy="14" r="2"/><circle cx="24" cy="14" r="2"/><circle cx="34" cy="14" r="2"/></svg>';
+  var scaleSvg='<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 38h36M8 34V14h5v20M19 34V8h5v26M30 34V19h5v15M40 34V11h3v23"/><path d="M7 8h7M18 3h7M29 14h7M39 6h4"/></svg>';
+  var metroSvg='<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 42h22l-3-34H16z"/><path d="M24 36 33 15"/><circle cx="24" cy="35" r="3"/><path d="M7 12v24M4 15l3-3 3 3M41 12v24M38 33l3 3 3-3"/></svg>';
+  var gearSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+  return '<div class="appmenu-backdrop" id="sidebarBackdrop"></div><div class="appmenu" id="sidebarDrawer" role="dialog" aria-modal="true" aria-label="Menu"><div class="appmenu-grid">'
+    +appMenuCard('menuTuner',tunerSvg,'Tuner',{active:toolsPage&&tunerOpen})
+    +appMenuCard('menuChord',chordSvg,'Chord',{active:toolsPage&&!tunerOpen&&!metronomeOpen&&!scaleToolOpen&&chordToolStage!=='home'})
+    +appMenuCard('menuScale',scaleSvg,'Scale Chart',{active:toolsPage&&scaleToolOpen})
+    +appMenuCard('menuMetronome',metroSvg,'Metronome',{active:toolsPage&&metronomeOpen})
+    +appMenuCard('cloud',gearSvg,'Settings',{html:sbOn()?'<span class="appmenu-dot" title="Connected"></span>':''})
+    +'</div><div class="appmenu-theme"><span class="appmenu-theme-label">Dark mode</span>'+themeBtn()+'</div></div>';
+}
+function openToolFromMenu(which){
+  if(tunerRunning||tunerStarting)stopTuner(false);
+  stopMetronome(false);
+  tunerOpen=false;metronomeOpen=false;scaleToolOpen=false;chordToolStage='home';metroBeatsMenuOpen=false;metroClicksMenuOpen=false;
+  if(which==='tuner'){tunerOpen=true;tunerStatus='Choose a tuning mode, then start the microphone tuner.'}
+  else if(which==='chord')chordToolStage='choose';
+  else if(which==='scale')scaleToolOpen=true;
+  else if(which==='metronome')metronomeOpen=true;
+  toolsPage=true;sidebarOpen=false;cloudOpen=false;draw();window.scrollTo(0,0);
 }
 function bindSidebar(){
-  var open=document.getElementById('navOpen'),close=document.getElementById('sidebarClose'),backdrop=document.getElementById('sidebarBackdrop'),tools=document.getElementById('toolsNav');
-  // The Tools workspace does not run bindTop(), so wire the sidebar's group buttons here too.
-  // This lets All / any group leave Tools and return to the song library.
+  var $=function(i){return document.getElementById(i)};
   bindChips();
-  if(open)open.onclick=function(){sidebarOpen=true;draw()};
-  if(close)close.onclick=function(){sidebarOpen=false;draw()};
-  if(backdrop)backdrop.onclick=function(){sidebarOpen=false;draw()};
-  if(tools)tools.onclick=function(){if(tunerRunning||tunerStarting)stopTuner(false);stopMetronome(false);toolsPage=true;tunerOpen=false;metronomeOpen=false;chordToolStage='home';sidebarOpen=false;cloudOpen=false;draw()};
+  if($('navOpen'))$('navOpen').onclick=function(){sidebarOpen=!sidebarOpen;draw()};
+  if($('sidebarBackdrop'))$('sidebarBackdrop').onclick=function(){sidebarOpen=false;draw()};
+  [['menuTuner','tuner'],['menuChord','chord'],['menuScale','scale'],['menuMetronome','metronome']].forEach(function(p){
+    var b=$(p[0]);if(b)b.onclick=function(){openToolFromMenu(p[1])};
+  });
+  // Settings uses id="cloud"; bindCloud() wires it to open the Settings modal.
+  var ex=$('toolsExit');
+  if(ex)ex.onclick=function(){
+    if(tunerRunning||tunerStarting)stopTuner(false);
+    stopMetronome(false);
+    toolsPage=false;tunerOpen=false;metronomeOpen=false;scaleToolOpen=false;chordToolStage='home';sidebarOpen=false;draw();window.scrollTo(0,0);
+  };
 }
 function addModalHTML(){
   if(!addOpen)return '';
@@ -3777,7 +3827,7 @@ function drawMain(){
   if(view!=="list"){cloudOpen=false;sidebarOpen=false}
   document.body.style.overflow=(cloudOpen||addOpen||sidebarOpen||groupSongPickerOpen||groupsMgrOpen||gedit)?"hidden":"";
   if(view==="list"&&toolsPage){
-    var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle">Tools</div></div></div>';
+    var h='<div class="top"><button type="button" id="toolsExit" aria-label="Back to songs" title="Back to songs">←</button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle">Tools</div></div>'+appMenuBtn()+'</div>';
     h+=tunerHomeHTML();
     if(cloudOpen)h+=modalHTML();
     h+=sidebarHTML();
@@ -3788,7 +3838,7 @@ function drawMain(){
   if(view==="list"){
     var activeGroupForHeader=grp?gById(grp):null;
     var activeGroupTitle=activeGroupForHeader?(activeGroupForHeader.title||"Untitled"):"All";
-    var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle" aria-live="polite">'+esc(activeGroupTitle)+'</div></div>'+((canEditGroup(grp?gById(grp):null)&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top" aria-label="Manage group">Manage</button>':'')+fsBtn()+'</div>';
+    var h='<div class="top"><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle" aria-live="polite">'+esc(activeGroupTitle)+'</div></div>'+((canEditGroup(grp?gById(grp):null)&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top" aria-label="Manage group">Manage</button>':'')+fsBtn()+appMenuBtn()+'</div>';
     h+='<div class="mut" id="sync" style="margin:-4px 0 10px">'+esc(syncMsg)+'</div>';
     h+='<div class="sticky-tools"><input id="q" type="search" placeholder="Search songs by title, artist or key" value="'+esc(qry)+'" aria-label="Search songs" style="margin-bottom:10px">'+groupBarHTML()+'</div>';
     h+=allSortBarHTML()+gboxHTML()+groupActionBarHTML()+'<div id="sl">'+listHTML()+'</div>';
@@ -4170,6 +4220,8 @@ function bindXposeDrag(f){
     clearTimeout(growTimer);growTimer=null;
     if(dragging)return;
     f.classList.remove("holding");applyXposePos();
+    // The blur turns on after GROW_DELAY, so a release before the drag starts must turn it off again.
+    setXposeDim(false);
   }
   function cleanup(){
     clearTimeout(timer);timer=null;clearTimeout(growTimer);growTimer=null;
@@ -4336,7 +4388,7 @@ document.addEventListener("keydown",function(e){
 var navRestoring=false,navReady=false,lastHomeBack=0,baseDraw=draw;
 function mobileNavState(){
   return {
-    view:view,cur:cur,mode:mode,isCreatingSong:isCreatingSong,
+    view:view,cur:cur,mode:mode,isCreatingSong:isCreatingSong,practice:!!practiceMode&&view==="song",
     toolsPage:toolsPage,tunerOpen:tunerOpen,metronomeOpen:metronomeOpen,
     scaleToolOpen:scaleToolOpen,chordToolStage:chordToolStage,
     addOpen:addOpen,addView:addView,sidebarOpen:sidebarOpen,cloudOpen:cloudOpen,
@@ -4356,6 +4408,12 @@ function restoreMobileNav(s){
   scaleToolOpen=!!s.scaleToolOpen;chordToolStage=s.chordToolStage||"home";
   addOpen=!!s.addOpen;addView=s.addView||"picker";sidebarOpen=!!s.sidebarOpen;cloudOpen=!!s.cloudOpen;
   groupSongPickerOpen=!!s.groupSongPickerOpen;groupsMgrOpen=!!s.groupsMgrOpen;gedit=!!s.gedit;
+  var wantPractice=!!s.practice&&s.view==="song";
+  if(practiceMode&&!wantPractice){
+    clearTimeout(practiceHeaderTimer);practiceHeaderExiting=false;practiceHeaderAnimate=false;practiceHeaderOrigin=null;
+    try{cancelPracticeHold()}catch(e){}
+    practiceMode=false;settingsOpen=false;
+  }else practiceMode=wantPractice;
 }
 var NAV_SS="chordbook:v1:nav",navScrollT=0;
 function saveNavSession(){
@@ -4385,7 +4443,10 @@ draw=function(){
     /* Swiping from one song to another is not a new "page": replace the history entry so Back returns to the list. */
     var sameSongView=current&&current.view==="song"&&next.view==="song"&&current.mode===next.mode&&
       mobileNavKey(Object.assign({},current,{cur:0}))===mobileNavKey(Object.assign({},next,{cur:0}));
-    if(sameSongView)history.replaceState({chordbook:next},"");
+    var practiceOffOnly=current&&current.practice&&!next.practice&&
+      mobileNavKey(Object.assign({},current,{practice:false}))===mobileNavKey(next);
+    /* Leaving practice with the on-screen button: reuse the entry so Back does not re-open practice. */
+    if(sameSongView||practiceOffOnly)history.replaceState({chordbook:next},"");
     else history.pushState({chordbook:next},"");
   }
 };
@@ -4400,8 +4461,20 @@ window.addEventListener("popstate",function(e){
     return;
   }
   if(!target)return;
-  navRestoring=true;restoreMobileNav(target);baseDraw();navRestoring=false;
-  window.scrollTo(0,0);
+  /* Same song screen as the one showing (e.g. left over after closing practice): keep going back. */
+  if(current.view==="song"&&target.view==="song"&&
+     mobileNavKey(Object.assign({},target,{cur:0}))===mobileNavKey(Object.assign({},current,{cur:0}))){
+    history.back();return;
+  }
+  var closingPractice=!!current.practice&&!target.practice&&target.view==="song"&&current.view==="song";
+  var keepScroll=closingPractice;
+  var y=window.scrollY||0;
+  navRestoring=true;restoreMobileNav(target);
+  if(closingPractice)cur=current.cur; /* the song on screen may differ from the one saved in the entry */
+  baseDraw();navRestoring=false;
+  updatePracticeButtonVisibility();
+  if(closingPractice){practiceNotice(false);window.scrollTo(0,y)}
+  else window.scrollTo(0,0);
 });
 if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add("has-system-back");
 
@@ -4410,14 +4483,16 @@ if(songs.length===1&&songs[0].id==="sample-1"&&!songs[0].u&&!sent["sample-1"]){s
 try{var th=localStorage.getItem(LS+":theme");if(th)applyTheme(th)}catch(e){}
 syncMsg=sbOn()?(isAdmin()?"Signed in as administrator":"Signed in · view only"):"Saved on this device";
 history.replaceState({chordbook:mobileNavState()},"");
-var navResumeY=0;
+var navResumeY=0,navResumePractice=false;
 try{
   var rs=JSON.parse(sessionStorage.getItem(NAV_SS)||"null");
   if(rs&&rs.view==="song"&&rs.cur&&songs.some(function(x){return x.id===rs.cur})){
-    view="song";cur=rs.cur;mode="view";practiceMode=!!rs.practice;navResumeY=rs.y||0;
+    view="song";cur=rs.cur;mode="view";practiceMode=false;navResumeY=rs.y||0;
+    if(rs.practice)navResumePractice=true;
   }
 }catch(e){}
 history.pushState({chordbook:mobileNavState()},"");
+if(navResumePractice){practiceMode=true;history.pushState({chordbook:mobileNavState()},"")}
 navReady=true;
 draw();
 if(navResumeY){
