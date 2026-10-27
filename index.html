@@ -851,6 +851,58 @@ input[type=checkbox],input[type=radio],input[type=range]{padding:0;border:0;back
 #gb.sidebar-group-list>button.p .gtag{background:rgba(255,255,255,.22);color:var(--accink)}
 .group-live-box{border-color:var(--acc)}
 </style>
+<style>
+.gbar{margin:0 0 10px}
+.gscroll{position:relative;display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.gscroll::-webkit-scrollbar{display:none}
+.gscroll button{flex:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border-radius:999px;padding:8px 16px;background:var(--fill);border-color:transparent;font-weight:600}
+.gscroll button.on{background:var(--acc);color:var(--accink)}
+.gscroll button.more{color:var(--acc);background:transparent;border:1px solid var(--line-strong)}
+.gscroll .gtag{margin-left:0;padding:1px 7px;font-size:10px}
+.gscroll button.on .gtag{background:rgba(255,255,255,.22);color:var(--accink)}
+#groupsMgr.ov{align-items:center;padding:18px}
+.gm-modal{width:min(100%,520px);max-height:min(86vh,720px);display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.25)}
+.gm-head{display:flex;align-items:center;gap:10px}.gm-head h2{flex:1;margin:0;font-size:22px}
+.gm-help{margin:6px 0 12px}
+.gm-list{flex:1;min-height:0;overflow-y:auto;display:grid;gap:8px;align-content:start;padding-bottom:4px}
+.gm-row{display:flex;align-items:center;gap:6px;padding:6px 8px 6px 4px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.gm-row.gm-off{opacity:.65}
+.gm-name{flex:1;min-width:0;text-align:left;border:0;background:transparent;padding:8px 10px}
+.gm-name b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gm-name small{color:var(--mut)}
+.gm-btn{flex:none;width:38px;height:38px;padding:0;border-radius:10px;font-size:18px;line-height:1}
+.gm-add{display:flex;gap:8px;margin-top:12px}.gm-add input{flex:1;min-width:0}.gm-add button{flex:none}
+</style>
+<style>
+.sticky-tools{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);margin:0 -14px 4px;padding:8px 14px 0}
+.sticky-tools::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:env(safe-area-inset-top,0px);background:var(--bg)}
+.sticky-tools .gbar{margin-bottom:6px}
+</style>
+<style>
+.fab-spacer{height:96px}
+.fab-root{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;pointer-events:none}
+.fab-backdrop{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;transition:opacity .22s ease}
+.fab-root.open .fab-backdrop{opacity:1;pointer-events:auto}
+.fab-btn{pointer-events:auto;position:absolute;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--acc);color:var(--accink);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.2);transition:transform .15s ease,box-shadow .2s ease;-webkit-tap-highlight-color:transparent}
+.fab-btn:active{transform:scale(.94)}
+.fab-btn svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;transition:transform .28s cubic-bezier(.3,.9,.3,1.2)}
+.fab-root.open .fab-btn svg{transform:rotate(135deg)}
+.fab-btn:focus-visible,.fab-opt:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.fab-sheet{pointer-events:auto;position:absolute;left:0;right:0;bottom:0;background:var(--card);color:var(--ink);border-radius:24px 24px 0 0;padding:10px 16px calc(96px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 40px rgba(0,0,0,.22);transform:translateY(105%);visibility:hidden;transition:transform .3s cubic-bezier(.32,.9,.3,1),visibility 0s linear .3s}
+.fab-root.open .fab-sheet{transform:none;visibility:visible;transition:transform .3s cubic-bezier(.32,.9,.3,1),visibility 0s}
+.fab-grip{width:40px;height:5px;border-radius:3px;background:var(--line-strong);margin:2px auto 12px}
+.fab-title{font-size:13px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:0 4px 10px}
+.fab-opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:12px 12px;margin:0 0 8px;border-radius:16px;border:1px solid var(--line);background:var(--bg)}
+.fab-ico{flex:none;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:14px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
+.fab-ico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.fab-txt{min-width:0}.fab-txt b{display:block;font-size:17px}.fab-txt small{display:block;color:var(--mut);font-size:13.5px;line-height:1.3;margin-top:2px}
+@media(min-width:640px){
+  .fab-backdrop{background:rgba(0,0,0,.16)}
+  .fab-sheet{left:auto;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px));width:340px;border-radius:20px;padding:12px;border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.24);transform:translateY(10px) scale(.97);transform-origin:bottom right;opacity:0;transition:transform .2s ease,opacity .2s ease,visibility 0s linear .2s}
+  .fab-root.open .fab-sheet{transform:none;opacity:1;transition:transform .2s ease,opacity .2s ease,visibility 0s}
+  .fab-grip{display:none}.fab-opt:last-child{margin-bottom:0}
+}
+@media(prefers-reduced-motion:reduce){.fab-backdrop,.fab-btn,.fab-btn svg,.fab-sheet,.fab-root.open .fab-sheet{transition:none}}
+</style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
@@ -1640,6 +1692,7 @@ function load(){
   legacyGroups.forEach(function(x){if(!personalGroups.some(function(p){return p.id===x.id}))personalGroups.push({id:x.id,g:1,localGroup:1,title:x.title||"Untitled",members:Array.isArray(x.members)?x.members:[]})});
   songs=songs.filter(function(x){return !(x.g&&!x.del&&!x.live&&String(x.title||"").toLowerCase()!=="sunday")});
   try{localStorage.setItem(LS+":personalGroups",JSON.stringify(personalGroups))}catch(e){}
+  try{groupOrder=JSON.parse(localStorage.getItem(LS+":groupOrder")||"[]");if(!Array.isArray(groupOrder))groupOrder=[]}catch(e){groupOrder=[]}
   try{sent=JSON.parse(localStorage.getItem(LS+":sent")||"{}")}catch(e){}
   try{var z=parseFloat(localStorage.getItem(LS+":zoom"));if(z>=0.5&&z<=2.5){zoom=z;defaultZoom=z}}catch(e){}
   try{displayPrefs=JSON.parse(localStorage.getItem(LS+":display")||"{}")||{}}catch(e){displayPrefs={}}
@@ -2074,8 +2127,8 @@ function groups(){
     if(!p.g||p.del)return;
     if(isSundayG(p)){if(haveSunday)return;haveSunday=true}
     list.push(p)});
-  function rank(x){return isSundayG(x)?0:(isLiveG(x)?1:2)}
-  return list.sort(function(a,b){var ra=rank(a),rb=rank(b);if(ra!==rb)return ra-rb;if(a.o!=null&&b.o!=null)return a.o-b.o;return (a.title||"").localeCompare(b.title||"")});
+  function pos(x){var i=groupOrder.indexOf(x.id);return i<0?1e9:i}
+  return list.sort(function(a,b){if(isSundayG(a))return -1;if(isSundayG(b))return 1;var pa=pos(a),pb=pos(b);if(pa!==pb)return pa-pb;return (a.title||"").localeCompare(b.title||"")});
 }
 // One-time/idempotent cleanup: merge duplicate Sunday groups into one and remove the extras.
 function cleanDupSunday(){
@@ -2099,6 +2152,133 @@ function gById(id){return groups().find(function(s){return s.id===id})}
 function isPersonalGroup(g){return !!(g&&g.localGroup)}
 function savePersonalGroups(){try{localStorage.setItem(LS+":personalGroups",JSON.stringify(personalGroups))}catch(e){}}
 function isFixedGroup(g){return !g||!isPersonalGroup(g)}
+
+var groupsMgrOpen=false,groupOrder=[],MAX_BAR_GROUPS=10;
+function saveGroupOrder(){try{localStorage.setItem(LS+":groupOrder",JSON.stringify(groupOrder))}catch(e){}}
+function groupTag(x){return isLiveG(x)?(isAdmin()?"Live":"Shared"):((isAdmin()&&isPersonalGroup(x)&&liveDoc(x.liveId))?"Live":"")}
+function groupBarHTML(){
+  var shown=groups().slice(0,MAX_BAR_GROUPS);
+  var h='<div class="gbar" id="gbar"><div class="gscroll" id="gscroll">';
+  h+='<button type="button" data-g=""'+(!grp?' class="on"':'')+'>All</button>';
+  shown.forEach(function(x){var t=groupTag(x);h+='<button type="button" data-g="'+x.id+'"'+(grp===x.id?' class="on"':'')+'><span>'+esc(x.title||"Untitled")+'</span>'+(t?'<span class="gtag">'+t+'</span>':'')+'</button>'});
+  h+='<button type="button" id="gmore" class="more" aria-haspopup="dialog">More</button></div></div>';
+  return h;
+}
+function groupsMgrListHTML(){
+  var gs=groups(),mv=gs.filter(function(x){return !isSundayG(x)});
+  if(!gs.length)return '<div class="group-picker-empty">No groups yet. Add one below.</div>';
+  return gs.map(function(x,ix){
+    var sun=isSundayG(x),k=mv.indexOf(x),t=groupTag(x),canDel=!sun&&(isPersonalGroup(x)||(isAdmin()&&isLiveG(x)));
+    var off=ix>=MAX_BAR_GROUPS;
+    return '<div class="gm-row'+(off?' gm-off':'')+'"><button type="button" class="gm-name" data-gm-open="'+x.id+'"><b>'+esc(x.title||"Untitled")+'</b><small>'+(sun?'Pinned at the top':(t?t+' group':'My group'))+(off?' \u00B7 only in More':'')+'</small></button>'
+      +(sun?'':'<button type="button" class="gm-btn" data-gm-up="'+x.id+'" aria-label="Move up"'+(k<=0?' disabled':'')+'>\u2191</button><button type="button" class="gm-btn" data-gm-down="'+x.id+'" aria-label="Move down"'+(k>=mv.length-1?' disabled':'')+'>\u2193</button>')
+      +(canDel?'<button type="button" class="gm-btn d" data-gm-del="'+x.id+'" aria-label="Remove group">\u2715</button>':'')+'</div>';
+  }).join("");
+}
+function groupsMgrHTML(){
+  return '<div class="ov" id="groupsMgr"><section class="gm-modal" role="dialog" aria-modal="true" aria-labelledby="gmTitle"><div class="gm-head"><h2 id="gmTitle">Groups</h2><button type="button" class="group-picker-close" id="gmClose" aria-label="Close">\u00D7</button></div><p class="mut gm-help">The first '+MAX_BAR_GROUPS+' groups show under the search bar. Use the arrows to reorder. Sunday always stays first.</p><div id="gmList" class="gm-list">'+groupsMgrListHTML()+'</div><div class="gm-add"><input id="gmNew" placeholder="New group name" maxlength="60" aria-label="New group name"><button type="button" class="p" id="gmAdd">Add</button></div></section></div>';
+}
+function refreshGroupUI(){
+  renderChips();
+  var l=document.getElementById("gmList");if(l){l.innerHTML=groupsMgrListHTML();bindGroupsMgrList()}
+}
+function moveGroup(id,dir){
+  var ids=groups().filter(function(x){return !isSundayG(x)}).map(function(x){return x.id});
+  var i=ids.indexOf(id),j=i+dir;if(i<0||j<0||j>=ids.length)return;
+  var t=ids[i];ids[i]=ids[j];ids[j]=t;groupOrder=ids;saveGroupOrder();refreshGroupUI();
+}
+function addGroupFromMgr(){
+  var inp=document.getElementById("gmNew"),n=inp?inp.value.trim().slice(0,60):"";if(!n)return;
+  if(n.toLowerCase()==="sunday"&&groups().some(isSundayG)){toast("A Sunday group already exists");return}
+  var ng={id:"local-group-"+uid(),g:1,localGroup:1,title:n,members:[]};
+  var ids=groups().filter(function(x){return !isSundayG(x)}).map(function(x){return x.id});
+  personalGroups.push(ng);savePersonalGroups();ids.push(ng.id);groupOrder=ids;saveGroupOrder();
+  inp.value="";refreshGroupUI();toast('Added "'+n+'"');
+}
+function removeGroupFromMgr(id){
+  var g=gById(id);if(!g||isSundayG(g))return;
+  if(isPersonalGroup(g)){
+    if(!window.confirm('Delete group "'+(g.title||"Untitled")+'"? Its songs stay in All.'))return;
+    var hadLive=!!liveDoc(g.liveId),name=g.title||"Group";
+    personalGroups=personalGroups.filter(function(x){return x.id!==g.id});savePersonalGroups();
+    groupOrder=groupOrder.filter(function(x){return x!==g.id});saveGroupOrder();
+    if(grp===g.id)grp=null;
+    save();draw();toast("Deleted "+name+(hadLive?" (the live copy is still online)":""),hadLive?3500:undefined);
+  }else if(isAdmin()&&isLiveG(g)){takeGroupOffline(g)}
+}
+function bindGroupsMgrList(){
+  document.querySelectorAll("[data-gm-up]").forEach(function(b){b.onclick=function(){moveGroup(b.dataset.gmUp,-1)}});
+  document.querySelectorAll("[data-gm-down]").forEach(function(b){b.onclick=function(){moveGroup(b.dataset.gmDown,1)}});
+  document.querySelectorAll("[data-gm-del]").forEach(function(b){b.onclick=function(){removeGroupFromMgr(b.dataset.gmDel)}});
+  document.querySelectorAll("[data-gm-open]").forEach(function(b){b.onclick=function(){grp=b.dataset.gmOpen;groupsMgrOpen=false;managing=false;gedit=false;gform=null;draw()}});
+}
+function bindGroupBar(){
+  var sc=document.getElementById("gscroll"),on=sc&&sc.querySelector("button.on");
+  if(sc&&on)sc.scrollLeft=Math.max(0,on.offsetLeft-(sc.clientWidth-on.offsetWidth)/2);
+  var more=document.getElementById("gmore");if(more)more.onclick=function(){groupsMgrOpen=true;draw()};
+}
+function bindGroupsMgr(){
+  var ov=document.getElementById("groupsMgr");if(!ov)return;
+  var close=function(){groupsMgrOpen=false;draw()};
+  document.getElementById("gmClose").onclick=close;
+  ov.onclick=function(e){if(e.target===ov)close()};
+  document.getElementById("gmAdd").onclick=addGroupFromMgr;
+  document.getElementById("gmNew").onkeydown=function(e){if(e.key==="Enter")addGroupFromMgr()};
+  bindGroupsMgrList();
+}
+
+/* ---------- Floating "+" button (bottom-right) with add-song sheet ---------- */
+var fabOpen=false;
+function addBlankChart(){
+  if(!isAdmin())return toast('Sign in as Admin to add songs.',2500);
+  fabOpen=false;addOpen=false;addView='picker';sheetOpen=false;
+  var s={id:uid(),title:'',artist:'',key:'C',chart:''};
+  songs.push(s);save();cur=s.id;view='song';mode='edit';isCreatingSong=true;draw();window.scrollTo(0,0);
+}
+function addUploadSheet(){
+  if(!isAdmin())return toast('Sign in as Admin to upload a music sheet.',2500);
+  fabOpen=false;sidebarOpen=false;sheetOpen=false;resetMusicSheetTool();addView='sheet';addOpen=true;draw();
+}
+function addPasteSongs(){
+  if(!isAdmin())return toast('Sign in as Admin to add songs.',2500);
+  fabOpen=false;sidebarOpen=false;sheetOpen=false;addView='paste';addOpen=true;draw();
+}
+function fabHTML(){
+  var ic={
+    blank:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 5h15l10 10v27H13a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4z"/><path d="M28 5v11h10"/></svg>',
+    up:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 31V5"/><path d="m12 17 12-12 12 12"/><path d="M6 31v9a3 3 0 0 0 3 3h30a3 3 0 0 0 3-3v-9"/></svg>',
+    paste:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="8" width="28" height="34" rx="3"/><path d="M18 8V5h12v3"/><path d="M16 20h16M16 27h16M16 34h10"/></svg>'};
+  function opt(id,i,t,d){return '<button type="button" role="menuitem" class="fab-opt" id="'+id+'"><span class="fab-ico">'+ic[i]+'</span><span class="fab-txt"><b>'+t+'</b><small>'+d+'</small></span></button>'}
+  return '<div class="fab-spacer" aria-hidden="true"></div><div class="fab-root'+(fabOpen?' open':'')+'" id="fabRoot"><div class="fab-backdrop" id="fabBackdrop"></div>'
+    +'<div class="fab-sheet" id="fabSheet" role="menu" aria-label="Add a song" aria-hidden="'+(fabOpen?'false':'true')+'"><div class="fab-grip" aria-hidden="true"></div><div class="fab-title">Add a song</div>'
+    +opt('fabBlank','blank','Blank Chart','Create songs from scratch')
+    +opt('fabUpload','up','Upload','Photo, scan or PDF of a chord chart')
+    +opt('fabPaste','paste','Paste from Word','Import multiple songs at once from formatted text')
+    +'</div><button type="button" class="fab-btn" id="fabBtn" aria-haspopup="menu" aria-controls="fabSheet" aria-expanded="'+(fabOpen?'true':'false')+'" aria-label="'+(fabOpen?'Close add menu':'Add song')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>';
+}
+function fabSet(open,returnFocus){
+  fabOpen=!!open;
+  var r=document.getElementById("fabRoot"),b=document.getElementById("fabBtn"),sh=document.getElementById("fabSheet");
+  if(!r||!b)return;
+  r.classList.toggle("open",fabOpen);
+  b.setAttribute("aria-expanded",fabOpen?"true":"false");
+  b.setAttribute("aria-label",fabOpen?"Close add menu":"Add song");
+  if(sh)sh.setAttribute("aria-hidden",fabOpen?"false":"true");
+  document.body.style.overflow=fabOpen?"hidden":"";
+  if(fabOpen){var f=document.getElementById("fabBlank");if(f)setTimeout(function(){if(fabOpen)try{f.focus({preventScroll:true})}catch(e){}},60)}
+  else if(returnFocus)try{b.focus({preventScroll:true})}catch(e){}
+}
+function bindFab(){
+  var $=function(i){return document.getElementById(i)};
+  if(!$("fabBtn"))return;
+  if(fabOpen)document.body.style.overflow="hidden";
+  $("fabBtn").onclick=function(){fabSet(!fabOpen,false)};
+  $("fabBackdrop").onclick=function(){fabSet(false,true)};
+  $("fabBlank").onclick=addBlankChart;
+  $("fabUpload").onclick=addUploadSheet;
+  $("fabPaste").onclick=addPasteSongs;
+}
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&fabOpen){e.preventDefault();fabSet(false,true)}});
 function isLiveG(g){return !!(g&&g.live&&!g.localGroup)}
 function canEditGroup(g){return !!g&&(isPersonalGroup(g)||(isAdmin()&&!isLiveG(g)))}
 function liveDoc(id){return id?(songs.find(function(x){return x.id===id&&x.g&&x.live&&!x.del&&!x.localGroup})||null):null}
@@ -2337,16 +2517,7 @@ function endChipDrag(){
   if(order.join()!==d.orig.join())applyGroupOrder(order,d.id);else renderChips();
 }
 function chipsHTML(){
-  var h='<button type="button" data-g=""'+(!toolsPage&&!grp?' class="p"':'')+'>ALL</button>';
-  groups().forEach(function(x){var tag=isLiveG(x)?(isAdmin()?"Live":"Shared"):((isAdmin()&&isPersonalGroup(x)&&liveDoc(x.liveId))?"Live":"");h+='<button type="button" data-g="'+x.id+'"'+(!toolsPage&&grp===x.id?' class="p"':'')+'><span>'+esc(x.title||"Untitled")+'</span>'+(tag?'<span class="gtag">'+tag+'</span>':'')+'</button>'});
-  {
-    if(gform==="new"){
-      h+='<div class="sidebar-new-group-form" role="group" aria-label="Create a new group"><strong>New Group</strong><input id="gn" placeholder="Group name, e.g. Sunday set" maxlength="60" aria-label="New group name"><div class="row"><button type="button" class="p" id="gok">Save</button><button type="button" id="gno">Cancel</button></div></div>';
-    }else{
-      h+='<button type="button" class="sidebar-new-group" data-g="+">+ New Group</button>';
-    }
-  }
-  return h;
+  return '<button type="button" data-g=""'+(!toolsPage&&!grp?' class="p"':'')+'>All Songs</button>';
 }
 function gboxHTML(){
   var g=grp?gById(grp):null;
@@ -2396,18 +2567,14 @@ function groupSongPickerHTML(){
   var addedCount=(g.members||[]).length;
   return '<div class="ov" id="groupSongPicker"><section class="group-picker-modal" role="dialog" aria-modal="true" aria-labelledby="groupPickerTitle"><div class="group-picker-head"><div style="flex:1"><h2 id="groupPickerTitle">Manage Group Songs</h2><p>Choose existing songs for '+esc(g.title||"this group")+'.</p></div><button type="button" class="group-picker-close" id="groupPickerClose" aria-label="Close">×</button></div><div class="group-picker-tools"><input id="groupPickerSearch" type="search" placeholder="Search songs by title, artist or key" aria-label="Search songs" value="'+esc(groupPickerQuery)+'"><select id="groupPickerSort" aria-label="Sort songs"><option value="az"'+(groupPickerSort==="az"?' selected':'')+'>Sort by: Title A–Z</option><option value="artist"'+(groupPickerSort==="artist"?' selected':'')+'>Sort by: Artist</option><option value="recent"'+(groupPickerSort==="recent"?' selected':'')+'>Sort by: Most Recent</option></select></div><div class="group-picker-switch" role="group" aria-label="Filter songs"><button type="button" data-group-picker-tab="available" class="'+(groupPickerTab==="available"?'active':'')+'" aria-pressed="'+(groupPickerTab==="available"?'true':'false')+'">Not in group</button><button type="button" data-group-picker-tab="added" class="'+(groupPickerTab==="added"?'active':'')+'" aria-pressed="'+(groupPickerTab==="added"?'true':'false')+'">In group ('+addedCount+')</button></div><div class="group-picker-count">'+all.length+' song'+(all.length===1?'':'s')+'</div><div class="group-picker-list">'+body+'</div></section></div>';
 }
-function renderChips(){var e=document.getElementById("gb");if(e){e.innerHTML=chipsHTML();bindChips()}}
+function renderChips(){var e=document.getElementById("gb");if(e)e.innerHTML=chipsHTML();var b=document.getElementById("gbar");if(b)b.outerHTML=groupBarHTML();bindChips();bindGroupBar()}
 function renderList(){var e=document.getElementById("sl");if(e){e.innerHTML=listHTML();bindList()}}
 function bindChips(){
   var $=function(i){return document.getElementById(i)};
-  document.querySelectorAll("#gb button[data-g]").forEach(function(b){
+  document.querySelectorAll("#gb button[data-g], #gbar button[data-g]").forEach(function(b){
     b.onclick=function(){
-      if(Date.now()-dragEnded<400)return;
       var v=b.dataset.g;
-      if(v==="+"){}
-      if(v==="+"){gform="new";managing=false;gedit=false;sidebarOpen=true;draw();return}
       stopTuner(false);stopMetronome(false);toolsPage=false;tunerOpen=false;metronomeOpen=false;chordToolStage="home";grp=v||null;managing=false;gedit=false;gform=null;sidebarOpen=false;draw()};
-    if(b.dataset.g&&b.dataset.g!=="+"&&canEditGroup(gById(b.dataset.g)))b.onpointerdown=function(e){startChipPress(e,b)};
   });
   if($("gedit")&&isAdmin())$("gedit").onclick=function(){gedit=true;sidebarOpen=false;draw()};
   if($("gedone"))$("gedone").onclick=function(){gedit=false;draw()};
@@ -2642,7 +2809,7 @@ function bindMusicSheet(){
 
 function sidebarHTML(){
   if(!sidebarOpen)return '';
-  return '<div class="sidebar-backdrop" id="sidebarBackdrop"></div><aside class="sidebar-drawer" id="sidebarDrawer" aria-label="Chordbook navigation"><div class="sidebar-head"><span class="sidebar-head-label">Groups</span><button type="button" class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">×</button></div><nav id="gb" class="pal sidebar-group-list" aria-label="Song groups">'+chipsHTML()+'</nav><div class="sidebar-bottom"><button type="button" id="toolsNav" class="sidebar-tools-button'+(toolsPage?' active':'')+'" aria-current="'+(toolsPage?'page':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4.3 4.3 0 0 0-5.5 5.5L3.5 17.5a2.1 2.1 0 0 0 3 3l5.7-5.7a4.3 4.3 0 0 0 5.5-5.5l-2.5 2.5-3-3z"/><path d="m15 5 4-2 2 2-2 4"/></svg><span>Tools</span></button><div class="sidebar-bottom-row">'+cloudBtn()+themeBtn()+'</div><div class="sidebar-sync-status">'+esc(syncMsg)+'</div></div></aside>';
+  return '<div class="sidebar-backdrop" id="sidebarBackdrop"></div><aside class="sidebar-drawer" id="sidebarDrawer" aria-label="Chordbook navigation"><div class="sidebar-head"><span class="sidebar-head-label">Library</span><button type="button" class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">×</button></div><nav id="gb" class="pal sidebar-group-list" aria-label="Song groups">'+chipsHTML()+'</nav><div class="sidebar-bottom"><button type="button" id="toolsNav" class="sidebar-tools-button'+(toolsPage?' active':'')+'" aria-current="'+(toolsPage?'page':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4.3 4.3 0 0 0-5.5 5.5L3.5 17.5a2.1 2.1 0 0 0 3 3l5.7-5.7a4.3 4.3 0 0 0 5.5-5.5l-2.5 2.5-3-3z"/><path d="m15 5 4-2 2 2-2 4"/></svg><span>Tools</span></button><div class="sidebar-bottom-row">'+cloudBtn()+themeBtn()+'</div><div class="sidebar-sync-status">'+esc(syncMsg)+'</div></div></aside>';
 }
 function bindSidebar(){
   var open=document.getElementById('navOpen'),close=document.getElementById('sidebarClose'),backdrop=document.getElementById('sidebarBackdrop'),tools=document.getElementById('toolsNav');
@@ -2744,15 +2911,10 @@ function bindAddModal(){
   var overlay=$('addOverlay');if(!overlay)return;
   if($('addClose'))$('addClose').onclick=closeAddModal;
   overlay.onclick=function(e){if(e.target===overlay)closeAddModal()};
-  if($('addNewFile'))$('addNewFile').onclick=function(){
-    if(!isAdmin())return toast('Sign in as Admin to add songs.',2500);
-    addOpen=false;addView='picker';sheetOpen=false;
-    var s={id:uid(),title:'',artist:'',key:'C',chart:''};
-    songs.push(s);save();cur=s.id;view='song';mode='edit';isCreatingSong=true;draw();window.scrollTo(0,0);
-  };
-  if($('addPasteText'))$('addPasteText').onclick=function(){if(!isAdmin())return toast('Sign in as Admin to add songs.',2500);addView='paste';draw()};
+  if($('addNewFile'))$('addNewFile').onclick=addBlankChart;
+  if($('addPasteText'))$('addPasteText').onclick=addPasteSongs;
   bindBulkPaste();
-  if($('addUploadImage'))$('addUploadImage').onclick=function(){if(!isAdmin())return toast('Sign in as Admin to upload a music sheet.',2500);resetMusicSheetTool();addView='sheet';draw()};
+  if($('addUploadImage'))$('addUploadImage').onclick=addUploadSheet;
     if($('addBack'))$('addBack').onclick=function(){if(addView==='paste'){addView='picker';draw();return}if(sheetBusy||sheetAIBusy)return toast('Please wait for the current task to finish.',2500);addView='picker';sheetOpen=false;draw()};
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&addOpen){e.preventDefault();closeAddModal()}});
@@ -3348,8 +3510,9 @@ function drawMain(){
   var _ag=grp?gById(grp):null;
   if(!canEditGroup(_ag)){gedit=false;managing=false;if(gform!=="new")gform=null;}
   if(grp&&!gById(grp)){grp=null;managing=false}
+  if(view!=="list"||toolsPage){groupsMgrOpen=false}
   if(view!=="list"){cloudOpen=false;sidebarOpen=false}
-  document.body.style.overflow=(cloudOpen||addOpen||sidebarOpen||groupSongPickerOpen)?"hidden":"";
+  document.body.style.overflow=(cloudOpen||addOpen||sidebarOpen||groupSongPickerOpen||groupsMgrOpen)?"hidden":"";
   if(view==="list"&&toolsPage){
     var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle">Tools</div></div></div>';
     h+=tunerHomeHTML();
@@ -3362,16 +3525,18 @@ function drawMain(){
   if(view==="list"){
     var activeGroupForHeader=grp?gById(grp):null;
     var activeGroupTitle=activeGroupForHeader?(activeGroupForHeader.title||"Untitled"):"All";
-    var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle" aria-live="polite">'+esc(activeGroupTitle)+'</div></div>'+((canEditGroup(grp?gById(grp):null)&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top">Edit Group</button>':'')+fsBtn()+(isAdmin()?'<button class="settings-icon add-icon" id="add" aria-label="Add new song" title="Add new song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>':'')+'</div>';
+    var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle" aria-live="polite">'+esc(activeGroupTitle)+'</div></div>'+((canEditGroup(grp?gById(grp):null)&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top">Edit Group</button>':'')+fsBtn()+'</div>';
     h+='<div class="mut" id="sync" style="margin:-4px 0 10px">'+esc(syncMsg)+'</div>';
-    h+='<input id="q" type="search" placeholder="Search songs by title, artist or key" value="'+esc(qry)+'" aria-label="Search songs" style="margin-bottom:10px">';
+    h+='<div class="sticky-tools"><input id="q" type="search" placeholder="Search songs by title, artist or key" value="'+esc(qry)+'" aria-label="Search songs" style="margin-bottom:10px">'+groupBarHTML()+'</div>';
     h+=allSortBarHTML()+gboxHTML()+'<div id="sl">'+listHTML()+'</div>';
     if(cloudOpen)h+=modalHTML();
     if(addOpen&&isAdmin())h+=addModalHTML();
     if(groupSongPickerOpen&&canEditGroup(grp?gById(grp):null))h+=groupSongPickerHTML();
+    if(groupsMgrOpen)h+=groupsMgrHTML();
+    if(isAdmin()&&!addOpen&&!cloudOpen&&!sidebarOpen&&!groupsMgrOpen&&!groupSongPickerOpen)h+=fabHTML();else fabOpen=false;
     h+=sidebarHTML();
     a.innerHTML=h;
-    bindTop();bindFS();bindTheme();bindCloud();bindModal();bindMusicSheet();bindAddModal();bindSidebar();
+    bindTop();bindFS();bindTheme();bindCloud();bindModal();bindMusicSheet();bindAddModal();bindSidebar();bindGroupBar();bindGroupsMgr();bindFab();
      var groupAddSongBtn=document.getElementById("groupAddSong");if(groupAddSongBtn)groupAddSongBtn.onclick=function(){if(!canEditGroup(grp?gById(grp):null))return;groupPickerQuery="";groupPickerTab="available";groupSongPickerOpen=true;draw()};
     var groupPickerClose=document.getElementById("groupPickerClose");if(groupPickerClose)groupPickerClose.onclick=function(){groupSongPickerOpen=false;draw()};
     var groupPickerOverlay=document.getElementById("groupSongPicker");if(groupPickerOverlay)groupPickerOverlay.onclick=function(e){if(e.target===groupPickerOverlay){groupSongPickerOpen=false;draw()}};
