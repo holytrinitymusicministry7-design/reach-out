@@ -613,7 +613,7 @@ body.swiping{overflow-x:hidden}
 
 
 /* Refined add-song dialog, chord selectors, and group empty state */
-.ov#addOverlay{align-items:center;padding:22px;background:rgba(28,27,26,.58);backdrop-filter:blur(3px)}
+.ov#addOverlay{align-items:center;padding:22px;background:rgba(28,27,26,.42);-webkit-backdrop-filter:blur(18px) saturate(165%);backdrop-filter:blur(18px) saturate(165%);z-index:85;isolation:isolate}
 #addOverlay .add-modal{width:min(100%,1360px);max-width:1360px;max-height:min(92vh,850px);padding:0 48px 34px;background:var(--card);border:1px solid var(--line);border-radius:30px;box-shadow:0 24px 70px rgba(0,0,0,.2);color:var(--ink)}
 #addOverlay .mh{padding:30px 0 24px;border-bottom:1px solid var(--line);margin-bottom:28px}
 #addOverlay .add-modal-title{font-size:clamp(26px,3vw,40px);font-weight:800;letter-spacing:-.035em}
@@ -657,7 +657,7 @@ body.swiping{overflow-x:hidden}
 .group-manage-danger{border-color:color-mix(in srgb,var(--danger) 18%,var(--line));background:color-mix(in srgb,var(--danger) 4%,var(--card))}
 .group-manage-danger b{display:block;font-size:14px}.group-manage-danger p{margin:3px 0 13px;color:var(--mut);font-size:12px;line-height:1.45}.group-manage-danger button{color:var(--danger);font-weight:750}.group-manage-danger button.is-confirming{background:var(--danger);border-color:var(--danger);color:#fff}
 @media(max-width:520px){.group-action-bar{padding:10px 10px 10px 13px}.group-manage-modal{padding:18px;border-radius:22px}.group-manage-name-row{grid-template-columns:1fr}.group-manage-name-row button{width:100%}.group-manage-songs{align-items:flex-start;flex-direction:column}.group-manage-songs button{width:100%}.group-manage-share-head{flex-wrap:wrap}.group-manage-share-actions{flex-direction:column}.group-manage-share-actions button{width:100%}}
-#groupSongPicker.ov{align-items:center;padding:18px;background:rgba(28,27,26,.58);backdrop-filter:blur(3px)}
+#groupSongPicker.ov{align-items:center;padding:18px;background:rgba(28,27,26,.58);backdrop-filter:blur(3px);z-index:65;-webkit-backdrop-filter:blur(14px) saturate(160%)}
 #groupSongPicker .group-picker-modal{width:min(100%,720px);max-height:min(88vh,800px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.2)}
 .group-picker-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.group-picker-head h2{font-size:25px;margin:0;flex:1}.group-picker-head p{color:var(--mut);margin:5px 0 0}.group-picker-close{font-size:28px;border:0;background:transparent;color:var(--mut);padding:4px 10px}.group-picker-tools{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px;margin-bottom:14px}.group-picker-tools input,.group-picker-tools select{width:100%;min-width:0;margin:0}.group-picker-switch{display:flex;gap:4px;padding:4px;background:var(--bar);border-radius:999px;margin-bottom:16px}.group-picker-switch button{flex:1;border:0;border-radius:999px;background:transparent;color:var(--mut);font-weight:700;padding:10px 12px;min-height:42px}.group-picker-switch button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.09)}.group-picker-list{display:grid;gap:8px}.group-picker-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.group-picker-item>span{flex:1;min-width:0}.group-picker-item small{display:block;color:var(--mut);margin-top:2px}.group-picker-item button{font-weight:750;border-color:var(--line);white-space:nowrap}.group-picker-item button.add-existing{color:var(--acc)}.group-picker-item button.remove-existing{color:var(--danger,var(--mut))}.group-picker-count{font-size:13px;color:var(--mut);margin:0 0 9px}.group-picker-empty{padding:24px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px}
 @media(max-width:520px){.group-picker-tools{grid-template-columns:1fr}.group-picker-tools select{min-height:44px}}
@@ -920,6 +920,9 @@ input[type=checkbox],input[type=radio],input[type=range]{padding:0;border:0;back
 .font-pick{border-radius:12px;background:var(--card)}
 .font-opt.on .font-pick{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
 .chart-editor-shell{border-radius:var(--r-lg)}
+
+/* Keep group-management dialogs above the sticky app header, with the same glass blur as the song picker. */
+#groupsMgr.ov,#groupManageOverlay.ov{z-index:80;background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(18px) saturate(165%);backdrop-filter:blur(18px) saturate(165%)}
 
 /* ---------- Overlays, sheets, materials ---------- */
 .ov,#groupSongPicker.ov{background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%)}
@@ -2225,7 +2228,7 @@ function bindAccordion(){
     });
   }});
 }
-document.addEventListener("keydown",function(e){if(e.key==="Escape"&&cloudOpen){cloudOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&scaleToolOpen){scaleToolOpen=false;draw()}else if(e.key==="Escape"&&sidebarOpen){sidebarOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&tunerOpen){stopTuner(false);tunerOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&metronomeOpen){stopMetronome(false);metronomeOpen=false;metroBeatsMenuOpen=false;metroClicksMenuOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&chordToolStage!=="home"){chordToolStage=(chordToolStage==="guitar"||chordToolStage==="piano")?"choose":"home";draw()}});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&cloudOpen){cloudOpen=false;draw()}else if(e.key==="Escape"&&sidebarOpen){sidebarOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&scaleToolOpen){exitToolsToSongs()}else if(e.key==="Escape"&&toolsPage&&tunerOpen){exitToolsToSongs()}else if(e.key==="Escape"&&toolsPage&&metronomeOpen){exitToolsToSongs()}else if(e.key==="Escape"&&toolsPage&&chordToolStage!=="home"){if(chordToolStage==="guitar"||chordToolStage==="piano"||chordToolStage==="bass"){chordToolStage="choose";draw()}else{exitToolsToSongs()}}});
 function loginBox(){
   if(isSignedIn()) return accBox("login","Account login",'<p class="mut">Signed in as '+esc(SB.email||'')+'. '+(isAdmin()?"Administrator access.":"View and practice access.")+'</p><p class="mut" id="dst">'+esc(syncMsg)+'</p><div class="row"><button id="dsync" class="p">Sync Now</button><button id="dout" class="d">Log out</button></div>');
   return accBox("login","Account login",'<input id="sbem" type="email" placeholder="Email address" autocomplete="username" value="'+esc(SB.email||'')+'"><input id="sbpw" type="password" placeholder="Password" autocomplete="current-password"><div class="row"><button id="sin" class="p">Sign in</button><button id="sup" disabled aria-disabled="true" title="Account creation is disabled">Create account</button></div><p class="mut">Not signed in.</p><p class="mut" id="loginmsg"></p>');
@@ -3131,6 +3134,11 @@ function sidebarHTML(){
     +appMenuCard('menuSettings',gearSvg,'Settings',{open:settingsMenuOpen,expandable:true,html:sbOn()?'<span class="appmenu-dot" title="Connected"></span>':''})
     +'</div><div class="appmenu-settings'+(settingsMenuOpen?' open':'')+'" id="settingsPanel"><div class="appmenu-settings-inner">'+loginBox()+fontBoxHTML()+installBox()+backupBox()+'</div></div><div class="appmenu-theme"><span class="appmenu-theme-label">Dark mode</span>'+themeBtn()+'</div></div>';
 }
+function exitToolsToSongs(){
+  if(tunerRunning||tunerStarting)stopTuner(false);
+  stopMetronome(false);
+  toolsPage=false;tunerOpen=false;metronomeOpen=false;scaleToolOpen=false;chordToolStage='home';sidebarOpen=false;settingsMenuOpen=false;draw();window.scrollTo(0,0);
+}
 function openToolFromMenu(which){
   if(tunerRunning||tunerStarting)stopTuner(false);
   stopMetronome(false);
@@ -3165,11 +3173,7 @@ function bindSidebar(){
     };
   }
   var ex=$('toolsExit');
-  if(ex)ex.onclick=function(){
-    if(tunerRunning||tunerStarting)stopTuner(false);
-    stopMetronome(false);
-    toolsPage=false;tunerOpen=false;metronomeOpen=false;scaleToolOpen=false;chordToolStage='home';sidebarOpen=false;draw();window.scrollTo(0,0);
-  };
+  if(ex)ex.onclick=exitToolsToSongs;
 }
 function addModalHTML(){
   if(!addOpen)return '';
@@ -3367,7 +3371,7 @@ var CHORD_QUALITIES=[
 var CHORD_PC_NAMES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 function chordLabel(root,quality){return CHORD_ROOTS[root]+quality.suffix}
 function chordInstrumentChooserHTML(){
-  return '<main class="chord-tool-wrap"><div class="chord-tool-head"><button type="button" id="chordBackHome">← Tools</button><h2>Chord Library</h2></div><p class="mut">Choose an instrument to view common chord diagrams.</p><div class="tools-home" style="min-height:0;margin-top:12px"><button type="button" id="chordChooseGuitar" class="tools-card"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5v10M19 15h10l4 7-4 7H19l-4-7zM24 29v14M10 23h5M33 23h5"/><circle cx="24" cy="23" r="3"/></svg><span>Guitar</span><small>Common guitar chord shapes</small></button><button type="button" id="chordChoosePiano" class="tools-card"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="8" width="40" height="32" rx="3"/><path d="M12 8v21M20 8v21M28 8v21M36 8v21M12 29v11M20 29v11M28 29v11M36 29v11M4 29h40"/><path d="M17 8v13M25 8v13M37 8v13" stroke-width="4"/></svg><span>Piano</span><small>Root-position piano chords</small></button><button type="button" id="chordChooseBass" class="tools-card"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 5v38M22 5v38M32 5v38M8 12h28M8 20h28M8 28h28M8 36h28"/><circle cx="12" cy="20" r="4"/><circle cx="32" cy="28" r="4"/></svg><span>Bass</span><small>Explore notes across the bass fretboard</small></button></div></main>';
+  return '<main class="chord-tool-wrap"><div class="chord-tool-head"><button type="button" id="chordBackHome">← Songs</button><h2>Chord Library</h2></div><p class="mut">Choose an instrument to view common chord diagrams.</p><div class="tools-home" style="min-height:0;margin-top:12px"><button type="button" id="chordChooseGuitar" class="tools-card"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5v10M19 15h10l4 7-4 7H19l-4-7zM24 29v14M10 23h5M33 23h5"/><circle cx="24" cy="23" r="3"/></svg><span>Guitar</span><small>Common guitar chord shapes</small></button><button type="button" id="chordChoosePiano" class="tools-card"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="8" width="40" height="32" rx="3"/><path d="M12 8v21M20 8v21M28 8v21M36 8v21M12 29v11M20 29v11M28 29v11M36 29v11M4 29h40"/><path d="M17 8v13M25 8v13M37 8v13" stroke-width="4"/></svg><span>Piano</span><small>Root-position piano chords</small></button><button type="button" id="chordChooseBass" class="tools-card"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 5v38M22 5v38M32 5v38M8 12h28M8 20h28M8 28h28M8 36h28"/><circle cx="12" cy="20" r="4"/><circle cx="32" cy="28" r="4"/></svg><span>Bass</span><small>Explore notes across the bass fretboard</small></button></div></main>';
 }
 function chordControlsHTML(){
   var names=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
@@ -3572,12 +3576,12 @@ function scaleChartHTML(){
   var options=SCALE_TYPES.map(function(t){return '<option value="'+t.id+'"'+(scaleType===t.id?' selected':'')+'>'+t.name+'</option>'}).join('');
   var cards=notes.map(function(n,i){return '<article class="scale-note-card"><div class="scale-note-degree">'+n.degree+'</div><div class="scale-note-pitch">'+n.pitch+'</div><div class="scale-note-letter">'+n.letter+'</div></article>'}).join('');
   var spelling='<div class="scale-spelling-control" role="group" aria-label="Note spelling"><button type="button" data-scale-spelling="flat" class="'+(scaleAccidental==='flat'?'active':'')+'" aria-label="Use flats" title="Use flats" aria-pressed="'+(scaleAccidental==='flat'?'true':'false')+'">♭</button><button type="button" data-scale-spelling="sharp" class="'+(scaleAccidental==='sharp'?'active':'')+'" aria-label="Use sharps" title="Use sharps" aria-pressed="'+(scaleAccidental==='sharp'?'true':'false')+'">♯</button></div>';
-  return '<main class="scale-chart-wrap"><div class="scale-chart-head"><button type="button" id="scaleBack">← Tools</button><h2>Scale Chart</h2></div><section class="scale-chart-panel"><label class="scale-chart-label">1. Select a key</label><div class="scale-key-grid">'+keys+'</div></section><section class="scale-chart-panel"><label class="scale-chart-label" for="scaleTypeSelect">2. Choose a scale</label><select id="scaleTypeSelect" class="scale-type-select">'+options+'</select></section><section class="scale-chart-panel"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px"><h3 style="margin:0;font-size:20px">'+esc(CHORD_ROOTS[scaleRoot]+' '+typeObj.name)+'</h3><span class="mut">'+notes.length+' notes</span>'+spelling+'</div><div class="scale-notes-grid">'+cards+'</div><p class="scale-chart-hint">Each card shows the scale degree, the note name, and its alphabetical letter name below. The notes are listed in ascending scale order.</p></section></main>';
+  return '<main class="scale-chart-wrap"><div class="scale-chart-head"><button type="button" id="scaleBack">← Songs</button><h2>Scale Chart</h2></div><section class="scale-chart-panel"><label class="scale-chart-label">1. Select a key</label><div class="scale-key-grid">'+keys+'</div></section><section class="scale-chart-panel"><label class="scale-chart-label" for="scaleTypeSelect">2. Choose a scale</label><select id="scaleTypeSelect" class="scale-type-select">'+options+'</select></section><section class="scale-chart-panel"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px"><h3 style="margin:0;font-size:20px">'+esc(CHORD_ROOTS[scaleRoot]+' '+typeObj.name)+'</h3><span class="mut">'+notes.length+' notes</span>'+spelling+'</div><div class="scale-notes-grid">'+cards+'</div><p class="scale-chart-hint">Each card shows the scale degree, the note name, and its alphabetical letter name below. The notes are listed in ascending scale order.</p></section></main>';
 }
 function bindScaleTool(){
  var open=document.getElementById('openScaleTool'),back=document.getElementById('scaleBack'),sel=document.getElementById('scaleTypeSelect');
  if(open)open.onclick=function(){if(tunerRunning||tunerStarting)stopTuner(false);stopMetronome(false);tunerOpen=false;metronomeOpen=false;chordToolStage='home';scaleToolOpen=true;draw()};
- if(back)back.onclick=function(){scaleToolOpen=false;draw()};
+ if(back)back.onclick=exitToolsToSongs;
  if(sel)sel.onchange=function(){scaleType=this.value;draw()};
  document.querySelectorAll('[data-scale-spelling]').forEach(function(b){b.onclick=function(){scaleAccidental=b.getAttribute('data-scale-spelling');draw()}});
  document.querySelectorAll('[data-scale-root]').forEach(function(b){b.onclick=function(){scaleRoot=Number(b.getAttribute('data-scale-root'));draw()}});
@@ -3587,7 +3591,7 @@ function bindChordTool(){
   var open=document.getElementById('openChordTool'),backHome=document.getElementById('chordBackHome'),guitar=document.getElementById('chordChooseGuitar'),piano=document.getElementById('chordChoosePiano'),bass=document.getElementById('chordChooseBass'),back=document.getElementById('chordBackChoose'),root=document.getElementById('chordRootSelect'),metroOpenBtn=document.getElementById('openMetronome');
   if(metroOpenBtn)metroOpenBtn.onclick=function(){if(tunerRunning||tunerStarting)stopTuner(false);tunerOpen=false;chordToolStage='home';metronomeOpen=true;metroBeatsMenuOpen=false;metroClicksMenuOpen=false;draw()};
   if(open)open.onclick=function(){stopMetronome(false);metronomeOpen=false;chordToolStage='choose';draw()};
-  if(backHome)backHome.onclick=function(){chordToolStage='home';draw()};
+  if(backHome)backHome.onclick=exitToolsToSongs;
   if(guitar)guitar.onclick=function(){chordInstrument='guitar';chordToolStage='guitar';draw()};
   if(piano)piano.onclick=function(){chordInstrument='piano';chordToolStage='piano';draw()};
   if(bass)bass.onclick=function(){chordInstrument='bass';chordToolStage='bass';draw()};
@@ -3605,7 +3609,7 @@ function metronomeHTML(){
   for(var i=0;i<metroBeatsPerBar;i++)squares+='<div class="metro-beat'+(i===0?' first-marker':'')+'" data-metro-beat="'+i+'" aria-label="Beat '+(i+1)+'">'+(i+1)+'</div>';
   var beatChoices='';for(var b=2;b<=12;b++)beatChoices+='<button type="button" data-metro-beats="'+b+'" class="'+(metroBeatsPerBar===b?'selected':'')+'" aria-pressed="'+(metroBeatsPerBar===b?'true':'false')+'">'+b+(b===1?' beat':' beats')+'</button>';
   var clickChoices='';for(var c=1;c<=4;c++)clickChoices+='<button type="button" data-metro-clicks="'+c+'" class="'+(metroClicksPerBeat===c?'selected':'')+'" aria-pressed="'+(metroClicksPerBeat===c?'true':'false')+'">'+c+(c===1?' click per beat':' clicks per beat')+'</button>';
-  return '<main class="metronome-wrap"><div class="metro-head"><button type="button" id="metroBack">← Tools</button><h2>Metronome</h2></div><section class="metro-card"><p class="mut" style="text-align:center;margin:0 0 14px">Keep time while you practice. Beat 1 has a stronger accent.</p><div class="metro-beat-grid" id="metroBeatGrid" style="--metro-beat-count:'+metroBeatsPerBar+'">'+squares+'</div><div class="metro-tempo-row"><button type="button" id="metroMinus" class="metro-tempo-step" aria-label="Decrease tempo">−</button><div class="metro-tempo-value"><div class="metro-tempo-number" id="metroBpmValue">'+metroBpm+'</div><div class="metro-tempo-unit">BPM</div></div><button type="button" id="metroPlus" class="metro-tempo-step" aria-label="Increase tempo">+</button></div><div class="metro-slider-wrap"><input type="range" id="metroTempoSlider" min="30" max="300" step="1" value="'+metroBpm+'" aria-label="Metronome tempo"/><div class="metro-slider-labels"><span>30 BPM</span><span>300 BPM</span></div></div><div class="metro-adjust-row"><button type="button" data-metro-step="-10">−10</button><button type="button" data-metro-step="-5">−5</button><button type="button" data-metro-step="5">+5</button><button type="button" data-metro-step="10">+10</button></div><div class="metro-control-grid"><div class="metro-control"><button type="button" class="metro-control-button" id="metroBeatsToggle" aria-expanded="'+(metroBeatsMenuOpen?'true':'false')+'"><div>Beats per bar<strong>'+metroBeatsPerBar+'</strong></div><span class="metro-chevron">'+(metroBeatsMenuOpen?'⌃':'⌄')+'</span></button>'+(metroBeatsMenuOpen?'<div class="metro-choice-list" role="group" aria-label="Beats per bar">'+beatChoices+'</div>':'')+'</div><div class="metro-control"><button type="button" class="metro-control-button" id="metroClicksToggle" aria-expanded="'+(metroClicksMenuOpen?'true':'false')+'"><div>Clicks per beat<strong>'+metroClicksPerBeat+'</strong></div><span class="metro-chevron">'+(metroClicksMenuOpen?'⌃':'⌄')+'</span></button>'+(metroClicksMenuOpen?'<div class="metro-choice-list" role="group" aria-label="Clicks per beat">'+clickChoices+'</div>':'')+'</div><div class="metro-control"><button type="button" class="metro-tap" id="metroTap">Tap Tempo<small>Tap to set BPM</small></button></div></div><button type="button" id="metroPlay" class="metro-play'+(metroPlaying?' playing':' p')+'">'+(metroPlaying?'■ Stop Metronome':'▶ Start Metronome')+'</button><p class="metro-help">Tempo range: 30–300 BPM. When clicks per beat is greater than 1, the extra clicks subdivide each beat. The first beat of every bar uses a higher, stronger accent and a different color.</p></section></main>';
+  return '<main class="metronome-wrap"><div class="metro-head"><button type="button" id="metroBack">← Songs</button><h2>Metronome</h2></div><section class="metro-card"><p class="mut" style="text-align:center;margin:0 0 14px">Keep time while you practice. Beat 1 has a stronger accent.</p><div class="metro-beat-grid" id="metroBeatGrid" style="--metro-beat-count:'+metroBeatsPerBar+'">'+squares+'</div><div class="metro-tempo-row"><button type="button" id="metroMinus" class="metro-tempo-step" aria-label="Decrease tempo">−</button><div class="metro-tempo-value"><div class="metro-tempo-number" id="metroBpmValue">'+metroBpm+'</div><div class="metro-tempo-unit">BPM</div></div><button type="button" id="metroPlus" class="metro-tempo-step" aria-label="Increase tempo">+</button></div><div class="metro-slider-wrap"><input type="range" id="metroTempoSlider" min="30" max="300" step="1" value="'+metroBpm+'" aria-label="Metronome tempo"/><div class="metro-slider-labels"><span>30 BPM</span><span>300 BPM</span></div></div><div class="metro-adjust-row"><button type="button" data-metro-step="-10">−10</button><button type="button" data-metro-step="-5">−5</button><button type="button" data-metro-step="5">+5</button><button type="button" data-metro-step="10">+10</button></div><div class="metro-control-grid"><div class="metro-control"><button type="button" class="metro-control-button" id="metroBeatsToggle" aria-expanded="'+(metroBeatsMenuOpen?'true':'false')+'"><div>Beats per bar<strong>'+metroBeatsPerBar+'</strong></div><span class="metro-chevron">'+(metroBeatsMenuOpen?'⌃':'⌄')+'</span></button>'+(metroBeatsMenuOpen?'<div class="metro-choice-list" role="group" aria-label="Beats per bar">'+beatChoices+'</div>':'')+'</div><div class="metro-control"><button type="button" class="metro-control-button" id="metroClicksToggle" aria-expanded="'+(metroClicksMenuOpen?'true':'false')+'"><div>Clicks per beat<strong>'+metroClicksPerBeat+'</strong></div><span class="metro-chevron">'+(metroClicksMenuOpen?'⌃':'⌄')+'</span></button>'+(metroClicksMenuOpen?'<div class="metro-choice-list" role="group" aria-label="Clicks per beat">'+clickChoices+'</div>':'')+'</div><div class="metro-control"><button type="button" class="metro-tap" id="metroTap">Tap Tempo<small>Tap to set BPM</small></button></div></div><button type="button" id="metroPlay" class="metro-play'+(metroPlaying?' playing':' p')+'">'+(metroPlaying?'■ Stop Metronome':'▶ Start Metronome')+'</button><p class="metro-help">Tempo range: 30–300 BPM. When clicks per beat is greater than 1, the extra clicks subdivide each beat. The first beat of every bar uses a higher, stronger accent and a different color.</p></section></main>';
 }
 function metroSetBpm(value){
   metroBpm=Math.max(30,Math.min(300,Math.round(Number(value)||100)));
@@ -3668,7 +3672,7 @@ async function startMetronome(){
 function bindMetronome(){
   var open=document.getElementById('openMetronome'),back=document.getElementById('metroBack'),play=document.getElementById('metroPlay'),minus=document.getElementById('metroMinus'),plus=document.getElementById('metroPlus'),tempoSlider=document.getElementById('metroTempoSlider'),beatsToggle=document.getElementById('metroBeatsToggle'),clicksToggle=document.getElementById('metroClicksToggle'),tap=document.getElementById('metroTap');
   if(open)open.onclick=function(){if(tunerRunning||tunerStarting)stopTuner(false);tunerOpen=false;chordToolStage='home';metronomeOpen=true;metroBeatsMenuOpen=false;metroClicksMenuOpen=false;draw()};
-  if(back)back.onclick=function(){stopMetronome(false);metronomeOpen=false;metroBeatsMenuOpen=false;metroClicksMenuOpen=false;draw()};
+  if(back)back.onclick=exitToolsToSongs;
   if(play)play.onclick=startMetronome;
   if(minus)minus.onclick=function(){metroSetBpm(metroBpm-1)};
   if(plus)plus.onclick=function(){metroSetBpm(metroBpm+1)};
@@ -3689,7 +3693,7 @@ function tunerHomeHTML(){
     if(chordToolStage==='choose')return chordInstrumentChooserHTML();
     if(chordToolStage==='guitar'||chordToolStage==='piano')return chordBrowserHTML();
     if(chordToolStage==='bass')return bassChartHTML();
-    return toolsLandingHTML();
+    return chordInstrumentChooserHTML();
   }
   var strings=tunerStrings();
   if(tunerSelectedString>=strings.length||tunerSelectedString<0)tunerSelectedString=0;
@@ -3697,7 +3701,7 @@ function tunerHomeHTML(){
   var ticks='';for(var i=-5;i<=5;i++){var a=i*10*Math.PI/180,x1=200+Math.sin(a)*103,y1=132-Math.cos(a)*103,x2=200+Math.sin(a)*(i===0?124:116),y2=132-Math.cos(a)*(i===0?124:116);ticks+='<line class="tn-gauge-tick'+(i===0?' center':Math.abs(i)===5?' major':'')+'" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>';}
   var stringButtons=strings.map(function(s,i){return '<button type="button" class="tn-string'+(i===tunerSelectedString?' active':'')+'" data-tuner-string="'+i+'" aria-pressed="'+(i===tunerSelectedString?'true':'false')+'"><b>'+esc(s[1].replace(/[0-9]/g,''))+'</b><small>String '+(i+1)+'</small><em>'+s[2].toFixed(1)+' Hz</em></button>'}).join('');
   var playIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 0 0-7 0v5A3.5 3.5 0 0 0 12 15zm5-3.5a1 1 0 1 1 2 0A7 7 0 0 1 13 18.4V21h-2v-2.6A7 7 0 0 1 5 11.5a1 1 0 1 1 2 0 5 5 0 0 0 10 0z"/></svg>';
-  return '<main class="tuner-wrap"><div class="tuner-head"><button type="button" id="tunerBack">← Tools</button><h2>Guitar Tuner</h2></div><div class="tn-card tn-guitar">'
+  return '<main class="tuner-wrap"><div class="tuner-head"><button type="button" id="tunerBack">← Songs</button><h2>Guitar Tuner</h2></div><div class="tn-card tn-guitar">'
   +'<div class="tn-topline"><div class="tn-status" aria-label="'+status+'"><i class="live-dot '+(tunerBusy?'on':'')+'"></i></div><div class="tn-actions">'+(tunerBusy?'<button type="button" class="tn-start stop" id="tunerStop">Stop</button>':'<button type="button" class="p tn-start" id="tunerStart">'+playIcon+'Start Tuning</button>')+'</div></div>'
   +'<div class="tn-gauge-wrap"><svg class="tn-gauge" viewBox="0 0 400 166" role="img" aria-label="Pitch meter from flat to sharp"><path class="tn-gauge-track" d="M109.6 56.1 A118 118 0 0 1 290.4 56.1"/><path class="tn-gauge-zone" d="M187.7 14.6 A118 118 0 0 1 212.3 14.6"/>'+ticks+'<line class="tn-gauge-needle tuner-tuning-needle" id="tunerNeedle" x1="200" y1="132" x2="200" y2="35"/><circle class="tn-gauge-hub" id="tunerHub" cx="200" cy="132" r="10"/><text class="tn-gauge-label" x="72" y="160" text-anchor="middle">♭ Flat</text><text class="tn-gauge-label tn-gauge-center-label" x="200" y="160" text-anchor="middle">In tune</text><text class="tn-gauge-label" x="328" y="160" text-anchor="middle">Sharp ♯</text></svg></div>'
   +'<div class="tn-read"><div class="tn-note" id="tunerNote">—</div><div id="tunerString" class="tuner-live-string">Play one string near your microphone</div><div class="tuner-live-string" id="tunerFrequency">— Hz</div><div id="tunerCents" class="tuner-live-cents">Waiting for sound</div></div><div class="tn-guidance" id="tunerGuidance">Pluck a string, then let it ring</div>'
@@ -3707,7 +3711,7 @@ function tunerHomeHTML(){
 function bindTuner(){
   var open=document.getElementById('openTuner'),back=document.getElementById('tunerBack'),start=document.getElementById('tunerStart'),stop=document.getElementById('tunerStop'),preset=document.getElementById('tunerPreset');
   if(open)open.onclick=function(){stopMetronome(false);metronomeOpen=false;chordToolStage='home';tunerOpen=true;tunerStatus='Microphone is off';draw()};
-  if(back)back.onclick=function(){stopTuner(false);tunerOpen=false;draw()};
+  if(back)back.onclick=exitToolsToSongs;
   if(preset)preset.onchange=function(){tunerPreset=this.value;tunerSelectedString=0;tunerSmoothedFrequency=0;tunerStatus='Ready for '+this.options[this.selectedIndex].text+'.';draw()};
   document.querySelectorAll('[data-tuner-string]').forEach(function(btn){btn.onclick=function(){var idx=Number(this.getAttribute('data-tuner-string'));if(idx>=0&&idx<tunerStrings().length){tunerSelectedString=idx;tunerSmoothedFrequency=0;tunerStatus='Target: '+tunerStrings()[idx][0]+' ('+tunerStrings()[idx][1]+')';draw()}}});
   if(start)start.onclick=startTuner;
