@@ -4365,7 +4365,13 @@ draw=function(){
   updatePracticeButtonVisibility();
   if(!navReady||navRestoring)return;
   var next=mobileNavState(),current=history.state&&history.state.chordbook;
-  if(!current||mobileNavKey(current)!==mobileNavKey(next))history.pushState({chordbook:next},"");
+  if(!current||mobileNavKey(current)!==mobileNavKey(next)){
+    /* Swiping from one song to another is not a new "page": replace the history entry so Back returns to the list. */
+    var sameSongView=current&&current.view==="song"&&next.view==="song"&&current.mode===next.mode&&
+      mobileNavKey(Object.assign({},current,{cur:0}))===mobileNavKey(Object.assign({},next,{cur:0}));
+    if(sameSongView)history.replaceState({chordbook:next},"");
+    else history.pushState({chordbook:next},"");
+  }
 };
 window.addEventListener("popstate",function(e){
   var target=e.state&&e.state.chordbook,current=mobileNavState();
