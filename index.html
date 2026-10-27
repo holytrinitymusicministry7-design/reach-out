@@ -20,6 +20,7 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 :root[data-theme="dark"]{--bg:#000;--card:#1c1c1e;--ink:#f5f5f7;--mut:#98989d;--line:#38383a;--line-strong:#48484a;--fill:rgba(120,120,128,.32);--acc:#6fb8a4;--accink:#102019;--bar:#2c2c2e;color-scheme:dark}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html.no-pull,html.no-pull body{overscroll-behavior-y:contain}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .wrap{max-width:1120px;margin:0 auto;padding:14px}
 h1{font-size:22px;margin:4px 0 12px}
@@ -4356,13 +4357,28 @@ function restoreMobileNav(s){
   addOpen=!!s.addOpen;addView=s.addView||"picker";sidebarOpen=!!s.sidebarOpen;cloudOpen=!!s.cloudOpen;
   groupSongPickerOpen=!!s.groupSongPickerOpen;groupsMgrOpen=!!s.groupsMgrOpen;gedit=!!s.gedit;
 }
+var NAV_SS="chordbook:v1:nav",navScrollT=0;
+function saveNavSession(){
+  try{
+    if(view==="song"&&cur)sessionStorage.setItem(NAV_SS,JSON.stringify({view:view,cur:cur,mode:mode,practice:!!practiceMode,y:window.scrollY||0}));
+    else sessionStorage.removeItem(NAV_SS);
+  }catch(e){}
+}
+window.addEventListener("scroll",function(){
+  if(view!=="song")return;
+  clearTimeout(navScrollT);navScrollT=setTimeout(saveNavSession,150);
+},{passive:true});
+window.addEventListener("pagehide",saveNavSession);
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden")saveNavSession()});
 function updatePracticeButtonVisibility(){
+  document.documentElement.classList.toggle("no-pull",view==="song");
   document.documentElement.classList.toggle("song-scrolled",view==="song"&&mode==="view"&&!practiceMode&&window.scrollY>8);
 }
 window.addEventListener("scroll",updatePracticeButtonVisibility,{passive:true});
 draw=function(){
   baseDraw();
   updatePracticeButtonVisibility();
+  if(navReady&&!navRestoring)saveNavSession();
   if(!navReady||navRestoring)return;
   var next=mobileNavState(),current=history.state&&history.state.chordbook;
   if(!current||mobileNavKey(current)!==mobileNavKey(next)){
@@ -4394,9 +4410,21 @@ if(songs.length===1&&songs[0].id==="sample-1"&&!songs[0].u&&!sent["sample-1"]){s
 try{var th=localStorage.getItem(LS+":theme");if(th)applyTheme(th)}catch(e){}
 syncMsg=sbOn()?(isAdmin()?"Signed in as administrator":"Signed in · view only"):"Saved on this device";
 history.replaceState({chordbook:mobileNavState()},"");
+var navResumeY=0;
+try{
+  var rs=JSON.parse(sessionStorage.getItem(NAV_SS)||"null");
+  if(rs&&rs.view==="song"&&rs.cur&&songs.some(function(x){return x.id===rs.cur})){
+    view="song";cur=rs.cur;mode="view";practiceMode=!!rs.practice;navResumeY=rs.y||0;
+  }
+}catch(e){}
 history.pushState({chordbook:mobileNavState()},"");
 navReady=true;
 draw();
+if(navResumeY){
+  try{history.scrollRestoration="manual"}catch(e){}
+  var resumeScroll=function(){window.scrollTo(0,navResumeY)};
+  requestAnimationFrame(resumeScroll);setTimeout(resumeScroll,120);setTimeout(resumeScroll,400);
+}
 schedule(300);
 if("serviceWorker" in navigator)window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
 </script>
