@@ -159,7 +159,50 @@ textarea{font-family:ui-monospace,Menlo,Consolas,monospace;min-height:210px;resi
 .add-subnav{display:flex;align-items:center;gap:10px;margin:0 0 8px;padding:0 0 8px;border-bottom:1px solid var(--line)}
 .add-subnav strong{font-size:15px}
 .add-modal .sheetpanel{margin:8px 0 0}
+.import-workspace{max-width:860px;margin:0 auto;padding:2px 0 8px}
+.add-flow-head{display:grid!important;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:12px}
+#addOverlay .mh.add-flow-head{padding:18px 0;margin-bottom:20px;background:var(--card);border-bottom:1px solid var(--hair)}
+.add-flow-back,#addOverlay .add-flow-head #addClose{display:inline-flex;width:40px;height:40px;min-height:40px;margin:0;padding:0;align-items:center;justify-content:center;justify-self:end;border:0;border-radius:50%;background:var(--fill);color:var(--ink);font-size:0;line-height:0}
+.add-flow-back svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#addOverlay #addClose svg{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.add-flow-heading{min-width:0;text-align:left}
+.add-flow-heading h2{margin:0;color:var(--ink);font-size:19px;font-weight:700;line-height:1.25;letter-spacing:-.022em}
+.add-flow-heading p{margin:3px 0 0;color:var(--mut);font-size:13px;font-weight:450;line-height:1.4}
+.import-back{display:inline-flex;align-items:center;gap:7px;margin:0 0 22px;padding:8px 0;border:0;background:transparent;color:var(--acc);font-size:14px;font-weight:700}
+.import-back:hover{background:transparent;opacity:.72}
+.import-intro{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px}
+.import-intro-icon{display:flex;width:54px;height:54px;flex:0 0 54px;align-items:center;justify-content:center;border-radius:17px;background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc)}
+.import-intro-icon svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.import-intro h3{margin:1px 0 4px;font-size:22px;line-height:1.2;letter-spacing:-.025em}
+.import-intro p{margin:0;color:var(--mut);font-size:14px;line-height:1.55}
+.import-panel{padding:24px;background:var(--card);border:1px solid var(--hair,var(--line));border-radius:22px;box-shadow:var(--shadow-1,0 3px 16px rgba(0,0,0,.06))}
+.import-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.import-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.import-field>label,.import-label{color:var(--ink);font-size:13px;font-weight:700}
+.import-field input,.import-field select{min-height:48px;border-radius:13px;background:var(--bg)}
+.import-file{position:relative;display:flex;min-height:160px;margin:20px 0;align-items:center;justify-content:center;border:1.5px dashed color-mix(in srgb,var(--acc) 45%,var(--line));border-radius:18px;background:color-mix(in srgb,var(--acc) 4%,var(--card));text-align:center;transition:border-color .2s,background .2s}
+.import-file:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,var(--card))}
+.import-file input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.import-file-content{pointer-events:none}
+.import-file-icon{display:flex;width:44px;height:44px;margin:0 auto 10px;align-items:center;justify-content:center;border-radius:14px;background:var(--card);color:var(--acc);box-shadow:var(--shadow-1,0 2px 8px rgba(0,0,0,.07))}
+.import-file-icon svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.import-file-content b{display:block;font-size:15px}
+.import-file-content small{display:block;margin-top:4px;color:var(--mut);font-size:12px}
+.import-filename{margin:-10px 0 18px;text-align:center;color:var(--mut);font-size:13px;overflow-wrap:anywhere}
+.import-status{display:flex;align-items:flex-start;gap:8px;margin:16px 0 0;padding:11px 13px;border-radius:12px;background:var(--bg);color:var(--mut);font-size:13px;line-height:1.45}
+.import-status:before{content:"";width:7px;height:7px;flex:0 0 7px;margin-top:5px;border-radius:50%;background:var(--acc)}
+.import-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+.import-actions button{min-height:44px;padding:10px 18px;border-radius:12px;font-weight:700}
+.import-actions .secondary-action{margin-right:auto}
+.import-note{margin:16px 0 0;color:var(--mut);font-size:12px;line-height:1.5;text-align:center}
+.paste-guide{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.72fr);gap:18px;margin-bottom:18px}
+.paste-help{padding:17px 18px;border-radius:16px;background:color-mix(in srgb,var(--acc) 7%,var(--card));color:var(--mut);font-size:13px;line-height:1.55}
+.paste-help b{color:var(--ink)}
+.paste-example{margin:0;padding:15px 17px;border:1px solid var(--line);border-radius:16px;background:var(--bg);color:var(--mut);font:12px/1.55 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap}
+.paste-editor{min-height:300px!important;padding:16px!important;border-radius:16px!important;background:var(--bg)!important;font-size:14px;line-height:1.6}
+.paste-count{display:inline-flex;align-items:center;min-height:28px;margin:10px 0 0;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--acc) 10%,transparent);color:var(--acc);font-size:12px;font-weight:700}
 @media(max-width:560px){.add-modal{padding-left:14px;padding-right:14px}.add-grid{grid-template-columns:1fr;gap:10px;padding:8px 0 14px}.add-card{min-height:92px;flex-direction:row;justify-content:flex-start;text-align:left;padding:12px 20px;border-radius:14px;font-size:19px;gap:18px}.add-card svg{width:46px;height:46px}.add-modal-title{font-size:24px}}
+@media(max-width:680px){#addOverlay .mh.add-flow-head{margin-bottom:14px;padding:14px 0}.add-flow-heading h2{font-size:17px}.add-flow-heading p{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.import-workspace{padding-top:0}.import-back{margin-bottom:14px}.import-intro{gap:12px;margin-bottom:18px}.import-intro-icon{width:46px;height:46px;flex-basis:46px;border-radius:14px}.import-intro h3{font-size:19px}.import-panel{padding:16px;border-radius:18px}.import-grid,.paste-guide{grid-template-columns:1fr}.import-file{min-height:138px;margin:16px 0}.paste-example{display:none}.import-actions{flex-wrap:wrap}.import-actions button{flex:1 1 auto}.import-actions .secondary-action{order:3;flex-basis:100%;margin-right:0}.paste-editor{min-height:260px!important}}
 .song{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .pal button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .settings-icon{width:38px;height:38px;padding:7px 9px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;line-height:0;border-radius:10px}.settings-icon svg{width:20px;height:20px;display:block;transition:transform .16s ease;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round}.settings-icon[aria-expanded="true"] svg{transform:rotate(180deg)}
@@ -549,6 +592,29 @@ body.swiping{overflow-x:hidden}
 .group-add-song-row{display:flex;justify-content:center;margin:14px 0 24px}
 .group-add-song-row button{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid transparent;background:transparent;color:var(--acc);font-size:14px;font-weight:700;border-radius:10px}
 .group-add-song-row button:hover{background:var(--bg);border-color:var(--line)}
+.group-action-bar{display:flex;align-items:center;gap:12px;margin:2px 0 14px;padding:11px 12px 11px 15px;border:1px solid var(--hair,var(--line));border-radius:15px;background:var(--card);box-shadow:var(--shadow-1,0 1px 5px rgba(0,0,0,.04))}
+.group-action-summary{min-width:0;flex:1}
+.group-action-summary b{display:block;font-size:14px}
+.group-action-summary span{display:block;margin-top:1px;color:var(--mut);font-size:12px}
+.group-action-bar button{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:8px 13px;border:0;border-radius:11px;background:color-mix(in srgb,var(--acc) 11%,transparent);color:var(--acc);font-size:13px;font-weight:750;white-space:nowrap}
+.group-action-bar button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.group-manage-modal{width:min(100%,500px);max-height:min(88vh,720px);overflow-y:auto;background:var(--card);border-radius:26px;padding:24px;box-shadow:var(--shadow-2,0 24px 70px rgba(0,0,0,.22))}
+.group-manage-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:24px}
+.group-manage-head-icon{display:flex;width:46px;height:46px;flex:0 0 46px;align-items:center;justify-content:center;border-radius:15px;background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc)}
+.group-manage-head-icon svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.group-manage-head-copy{min-width:0;flex:1}.group-manage-head h2{margin:1px 0 3px;font-size:23px;letter-spacing:-.025em}.group-manage-head p{margin:0;color:var(--mut);font-size:13px}
+.group-manage-close{width:36px;height:36px;padding:0;border:0;background:var(--fill);color:var(--mut);border-radius:50%;font-size:22px;line-height:1}
+.group-manage-section{padding:18px;border:1px solid var(--hair,var(--line));border-radius:17px;background:var(--bg)}
+.group-manage-section+.group-manage-section{margin-top:12px}
+.group-manage-label{display:block;margin-bottom:8px;font-size:13px;font-weight:750}
+.group-manage-name-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.group-manage-name-row input{min-height:44px;margin:0;background:var(--card)}.group-manage-name-row button{min-height:44px;font-weight:700}
+.group-manage-songs{display:flex;align-items:center;gap:12px}.group-manage-songs>div{min-width:0;flex:1}.group-manage-songs b{display:block;font-size:14px}.group-manage-songs span{display:block;margin-top:3px;color:var(--mut);font-size:12px;line-height:1.4}.group-manage-songs button{font-weight:750;color:var(--acc);white-space:nowrap}
+.group-manage-share-head{display:flex;align-items:flex-start;gap:10px}.group-manage-share-copy{min-width:0;flex:1}.group-manage-share-copy b{display:block;font-size:14px}.group-manage-share-copy p{margin:3px 0 0;color:var(--mut);font-size:12px;line-height:1.45}
+.group-share-status{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;padding:5px 8px;border-radius:999px;background:var(--fill);color:var(--mut);font-size:11px;font-weight:750;white-space:nowrap}.group-share-status:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--mut)}.group-share-status.live{background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc)}.group-share-status.live:before{background:var(--acc)}
+.group-manage-share-actions{display:flex;gap:8px;margin-top:15px}.group-manage-share-actions button{min-height:40px;font-size:13px;font-weight:750}.group-manage-share-actions .p{flex:1}.group-manage-share-actions .share-offline{color:var(--danger)}
+.group-manage-danger{border-color:color-mix(in srgb,var(--danger) 18%,var(--line));background:color-mix(in srgb,var(--danger) 4%,var(--card))}
+.group-manage-danger b{display:block;font-size:14px}.group-manage-danger p{margin:3px 0 13px;color:var(--mut);font-size:12px;line-height:1.45}.group-manage-danger button{color:var(--danger);font-weight:750}.group-manage-danger button.is-confirming{background:var(--danger);border-color:var(--danger);color:#fff}
+@media(max-width:520px){.group-action-bar{padding:10px 10px 10px 13px}.group-manage-modal{padding:18px;border-radius:22px}.group-manage-name-row{grid-template-columns:1fr}.group-manage-name-row button{width:100%}.group-manage-songs{align-items:flex-start;flex-direction:column}.group-manage-songs button{width:100%}.group-manage-share-head{flex-wrap:wrap}.group-manage-share-actions{flex-direction:column}.group-manage-share-actions button{width:100%}}
 #groupSongPicker.ov{align-items:center;padding:18px;background:rgba(28,27,26,.58);backdrop-filter:blur(3px)}
 #groupSongPicker .group-picker-modal{width:min(100%,720px);max-height:min(88vh,800px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.2)}
 .group-picker-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.group-picker-head h2{font-size:25px;margin:0;flex:1}.group-picker-head p{color:var(--mut);margin:5px 0 0}.group-picker-close{font-size:28px;border:0;background:transparent;color:var(--mut);padding:4px 10px}.group-picker-tools{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px;margin-bottom:14px}.group-picker-tools input,.group-picker-tools select{width:100%;min-width:0;margin:0}.group-picker-switch{display:flex;gap:4px;padding:4px;background:var(--bar);border-radius:999px;margin-bottom:16px}.group-picker-switch button{flex:1;border:0;border-radius:999px;background:transparent;color:var(--mut);font-weight:700;padding:10px 12px;min-height:42px}.group-picker-switch button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.09)}.group-picker-list{display:grid;gap:8px}.group-picker-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.group-picker-item>span{flex:1;min-width:0}.group-picker-item small{display:block;color:var(--mut);margin-top:2px}.group-picker-item button{font-weight:750;border-color:var(--line);white-space:nowrap}.group-picker-item button.add-existing{color:var(--acc)}.group-picker-item button.remove-existing{color:var(--danger,var(--mut))}.group-picker-count{font-size:13px;color:var(--mut);margin:0 0 9px}.group-picker-empty{padding:24px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px}
@@ -634,6 +700,13 @@ body.pb-on{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
 /* ---------- Practice mode ---------- */
 .practice-icon.active{background:var(--acc);color:var(--accink);border-color:var(--acc)}
 .practice-icon svg{width:22px;height:22px}
+.practice-mode-banner{position:sticky;top:calc(8px + env(safe-area-inset-top,0px));z-index:35;display:flex;align-items:center;gap:11px;min-height:48px;margin:4px 0 14px;padding:7px 8px 7px 13px;border:1px solid color-mix(in srgb,var(--acc) 24%,var(--line));border-radius:15px;background:color-mix(in srgb,var(--card) 90%,var(--acc) 10%);box-shadow:0 5px 20px rgba(0,0,0,.08);-webkit-backdrop-filter:saturate(160%) blur(18px);backdrop-filter:saturate(160%) blur(18px)}
+.practice-mode-mark{position:relative;width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 14%,transparent)}
+.practice-mode-copy{min-width:0;display:flex;align-items:baseline;gap:9px;flex:1}
+.practice-mode-copy b{font-size:13px;white-space:nowrap}
+.practice-mode-copy span{color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.practice-mode-exit{min-height:34px;padding:6px 12px;border:0;border-radius:10px;background:color-mix(in srgb,var(--acc) 11%,transparent);color:var(--acc);font-size:12px;font-weight:750}
+.practice-mode-exit:hover{background:color-mix(in srgb,var(--acc) 18%,transparent)}
 .pr-notice{position:fixed;left:50%;top:42%;z-index:70;width:min(86vw,320px);transform:translate(-50%,-50%) scale(.94);opacity:0;pointer-events:none;text-align:center;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:20px;padding:22px 20px 20px;box-shadow:0 14px 44px rgba(0,0,0,.35);transition:opacity .22s ease,transform .22s ease}
 .pr-notice.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .pr-notice .pr-ic{width:54px;height:54px;margin:0 auto 10px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--acc);color:var(--accink)}
@@ -641,7 +714,12 @@ body.pb-on{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
 .pr-notice .pr-ic svg{width:28px;height:28px}
 .pr-notice b{display:block;font-size:19px;margin-bottom:4px}
 .pr-notice span{font-size:13.5px;color:var(--mut)}
-#cc.practice-on{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#cc.practice-on{margin:0 -8px;padding:12px 8px 18px;border-radius:18px;background:color-mix(in srgb,var(--acc) 4%,var(--bg));-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;transition:background .25s ease}
+#cc.practice-on .chart{gap:9px}
+#cc.practice-on .bar{padding-top:7px;padding-bottom:7px}
+#cc.practice-on .sec{margin-top:8px}
+#cc.practice-on .bar.pb-cue{background:color-mix(in srgb,var(--acc) 9%,var(--bar));box-shadow:inset 0 0 0 2px var(--acc),0 3px 12px color-mix(in srgb,var(--acc) 12%,transparent)}
+#cc.practice-on .bar.pb-on{background:color-mix(in srgb,var(--acc) 28%,var(--bar));box-shadow:inset 0 0 0 2.5px var(--acc),0 4px 16px color-mix(in srgb,var(--acc) 18%,transparent)}
 #cc.practice-on .beat-chord,#cc.practice-on .bar>span{cursor:pointer;-webkit-tap-highlight-color:transparent}
 #cc.practice-on .ch{transition:transform .2s ease;transform-origin:center}
 #cc .practice-holding .ch{transform:scale(1.2);transition:transform 1s ease}
@@ -668,7 +746,8 @@ body.pb-on{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
 .practice-inv button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 6px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-weight:700;font-size:14px}
 .practice-inv button small{font-size:11px;font-weight:500;opacity:.75}
 .practice-inv button.active{background:var(--acc);color:var(--accink);border-color:var(--acc)}
-@media(prefers-reduced-motion:reduce){.practice-card{transition:none}#cc .practice-holding .ch{transition:none}}
+@media(max-width:500px){.practice-mode-banner{margin-top:2px}.practice-mode-copy{display:block}.practice-mode-copy b,.practice-mode-copy span{display:block}.practice-mode-copy span{margin-top:1px}}
+@media(prefers-reduced-motion:reduce){.practice-card,#cc.practice-on{transition:none}#cc .practice-holding .ch{transition:none}}
 
 /* =====================================================================
    Apple-style refresh  (tokens documented in DESIGN.md)
@@ -902,6 +981,83 @@ input[type=checkbox],input[type=radio],input[type=range]{padding:0;border:0;back
   .fab-grip{display:none}.fab-opt:last-child{margin-bottom:0}
 }
 @media(prefers-reduced-motion:reduce){.fab-backdrop,.fab-btn,.fab-btn svg,.fab-sheet,.fab-root.open .fab-sheet{transition:none}}
+</style>
+<style>
+/* ---------- Unified button system ---------- */
+:root{--btn-h:42px;--btn-r:12px;--btn-pad:9px 16px}
+button{min-height:var(--btn-h);padding:var(--btn-pad);border:1px solid transparent;border-radius:var(--btn-r);background:var(--fill);color:var(--ink);font-size:14px;font-weight:600;line-height:1.15;letter-spacing:-.008em;box-shadow:none}
+button.p{min-height:var(--btn-h);padding:var(--btn-pad);border:1px solid var(--acc);border-radius:var(--btn-r);background:var(--acc);color:var(--accink);font-weight:700}
+button.d,.share-offline,.remove-existing{border-color:transparent;background:color-mix(in srgb,var(--danger) 9%,transparent);color:var(--danger)}
+button:focus-visible{outline:3px solid color-mix(in srgb,var(--acc) 35%,transparent);outline-offset:2px}
+button:disabled{opacity:.42;box-shadow:none;cursor:not-allowed}
+@media(hover:hover){
+  button:hover{filter:none;background:color-mix(in srgb,var(--fill) 86%,var(--ink))}
+  button.p:hover{filter:none;background:color-mix(in srgb,var(--acc) 88%,#000);border-color:transparent}
+  button.d:hover,.share-offline:hover,.remove-existing:hover{filter:none;background:color-mix(in srgb,var(--danger) 15%,transparent)}
+}
+
+/* Icon-only controls are the sole circular button family. */
+.settings-icon,#navOpen,#add.add-icon,.sidebar-close,.practice-close,.pb-x,.group-picker-close,.group-manage-close{
+  width:40px;height:40px;min-height:40px;flex:0 0 40px;padding:0;border:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--fill)}
+.group-picker-close,.group-manage-close{font-size:24px;color:var(--mut)}
+.pb-x{font-size:0;line-height:0}
+.pb-x svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+
+/* Compact utility controls keep their geometry but share the same surface language. */
+.gm-btn{width:38px;height:38px;min-height:38px;padding:0;border-radius:10px}
+.metro-adjust-row button{min-height:32px;padding:6px 10px;border-radius:9px;font-size:12px}
+.transpose-control button,.zoom-control button{min-height:44px;padding:7px 10px;border:0;border-radius:0;background:transparent}
+.pb-eq{width:50px;height:50px;min-height:50px;padding:0;border-radius:50%}
+.pb-play{width:80px;height:80px;min-height:80px;padding:0;border-radius:50%}
+.pb-tempo{min-height:44px;padding:6px 4px;border:0;background:transparent}
+.fab-btn{width:58px;height:58px;min-height:58px;padding:0;border-radius:50%;background:var(--acc);color:var(--accink)}
+
+/* Pills are reserved for selection and navigation, not general actions. */
+.gscroll button,.scale-spelling-control button,.chord-style-switch button,.group-picker-switch button{
+  border-radius:999px}
+.practice-tabs button,.chord-instrument-tabs button,.tuner-mode-tabs button{border-radius:10px}
+.practice-tabs button,.chord-instrument-tabs button,.tuner-mode-tabs button,.group-picker-switch button,.chord-style-switch button,.scale-spelling-control button{
+  min-height:36px;border:0;background:transparent}
+.practice-tabs button.active,.chord-instrument-tabs button.active,.tuner-mode-tabs button.active,.group-picker-switch button.active,.chord-style-switch button.active{
+  background:var(--seg-thumb);color:var(--ink)}
+
+/* Purpose-built cards and musical controls retain their layouts. */
+#addOverlay .add-card,.tools-card,.fab-opt{font-size:inherit}
+.pal button,.chord-root-keys button,.scale-key-grid button,.practice-inv button{border-radius:var(--btn-r)}
+.group-action-bar button,.group-manage-name-row button,.group-manage-songs button,.group-manage-share-actions button,.group-manage-danger button,.import-actions button,.create-song-actions button{
+  min-height:var(--btn-h);padding:var(--btn-pad);border-radius:var(--btn-r)}
+.group-action-bar button{background:color-mix(in srgb,var(--acc) 11%,transparent);color:var(--acc)}
+.group-manage-danger button,.group-manage-share-actions .share-offline{background:color-mix(in srgb,var(--danger) 9%,transparent);color:var(--danger)}
+.group-manage-danger button.is-confirming{background:var(--danger);border-color:var(--danger);color:#fff}
+.top .edit-group-top{min-height:40px;padding:8px 14px;border-radius:var(--btn-r);background:var(--fill);font-weight:650}
+
+/* Playback mixer */
+.pb-sheet .pb-mixer-card{width:min(100%,520px);max-width:520px;padding:0;overflow:hidden;border:0;background:var(--card)}
+.pb-mix-head{display:flex;align-items:flex-start;gap:13px;padding:20px 58px 18px 20px;border-bottom:1px solid var(--hair)}
+.pb-mix-head-icon{display:flex;width:44px;height:44px;flex:0 0 44px;align-items:center;justify-content:center;border-radius:14px;background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc)}
+.pb-mix-head-icon svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.pb-mix-head-copy{min-width:0;flex:1}.pb-mix-head h2{margin:1px 0 3px;font-size:21px;line-height:1.2;letter-spacing:-.025em}.pb-mix-head p{margin:0;color:var(--mut);font-size:12px}
+.pb-mix-body{padding:18px 20px 22px}
+.pb-style-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,190px);align-items:center;gap:14px;margin-bottom:20px;padding:14px;border-radius:15px;background:var(--bg);border:1px solid var(--hair)}
+.pb-style-card label{display:block;font-size:13px;font-weight:750}.pb-style-card small{display:block;margin-top:3px;color:var(--mut);font-size:11px;line-height:1.35}.pb-style-card select{min-height:42px;margin:0;background:var(--card);font-weight:650}
+.pb-mix-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 9px}.pb-mix-section-head>span{color:var(--mut);font-size:11px;font-weight:750;letter-spacing:.065em;text-transform:uppercase}
+.pb-drum-toggle{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:6px 9px;border-radius:10px;background:transparent;color:var(--acc);font-size:12px}.pb-drum-toggle svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.pb-channel-list{display:grid;gap:8px}
+.pb-channel{display:grid;grid-template-columns:36px minmax(0,1fr) 42px 76px;align-items:center;gap:10px;min-height:72px;padding:11px 12px;border:1px solid var(--hair);border-radius:15px;background:var(--bg)}
+.pb-channel-icon{grid-row:1/3;display:flex;width:36px;height:36px;align-items:center;justify-content:center;border-radius:11px;background:var(--card);color:var(--acc)}
+.pb-channel-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.pb-channel-name{align-self:end;font-size:13px;font-weight:700}
+.pb-channel-value{align-self:end;color:var(--mut);font-size:11px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.pb-channel input[type=range]{grid-column:2/4;align-self:start;width:100%;height:20px;margin:0;accent-color:var(--acc)}
+.pb-channel-mute{grid-column:4;grid-row:1/3;align-self:center;min-width:76px;min-height:36px;padding:7px 10px;border-radius:10px;font-size:12px}
+.pb-channel-mute.active{background:color-mix(in srgb,var(--danger) 10%,transparent);color:var(--danger)}
+.pb-channel-action-spacer{grid-column:4;grid-row:1/3;width:76px}
+.pb-drum-submix{display:grid;gap:7px;margin:8px 0 4px;padding:9px;border-radius:17px;background:color-mix(in srgb,var(--acc) 5%,var(--bg));border:1px solid color-mix(in srgb,var(--acc) 13%,var(--hair))}
+.pb-drum-submix-label{margin:1px 3px 2px;color:var(--mut);font-size:11px;font-weight:700}
+.pb-drum-submix .pb-channel{min-height:62px;background:var(--card)}
+@media(max-width:520px){.pb-mix-head{padding:17px 54px 15px 16px}.pb-mix-body{padding:15px 14px 18px}.pb-style-card{grid-template-columns:1fr;gap:10px}.pb-channel{grid-template-columns:34px minmax(0,1fr) 38px 66px;gap:8px;padding:10px}.pb-channel-icon{width:34px;height:34px}.pb-channel-mute,.pb-channel-action-spacer{min-width:66px;width:66px}.pb-channel-mute{padding:7px 6px}.pb-drum-toggle span{display:none}}
+
+@media(prefers-reduced-motion:reduce){button{transition:none!important}}
 </style>
 </head>
 <body>
@@ -1238,7 +1394,7 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape"&&practiceSta
 var metroBpm=100,metroBeatsPerBar=4,metroClicksPerBeat=1,metroPlaying=false,metroAudioContext=null,metroScheduler=null,metroNextTime=0,metroStep=0,metroPendingVisualTimers=[],metroVisualClearTimer=0,metroTapTimes=[],metroBeatsMenuOpen=false,metroClicksMenuOpen=false;
 /* ---------- Practice playback bar (metronome + live chart highlight) ---------- */
 var pbBpm=100,pbClicks=1,pbPlaying=false,pbCtx=null,pbTimer=null,pbNext=0,pbBar=0,pbBeat=0,pbSub=0,pbShown=0,pbShownBeat=0,pbCued=false,pbVis=[],pbSong=null,pbSheet=false,pbMenu=false,pbTaps=[];
-var PB_PLAY='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',PB_PAUSE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+var PB_PLAY='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',PB_PAUSE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>',PB_CLOSE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>';
 function pbBars(){return document.querySelectorAll("#cc .bar")}
 function pbBeatsOf(el){return el?(parseInt(el.getAttribute("data-beats"),10)||4):4}
 function pbTempoMap(){try{return JSON.parse(localStorage.getItem(LS+":practiceTempo")||"{}")||{}}catch(e){return {}}}
@@ -1399,16 +1555,28 @@ function pbRun(){
 function pbOpenMix(){var s=document.getElementById("pbSheet");if(!s){s=document.createElement("div");s.id="pbSheet";s.className="pb-sheet";document.body.appendChild(s)}pbSheet="m";pbRenderMix()}
 function pbRenderMix(){
   var s=document.getElementById("pbSheet");if(!s)return;
-  var row=function(lab,i,ext){return '<div class="pb-mrow"><span>'+lab+'</span><input type="range" min="0" max="100" value="'+pbMix.v[i]+'" data-pbv="'+i+'" aria-label="'+lab+' volume"><div class="pb-mbtns">'+(i<4?'<button type="button" data-pbm="'+i+'" class="'+(pbMix.mu[i]?"p":"")+'">'+(pbMix.mu[i]?"Unmute":"Mute")+'</button>':"")+(ext||"")+'</div></div>'};
+  var icons={
+    drums:'<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v9c0 1.7 3.1 3 7 3s7-1.3 7-3V7M9 10v8m6-8v8"/></svg>',
+    bass:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5v11.5a3.5 3.5 0 1 1-2-3.2V7l7-2v4l-5 1.5"/></svg>',
+    chords:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M11 4v16M16 6v12M4 9h14M4 15h14"/></svg>',
+    metro:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4-3 16h14L16 4H8Z"/><path d="m12 16 3-8M9 17h6"/></svg>',
+    kick:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="12" r="7"/><path d="M18 12h3m-3 4 2 3M8 19l-1 2"/></svg>',
+    snare:'<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="8" rx="7" ry="3"/><path d="M5 8v7c0 1.7 3.1 3 7 3s7-1.3 7-3V8M6 13l12 3"/></svg>',
+    hat:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16M7 9c1-4 9-4 10 0M12 10v10M8 20h8"/></svg>'};
+  var row=function(lab,i,icon){
+    var mute=i<4?'<button type="button" data-pbm="'+i+'" class="pb-channel-mute'+(pbMix.mu[i]?" active":"")+'" aria-pressed="'+(pbMix.mu[i]?"true":"false")+'">'+(pbMix.mu[i]?"Muted":"Mute")+'</button>':'<span class="pb-channel-action-spacer" aria-hidden="true"></span>';
+    return '<div class="pb-channel"><span class="pb-channel-icon">'+icons[icon]+'</span><span class="pb-channel-name">'+lab+'</span><output class="pb-channel-value" data-pbo="'+i+'">'+pbMix.v[i]+'%</output><input type="range" min="0" max="100" value="'+pbMix.v[i]+'" data-pbv="'+i+'" aria-label="'+lab+' volume">'+mute+'</div>'};
   var opts=Object.keys(PB_STY).map(function(k){return '<option'+(k===pbMix.style?" selected":"")+'>'+k+'</option>'}).join("");
-  s.innerHTML='<div class="metro-card pb-card" role="dialog" aria-modal="true" aria-label="Mixer"><button type="button" id="pbX" class="pb-x" aria-label="Close">\u2715</button>'
-   +'<label class="mut" for="pbStyle">Style</label><select id="pbStyle" style="width:100%;margin:4px 0 8px">'+opts+'</select>'
-   +row("Drums",0,'<button type="button" id="pbEqBtn" class="'+(pbEqOn?"p":"")+'">EQ</button>')+(pbEqOn?row("Kick",4)+row("Snare",5)+row("Hi-hat",6):"")+row("Bass",1)+row("Chords",2)+row("Metronome",3)+'</div>';
+  s.innerHTML='<div class="metro-card pb-card pb-mixer-card" role="dialog" aria-modal="true" aria-labelledby="pbMixTitle">'
+   +'<div class="pb-mix-head"><span class="pb-mix-head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M12 4v16M18 4v16"/><path d="M3.5 14h5M9.5 8h5M15.5 16h5"/></svg></span><div class="pb-mix-head-copy"><h2 id="pbMixTitle">Playback mixer</h2><p>Balance your practice band and choose a groove.</p></div><button type="button" id="pbX" class="pb-x" aria-label="Close">'+PB_CLOSE+'</button></div>'
+   +'<div class="pb-mix-body"><div class="pb-style-card"><div><label for="pbStyle">Backing style</label><small>Sets the groove and accompaniment pattern.</small></div><select id="pbStyle">'+opts+'</select></div>'
+   +'<div class="pb-mix-section-head"><span>Instrument levels</span><button type="button" id="pbEqBtn" class="pb-drum-toggle" aria-expanded="'+(pbEqOn?"true":"false")+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M12 4v16M18 4v16"/><path d="M3.5 14h5M9.5 8h5M15.5 16h5"/></svg><span>'+(pbEqOn?"Hide drum controls":"Drum controls")+'</span></button></div>'
+   +'<div class="pb-channel-list">'+row("Drums",0,"drums")+(pbEqOn?'<div class="pb-drum-submix"><div class="pb-drum-submix-label">Drum kit balance</div>'+row("Kick",4,"kick")+row("Snare",5,"snare")+row("Hi-hat",6,"hat")+'</div>':"")+row("Bass",1,"bass")+row("Chords",2,"chords")+row("Metronome",3,"metro")+'</div></div></div>';
   var $=function(id){return document.getElementById(id)};
   s.onclick=function(e){if(e.target===s)pbCloseSheet()};$("pbX").onclick=pbCloseSheet;
   $("pbStyle").onchange=function(){pbMix.style=this.value;pbSaveMix();pbSaveStyle(cur,this.value)};
   $("pbEqBtn").onclick=function(){pbEqOn=!pbEqOn;pbRenderMix()};
-  s.querySelectorAll("[data-pbv]").forEach(function(r){r.oninput=function(){pbMix.v[+r.getAttribute("data-pbv")]=+r.value;pbApplyMix();pbSaveMix()}});
+  s.querySelectorAll("[data-pbv]").forEach(function(r){r.oninput=function(){var i=+r.getAttribute("data-pbv");pbMix.v[i]=+r.value;var o=s.querySelector('[data-pbo="'+i+'"]');if(o)o.textContent=r.value+"%";pbApplyMix();pbSaveMix()}});
   s.querySelectorAll("[data-pbm]").forEach(function(b){b.onclick=function(){var i=+b.getAttribute("data-pbm");pbMix.mu[i]=pbMix.mu[i]?0:1;pbApplyMix();pbSaveMix();pbRenderMix()}});
 }
 async function pbToggle(){
@@ -1453,7 +1621,7 @@ function pbRenderSheet(){
   var n=pbBeatsOf(pbBars()[pbShown]),sq="",ch="";
   for(var i=0;i<n;i++)sq+='<div class="metro-beat" data-i="'+i+'">'+(i+1)+'</div>';
   for(var c=1;c<=4;c++)ch+='<button type="button" data-pbc="'+c+'" class="'+(pbClicks===c?"selected":"")+'">'+c+(c===1?" click per beat":" clicks per beat")+'</button>';
-  s.innerHTML='<div class="metro-card pb-card" role="dialog" aria-modal="true" aria-label="Metronome settings"><button type="button" id="pbX" class="pb-x" aria-label="Close">\u2715</button>'
+  s.innerHTML='<div class="metro-card pb-card" role="dialog" aria-modal="true" aria-label="Metronome settings"><button type="button" id="pbX" class="pb-x" aria-label="Close">'+PB_CLOSE+'</button>'
    +'<p class="mut" style="text-align:center;margin:0 0 14px">Keep time while you practice. Beat 1 has a stronger accent.</p>'
    +'<div class="metro-beat-grid" id="pbSq" style="--metro-beat-count:'+n+'">'+sq+'</div>'
    +'<div class="metro-tempo-row"><button type="button" id="pbMinus" class="metro-tempo-step" aria-label="Decrease tempo">\u2212</button><div class="metro-tempo-value"><div class="metro-tempo-number" id="pbSheetBpm">'+pbBpm+'</div><div class="metro-tempo-unit">BPM</div></div><button type="button" id="pbPlus" class="metro-tempo-step" aria-label="Increase tempo">+</button></div>'
@@ -2525,10 +2693,22 @@ function gboxHTML(){
   if(!g)return "";
   if(isLiveG(g))return isAdmin()?liveOnlyBoxHTML(g):"";
   if(!canEditGroup(g))return "";
-  if(gform==="rename")return '<div class="box"><b>Rename group</b><input id="gn" value="'+esc(g.title)+'" maxlength="60"><div class="row"><button class="p" id="gok">Save</button><button id="gno">Cancel</button></div></div>';
-  if(managing)return '<div class="box"><div class="mut" style="margin:2px 0 10px">Tap songs to add or remove them from this group.</div><div class="row" style="margin:0"><button id="gadd" class="p">Done adding songs</button></div></div>';
-  if(gedit)return '<div class="box"><div class="row" style="margin:0"><button id="gren">Rename</button><button id="gdel" class="d">Delete group</button><button id="gedone">Done</button></div></div>';
-  return (isAdmin()&&isPersonalGroup(g))?publishBoxHTML(g):"";
+  return "";
+}
+function groupActionBarHTML(){
+  var g=grp?gById(grp):null;if(!canEditGroup(g)||(g.members||[]).length===0)return "";
+  var count=(g.members||[]).length;
+  return '<div class="group-action-bar"><div class="group-action-summary"><b>'+count+' song'+(count===1?'':'s')+' in this group</b><span>Add or remove songs from one place</span></div><button type="button" id="groupAddSong"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Manage songs</button></div>';
+}
+function groupManageHTML(){
+  var g=grp?gById(grp):null;if(!gedit||!canEditGroup(g))return "";
+  var count=(g.members||[]).length;
+  var sharing='';
+  if(isAdmin()&&isPersonalGroup(g)){
+    var lv=liveDoc(g.liveId),same=liveUpToDate(g,lv);
+    sharing='<div class="group-manage-section"><div class="group-manage-share-head"><div class="group-manage-share-copy"><b>Sharing</b><p>'+(lv?(same?'Everyone can see the latest version of this group.':'You have private changes that are not live yet.'):'This group is currently only available on this device.')+'</p></div><span class="group-share-status'+(lv?' live':'')+'">'+(lv?'Live':'Private')+'</span></div><div class="group-manage-share-actions">'+(lv&&same?'<button type="button" disabled>Published and up to date</button>':'<button type="button" class="p" id="gpub">'+(lv?'Update for everyone':'Publish for everyone')+'</button>')+(lv?'<button type="button" class="share-offline" id="gunpub">Take offline</button>':'')+'</div></div>';
+  }
+  return '<div class="ov" id="groupManageOverlay"><section class="group-manage-modal" role="dialog" aria-modal="true" aria-labelledby="groupManageTitle"><div class="group-manage-head"><span class="group-manage-head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2.5"/></svg></span><div class="group-manage-head-copy"><h2 id="groupManageTitle">Manage group</h2><p>Update the group details, songs, and sharing.</p></div><button type="button" class="group-manage-close" id="groupManageClose" aria-label="Close">×</button></div><div class="group-manage-section"><label class="group-manage-label" for="groupManageName">Group name</label><div class="group-manage-name-row"><input id="groupManageName" value="'+esc(g.title||"")+'" maxlength="60"><button type="button" class="p" id="groupManageSave">Save name</button></div></div><div class="group-manage-section group-manage-songs"><div><b>Songs in this group</b><span>'+count+' song'+(count===1?'':'s')+' · Add new songs or remove existing ones.</span></div><button type="button" id="groupManageSongs">Manage songs</button></div>'+sharing+'<div class="group-manage-section group-manage-danger"><b>Delete this group</b><p>The songs will stay safely in All Songs. Only the group will be removed.</p><button type="button" id="groupManageDelete">Delete group</button></div></section></div>';
 }
 function songCategory(s){return ["Lyrics","Lyrics with chords","Chords"].indexOf(s.category)>=0?s.category:"Lyrics with chords";}
 function categoryBadgeHTML(s){var c=songCategory(s),cls=c==="Lyrics"?"cat-lyrics":c==="Chords"?"cat-chords":"cat-lyrics-chords";return '<span class="category-badge '+cls+'">'+esc(c)+'</span>';}
@@ -2541,16 +2721,14 @@ function listHTML(){
     if(g)return '<section class="group-empty-state"><div class="group-empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h2>No songs in this group yet</h2><p>'+(canEditGroup(g)?'Tap Add Songs to pick songs from your library.':'The admin hasn\'t added any songs here yet.')+'</p>'+(canEditGroup(g)?'<button type="button" class="p" id="groupAddSong">＋ &nbsp; Add Songs</button>':'')+'</section>';
     return '<div class="mut" style="margin:14px 0">No songs yet.</div>';
   }
-  var rmOn=!!(canEditGroup(g)&&gedit&&!managing);
+  var rmOn=false;
   var hint=(canEditGroup(g)&&!managing&&list.length>1)?'<div class="mut" style="margin:0 0 8px;font-size:13px">Tip: hold a song, then drag it up or down to reorder this group.</div>':'';
-  if(rmOn)hint+='<div class="mut" style="margin:0 0 8px;font-size:13px">Tap the minus icon to take a song out of this group. It stays in All songs.</div>';
   var songsHTML=list.map(function(s){
     var chk=canEditGroup(g)&&managing?'<input type="checkbox" style="width:auto;margin-right:12px;pointer-events:none" tabindex="-1"'+(inG(g,s.id)?' checked':'')+'>':'';
     var rm=rmOn?'<button class="d rm" data-rm="'+s.id+'" aria-label="Remove from group" style="padding:6px;line-height:0;border-radius:50%;margin-left:10px;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></button>':'';
     return '<div class="song" data-id="'+s.id+'"><div style="display:flex;align-items:center">'+chk+'<div><b>'+esc(s.title||"Untitled")+'</b><br><small>'+esc(s.artist||"\u2014")+'</small></div></div><div style="display:flex;align-items:center;gap:10px">'+categoryBadgeHTML(s)+rm+'</div></div>';
   }).join("");
-  var addSongRow=(canEditGroup(g)&&!managing&&!gedit)?'<div class="group-add-song-row"><button type="button" id="groupAddSong">＋ &nbsp; Add Songs</button></div>':'';
-  return hint+songsHTML+addSongRow;
+  return hint+songsHTML;
 }
 function groupSongPickerHTML(){
   var g=grp?gById(grp):null;if(!canEditGroup(g))return "";
@@ -2654,6 +2832,29 @@ function bindTop(){
   if(editGroupTop)editGroupTop.onclick=function(){if(!canEditGroup(grp?gById(grp):null))return;gedit=true;managing=false;gform=null;sidebarOpen=false;draw()};
   bindChips();bindList();bindBox();
 }
+function bindGroupManage(){
+  var g=grp?gById(grp):null,$=function(id){return document.getElementById(id)},ov=$("groupManageOverlay");
+  if(!ov||!canEditGroup(g))return;
+  var close=function(){gedit=false;draw()};
+  $("groupManageClose").onclick=close;
+  ov.onclick=function(e){if(e.target===ov)close()};
+  $("groupManageSave").onclick=function(){
+    var n=$("groupManageName").value.trim().slice(0,60);if(!n)return toast("Enter a group name.",2200);
+    if(n.toLowerCase()==="sunday"&&groups().some(function(x){return isSundayG(x)&&x.id!==g.id})){return toast("A Sunday group already exists")};
+    g.title=n;if(isPersonalGroup(g))savePersonalGroups();save();draw();toast("Group name updated");
+  };
+  $("groupManageName").onkeydown=function(e){if(e.key==="Enter")$("groupManageSave").click()};
+  $("groupManageSongs").onclick=function(){gedit=false;groupPickerQuery="";groupPickerTab="available";groupSongPickerOpen=true;draw()};
+  var del=$("groupManageDelete"),armed=false,timer=null;
+  del.onclick=function(){
+    if(!isPersonalGroup(g)&&String(g.title||"").toLowerCase()==="sunday")return toast("Sunday is a permanent shared group");
+    if(!armed){armed=true;del.textContent="Confirm delete";del.classList.add("is-confirming");timer=setTimeout(function(){armed=false;del.textContent="Delete group";del.classList.remove("is-confirming")},4000);return}
+    clearTimeout(timer);
+    var name=g.title||"Group",hadLive=!!(isPersonalGroup(g)&&liveDoc(g.liveId));
+    if(isPersonalGroup(g)){personalGroups=personalGroups.filter(function(x){return x.id!==g.id});savePersonalGroups()}else{killItem(g.id)}
+    grp=null;managing=false;gedit=false;gform=null;save();draw();toast("Deleted "+name+(hadLive?" (the live copy is still online)":""),hadLive?3500:undefined);
+  };
+}
 function songGroupsHTML(s){
   var gs=groups();
   return '<div class="box"><b>Groups</b>'+(gs.length?gs.map(function(g){return '<label class="ck" style="margin:8px 0"><input type="checkbox" class="gk" data-g="'+g.id+'"'+(inG(g,s.id)?' checked':'')+'> '+esc(g.title||"Untitled")+'</label>'}).join(""):'<p class="mut">No groups yet. Create one from the song list.</p>')+'</div>';
@@ -2663,15 +2864,15 @@ function keyOpts(sel){var cur=normKey(sel).replace(/m$/,"");return KEYS.map(func
 /* ---------- Music sheet OCR + AI import ---------- */
 function musicSheetBox(){
   var out='';
-  if(sheetAIBusy){return '<div class="sheetpanel"><div class="sheet-loading" role="status" aria-live="polite"><div class="sheet-spinner" aria-hidden="true"></div><h3>Reading your music sheet…</h3><p>Please wait while AI extracts '+(sheetImportMode==='lyrics-only'?'the lyrics':sheetImportMode==='chords-only'?'the chords':'the lyrics and chords')+' and prepares your chart. This may take a little while.</p><button type="button" id="sheetcancelbusy">Cancel extraction</button></div></div>';}
+  if(sheetAIBusy){return '<div class="import-workspace"><div class="import-panel"><div class="sheet-loading" role="status" aria-live="polite"><div class="sheet-spinner" aria-hidden="true"></div><h3>Reading your music sheet…</h3><p>Please wait while AI extracts '+(sheetImportMode==='lyrics-only'?'the lyrics':sheetImportMode==='chords-only'?'the chords':'the lyrics and chords')+' and prepares your chart.</p><button type="button" id="sheetcancelbusy">Cancel extraction</button></div></div></div>';}
   if(sheetProcessed){
     if(sheetMethod==='ai')out+='<div class="sheetmeta"><span>Method: <b>Vision AI</b></span>'+(sheetAIConfidence!=null?'<span>Estimated confidence: <b>'+Math.round(sheetAIConfidence)+'%</b></span>':'')+'<span>Key: <b>'+esc(sheetDetectedKey||'Unknown')+'</b></span><span>Time: <b>'+esc(sheetTimeSignature||'4/4')+'</b></span></div>';
-    out+='<label for="sheetchart" class="mut">Generated chart — review and edit before creating the song</label><textarea id="sheetchart" spellcheck="false" style="min-height:180px" placeholder="Review or edit the extracted chart here">'+esc(sheetDraft)+'</textarea>';
-    out+='<div class="row"><button class="p" id="sheetcreate">Create draft in Chordbook</button></div>';
+    out+='<div class="import-field"><label for="sheetchart">Generated chart — review before creating</label><textarea id="sheetchart" class="paste-editor" spellcheck="false" placeholder="Review or edit the extracted chart here">'+esc(sheetDraft)+'</textarea></div>';
+    out+='<div class="import-actions"><button class="p" id="sheetcreate">Create draft in Chordbook</button></div>';
     if(sheetRaw)out+='<details><summary>Review AI reading and notes</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto">'+esc(sheetRaw)+'</pre></details>';
   }
   var busy=sheetBusy||sheetAIBusy;
-  return '<div class="sheetpanel"><h3>Upload Music Sheet</h3><p class="mut">Upload a clear photo, scan, or PDF. Choose what you want AI to extract. Basic OCR remains available as a fallback.</p><div class="row"><input id="sheettitle" placeholder="Song title" value="'+esc(sheetTitle)+'"><input id="sheetartist" placeholder="Artist / composer" value="'+esc(sheetArtist)+'"></div><label for="sheetfile" class="mut">Music sheet image or PDF (up to 15 MB)</label><input type="file" id="sheetfile" accept="image/png,image/jpeg,image/webp,image/bmp,.pdf,application/pdf" style="margin:6px 0 10px" '+(busy?'disabled':'')+'><p class="mut" id="sheetfilename">'+esc(sheetFile?sheetFile.name:'Accepted: JPG, PNG, WEBP, BMP, and PDF (up to 8 pages processed).')+'</p><label class="mut" for="sheetimportmode">Import format</label><select id="sheetimportmode" class="sheet-mode-select" '+(busy?'disabled':'')+'><option value="lyrics-only" '+(sheetImportMode==='lyrics-only'?'selected':'')+'>Lyrics Only</option><option value="lyrics-chords" '+(sheetImportMode==='lyrics-chords'?'selected':'')+'>Lyrics with Chords</option><option value="chords-only" '+(sheetImportMode==='chords-only'?'selected':'')+'>Chords Only</option></select><p class="sheetstatus" id="sheetstatus">'+esc(sheetStatus||'Choose a file and import format, then extract with AI.')+'</p><div class="row"><button class="p" id="sheetai" '+(busy?'disabled':'')+'>✦ Extract with AI</button><button id="sheetextract" '+(busy?'disabled':'')+'>Basic OCR fallback</button><button id="sheetcancel" '+(busy?'disabled':'')+'>Back to options</button></div>'+out+'<p class="mut">AI extraction uses Firebase AI Logic with Gemini. Always review the draft before saving.</p></div>';
+  return '<div class="import-workspace"><div class="import-panel"><div class="import-grid"><div class="import-field"><label for="sheettitle">Song title <span class="mut">(optional)</span></label><input id="sheettitle" placeholder="e.g. Amazing Grace" value="'+esc(sheetTitle)+'"></div><div class="import-field"><label for="sheetartist">Artist or composer <span class="mut">(optional)</span></label><input id="sheetartist" placeholder="e.g. John Newton" value="'+esc(sheetArtist)+'"></div></div><label class="import-file" for="sheetfile"><input type="file" id="sheetfile" accept="image/png,image/jpeg,image/webp,image/bmp,.pdf,application/pdf" '+(busy?'disabled':'')+'><span class="import-file-content"><span class="import-file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5m0 0L8 9m4-4 4 4M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15"/></svg></span><b>Choose a file to upload</b><small>JPG, PNG, WEBP, BMP or PDF · up to 15 MB</small></span></label><p class="import-filename" id="sheetfilename">'+esc(sheetFile?sheetFile.name:'Up to 8 PDF pages will be processed.')+'</p><div class="import-field"><label for="sheetimportmode">What should we extract?</label><select id="sheetimportmode" '+(busy?'disabled':'')+'><option value="lyrics-only" '+(sheetImportMode==='lyrics-only'?'selected':'')+'>Lyrics only</option><option value="lyrics-chords" '+(sheetImportMode==='lyrics-chords'?'selected':'')+'>Lyrics with chords</option><option value="chords-only" '+(sheetImportMode==='chords-only'?'selected':'')+'>Chords only</option></select></div><p class="import-status" id="sheetstatus">'+esc(sheetStatus||'Choose a file and import format, then extract with AI.')+'</p><div class="import-actions"><button id="sheetcancel" class="secondary-action" '+(busy?'disabled':'')+'>Back to options</button><button id="sheetextract" '+(busy?'disabled':'')+'>Basic OCR</button><button class="p" id="sheetai" '+(busy?'disabled':'')+'>Extract with AI</button></div>'+out+'<p class="import-note">AI extraction uses Gemini. Always review the generated chart before saving.</p></div></div>';
 }
 function setSheetStatus(text){sheetStatus=text;var el=document.getElementById('sheetstatus');if(el)el.textContent=text}
 function loadSheetScript(src,globalName){
@@ -2824,7 +3025,7 @@ function bindSidebar(){
 function addModalHTML(){
   if(!addOpen)return '';
   var busy=sheetBusy||sheetAIBusy;
-  var title=addView==='sheet'?'Upload Music Sheet':addView==='paste'?'Paste Songs from Word':'Add Song to Chordbook';
+  var title=addView==='sheet'?'Upload music sheet':addView==='paste'?'Paste from Word':'Add Song to Chordbook';
   var body='';
   if(addView==='picker'){
     body='<div class="add-grid">'+
@@ -2833,21 +3034,19 @@ function addModalHTML(){
       '<button type="button" class="add-card" id="addPasteText"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="8" width="28" height="34" rx="3"/><path d="M18 8V5h12v3"/><path d="M16 20h16M16 27h16M16 34h10"/></svg><span>Paste from Word<small>Import many songs at once from formatted text.</small></span></button>'+
       '</div>';
   }else if(addView==='paste'){
-    body='<div class="add-subnav"><button type="button" id="addBack">← All options</button><strong>Paste songs from Word</strong></div>'+bulkPasteBox();
+    body=bulkPasteBox();
   }else{
-    body='<div class="add-subnav"><button type="button" id="addBack" '+(busy?'disabled':'')+'>← All options</button><strong>Upload a chord sheet</strong></div>'+musicSheetBox();
+    body=musicSheetBox();
   }
-  return '<div class="ov" id="addOverlay"><div class="modal add-modal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle"><div class="mh"><div><h2 class="add-modal-title" id="addModalTitle">'+title+'</h2>'+(addView==='picker'?'<p class="add-modal-subtitle">Choose how you would like to add your song.</p>':'')+'</div><button type="button" id="addClose" '+(busy?'disabled':'')+' aria-label="Close Add New Song">×</button></div>'+body+'</div></div>';
+  var closeIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>';
+  var head=addView==='picker'?'<div class="mh"><div><h2 class="add-modal-title" id="addModalTitle">'+title+'</h2><p class="add-modal-subtitle">Choose how you would like to add your song.</p></div><button type="button" id="addClose" aria-label="Close Add New Song">'+closeIcon+'</button></div>':'<div class="mh add-flow-head"><button type="button" class="add-flow-back" id="addBack" '+(busy?'disabled':'')+' aria-label="Back to all options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div class="add-flow-heading"><h2 id="addModalTitle">'+title+'</h2><p>'+(addView==='sheet'?'Turn a photo, scan, or PDF into an editable chart.':'Import multiple songs from formatted text.')+'</p></div><button type="button" id="addClose" '+(busy?'disabled':'')+' aria-label="Close">'+closeIcon+'</button></div>';
+  return '<div class="ov" id="addOverlay"><div class="modal add-modal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">'+head+body+'</div></div>';
 }
 
 /* ---------- Bulk import from pasted Word text ---------- */
 var bulkPasteText="";
 function bulkPasteBox(){
-  return '<div class="box"><p class="mut">Paste your songs, one block per song, with <b>###</b> on its own line between songs. Every field is optional: missing Title becomes "Song 1, Song 2…", Key becomes C, Time becomes 4/4.</p>'+
-  '<pre class="mut" style="white-space:pre-wrap;margin:8px 0;font-size:13px">Title: Amazing Grace\nArtist: John Newton\nKey: G\nTime: 3/4\nSTANDARD:\n[Verse 1]\nG      C      G\nAmazing grace...\nCHORDS:\n[Verse]\n| G | C | G | D |\n###\nTitle: Next Song</pre>'+
-  '<textarea id="bulkPaste" placeholder="Paste your songs here…" style="min-height:260px">'+esc(bulkPasteText)+'</textarea>'+
-  '<p class="mut" id="bulkCount"></p>'+
-  '<div class="row"><button type="button" class="p" id="bulkImport">Import</button><button type="button" id="bulkClear">Clear</button></div></div>';
+  return '<div class="import-workspace"><div class="import-panel"><div class="paste-guide"><div class="paste-help"><b>How to format your songs</b><br>Use one block per song and place <b>###</b> on its own line between songs. All fields are optional—we’ll fill in sensible defaults.</div><pre class="paste-example">Title: Amazing Grace\nArtist: John Newton\nKey: G\nTime: 3/4\nSTANDARD:\n[Verse 1]\nAmazing grace...\n###</pre></div><div class="import-field"><label for="bulkPaste">Formatted song text</label><textarea id="bulkPaste" class="paste-editor" placeholder="Paste your songs here…">'+esc(bulkPasteText)+'</textarea></div><p class="paste-count" id="bulkCount"></p><div class="import-actions"><button type="button" id="bulkClear" class="secondary-action">Clear text</button><button type="button" class="p" id="bulkImport">Import songs</button></div></div></div>';
 }
 function parseBulkSongs(text){
   var lines=String(text||"").replace(/\r/g,"").replace(/[\u2018\u2019]/g,"'").split("\n");
@@ -3512,7 +3711,7 @@ function drawMain(){
   if(grp&&!gById(grp)){grp=null;managing=false}
   if(view!=="list"||toolsPage){groupsMgrOpen=false}
   if(view!=="list"){cloudOpen=false;sidebarOpen=false}
-  document.body.style.overflow=(cloudOpen||addOpen||sidebarOpen||groupSongPickerOpen||groupsMgrOpen)?"hidden":"";
+  document.body.style.overflow=(cloudOpen||addOpen||sidebarOpen||groupSongPickerOpen||groupsMgrOpen||gedit)?"hidden":"";
   if(view==="list"&&toolsPage){
     var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle">Tools</div></div></div>';
     h+=tunerHomeHTML();
@@ -3525,18 +3724,19 @@ function drawMain(){
   if(view==="list"){
     var activeGroupForHeader=grp?gById(grp):null;
     var activeGroupTitle=activeGroupForHeader?(activeGroupForHeader.title||"Untitled"):"All";
-    var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle" aria-live="polite">'+esc(activeGroupTitle)+'</div></div>'+((canEditGroup(grp?gById(grp):null)&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top">Edit Group</button>':'')+fsBtn()+'</div>';
+    var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle" aria-live="polite">'+esc(activeGroupTitle)+'</div></div>'+((canEditGroup(grp?gById(grp):null)&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top" aria-label="Manage group">Manage</button>':'')+fsBtn()+'</div>';
     h+='<div class="mut" id="sync" style="margin:-4px 0 10px">'+esc(syncMsg)+'</div>';
     h+='<div class="sticky-tools"><input id="q" type="search" placeholder="Search songs by title, artist or key" value="'+esc(qry)+'" aria-label="Search songs" style="margin-bottom:10px">'+groupBarHTML()+'</div>';
-    h+=allSortBarHTML()+gboxHTML()+'<div id="sl">'+listHTML()+'</div>';
+    h+=allSortBarHTML()+gboxHTML()+groupActionBarHTML()+'<div id="sl">'+listHTML()+'</div>';
     if(cloudOpen)h+=modalHTML();
     if(addOpen&&isAdmin())h+=addModalHTML();
     if(groupSongPickerOpen&&canEditGroup(grp?gById(grp):null))h+=groupSongPickerHTML();
+    if(gedit&&canEditGroup(grp?gById(grp):null))h+=groupManageHTML();
     if(groupsMgrOpen)h+=groupsMgrHTML();
-    if(isAdmin()&&!addOpen&&!cloudOpen&&!sidebarOpen&&!groupsMgrOpen&&!groupSongPickerOpen)h+=fabHTML();else fabOpen=false;
+    if(isAdmin()&&!addOpen&&!cloudOpen&&!sidebarOpen&&!groupsMgrOpen&&!groupSongPickerOpen&&!gedit)h+=fabHTML();else fabOpen=false;
     h+=sidebarHTML();
     a.innerHTML=h;
-    bindTop();bindFS();bindTheme();bindCloud();bindModal();bindMusicSheet();bindAddModal();bindSidebar();bindGroupBar();bindGroupsMgr();bindFab();
+    bindTop();bindFS();bindTheme();bindCloud();bindModal();bindMusicSheet();bindAddModal();bindSidebar();bindGroupBar();bindGroupsMgr();bindGroupManage();bindFab();
      var groupAddSongBtn=document.getElementById("groupAddSong");if(groupAddSongBtn)groupAddSongBtn.onclick=function(){if(!canEditGroup(grp?gById(grp):null))return;groupPickerQuery="";groupPickerTab="available";groupSongPickerOpen=true;draw()};
     var groupPickerClose=document.getElementById("groupPickerClose");if(groupPickerClose)groupPickerClose.onclick=function(){groupSongPickerOpen=false;draw()};
     var groupPickerOverlay=document.getElementById("groupSongPicker");if(groupPickerOverlay)groupPickerOverlay.onclick=function(e){if(e.target===groupPickerOverlay){groupSongPickerOpen=false;draw()}};
@@ -3551,6 +3751,7 @@ function drawMain(){
   if(window.__lastSongRendered!==s.id){settingsOpen=false;window.__lastSongRendered=s.id}
   if(!isAdmin()&&mode==="edit")mode="view";
   var h=isCreatingSong?'<div class="top create-song-top"><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>':mode==="edit"?'<div class="top create-song-top"><h1>'+esc(s.title||"Untitled")+'</h1><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>':"<div class=\"top\"><button id=\"back\">\u2190</button><h1>"+esc(s.title||"Untitled")+"</h1><button id=\"settog\" class=\"settings-icon\" aria-label=\"Display settings\" aria-expanded=\""+(settingsOpen?"true":"false")+"\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" aria-hidden=\"true\"><path d=\"M5 9 L12 16 L19 9\"/></svg></button>"+practiceBtnHTML(s)+fsBtn()+(isAdmin()&&!practiceMode?"<button id=\"tog\" class=\"p\">Edit</button>":"")+"</div>";
+  if(practiceMode&&mode!=="edit"&&!isCreatingSong)h+='<div class="practice-mode-banner" role="status"><span class="practice-mode-mark" aria-hidden="true"></span><span class="practice-mode-copy"><b>Practice mode</b><span>Tap a bar to cue · Hold a chord for fingering</span></span><button type="button" class="practice-mode-exit" id="practiceExit">Exit</button></div>';
   h+=tempoHTML(s);
   var prefs=getDisplayPrefs(s),shownKey=displayKey(s),p=parseKey(shownKey),shownBars=displayBars(s);
   var viewSwitchLocked=!(songHasChord(s)&&songHasStandard(s));
@@ -3631,6 +3832,9 @@ function drawMain(){
     practiceMode=!practiceMode;cancelPracticeHold();
     draw();
     practiceNotice(practiceMode);
+  };
+  var prExit=document.getElementById("practiceExit");if(prExit)prExit.onclick=function(){
+    practiceMode=false;cancelPracticeHold();draw();practiceNotice(false);
   };
   var vmS=document.getElementById("viewModeStandard");if(vmS)vmS.onclick=function(){getDisplayPrefs(s).viewMode="standard";saveDisplayPrefs();draw()};
   var vmC=document.getElementById("viewModeChord");if(vmC)vmC.onclick=function(){getDisplayPrefs(s).viewMode="chord";saveDisplayPrefs();draw()};
