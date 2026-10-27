@@ -49,9 +49,12 @@ textarea{font-family:ui-monospace,Menlo,Consolas,monospace;min-height:210px;resi
 .bar{min-height:42px;padding:3px 6px;display:flex;align-items:center;justify-content:center;gap:10px;border-left:2px solid var(--ink);font-size:21px;font-weight:600;flex-wrap:wrap}
 .bar:first-child{border-left:3px double var(--ink)}
 .bar sup{font-size:.62em;font-weight:500}
-.settings-collapse{display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;transition:grid-template-rows .3s ease,opacity .22s ease,visibility 0s linear .3s}
-.settings-collapse.open{grid-template-rows:1fr;opacity:1;visibility:visible;transition:grid-template-rows .3s ease,opacity .25s ease .05s,visibility 0s}
-.settings-collapse-inner{overflow:hidden;min-height:0}
+.settings-collapse{position:fixed;top:calc(env(safe-area-inset-top,0px) + 68px);right:max(14px,calc((100vw - 1120px)/2 + 14px));z-index:45;display:block;width:min(620px,calc(100vw - 28px));opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-8px) scale(.985);transform-origin:top right;transition:transform .24s cubic-bezier(.32,.72,0,1),opacity .2s ease,visibility 0s linear .24s}
+.settings-collapse.open{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:transform .24s cubic-bezier(.32,.72,0,1),opacity .2s ease,visibility 0s}
+.settings-collapse-inner{overflow:visible;min-height:0}
+.settings-collapse .setting-panel{display:block;max-height:calc(100dvh - env(safe-area-inset-top,0px) - 88px);overflow:auto;overscroll-behavior:contain;margin:0;padding:18px;border:1px solid var(--hair,var(--line));border-radius:20px;background:color-mix(in srgb,var(--card) 94%,transparent);box-shadow:0 18px 54px rgba(0,0,0,.2);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%)}
+.settings-collapse .setting-chart-section{padding-top:0!important;padding-left:0;border-top:0!important;border-left:0}
+@media(max-width:680px){.settings-collapse{top:calc(env(safe-area-inset-top,0px) + 59px);right:0;width:100vw;transform:translateY(-5px);transform-origin:top center}.settings-collapse.open{transform:none}.settings-collapse .setting-panel{max-height:calc(100dvh - env(safe-area-inset-top,0px) - 59px);padding:18px 20px 20px;border-width:0;border-radius:0 0 20px 20px;background:var(--bg);box-shadow:none}}
 @media(prefers-reduced-motion:reduce){.settings-collapse,.settings-collapse.open{transition:none}}
 
 .tsrow{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:4px;align-items:stretch}
@@ -718,8 +721,8 @@ body.pb-on{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
 #cc.practice-on .chart{gap:9px}
 #cc.practice-on .bar{padding-top:7px;padding-bottom:7px}
 #cc.practice-on .sec{margin-top:8px}
-#cc.practice-on .bar.pb-cue{background:color-mix(in srgb,var(--acc) 9%,var(--bar));box-shadow:inset 0 0 0 2px var(--acc),0 3px 12px color-mix(in srgb,var(--acc) 12%,transparent)}
-#cc.practice-on .bar.pb-on{background:color-mix(in srgb,var(--acc) 28%,var(--bar));box-shadow:inset 0 0 0 2.5px var(--acc),0 4px 16px color-mix(in srgb,var(--acc) 18%,transparent)}
+#cc.practice-on .bar.pb-cue{background:color-mix(in srgb,var(--acc) 9%,var(--bar));box-shadow:inset 0 0 0 2px var(--acc)}
+#cc.practice-on .bar.pb-on{background:color-mix(in srgb,var(--acc) 28%,var(--bar));box-shadow:inset 0 0 0 2.5px var(--acc)}
 #cc.practice-on .beat-chord,#cc.practice-on .bar>span{cursor:pointer;-webkit-tap-highlight-color:transparent}
 #cc.practice-on .ch{transition:transform .2s ease;transform-origin:center}
 #cc .practice-holding .ch{transform:scale(1.2);transition:transform 1s ease}
@@ -775,14 +778,41 @@ body{font-family:var(--font);line-height:1.47;letter-spacing:-.011em;-webkit-fon
 h1,h2,h3{font-weight:700;letter-spacing:-.022em}
 
 /* ---------- Top bar: sticky, translucent ---------- */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin:0 -14px 12px;padding:10px 14px;gap:10px;
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;margin:0 -14px 12px;padding:10px 14px;gap:10px;
   background:color-mix(in srgb,var(--bg) 78%,transparent);
   -webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);
-  box-shadow:0 .5px 0 var(--line)}
+  box-shadow:0 1px 0 var(--line),0 5px 14px rgba(0,0,0,.045)}
+.top.settings-attached{background:var(--bg);box-shadow:none}
+.top.practice-top,.top.practice-top.settings-attached{background:var(--acc);color:var(--accink);box-shadow:0 1px 0 color-mix(in srgb,var(--accink) 18%,transparent)}
+.top.practice-top{isolation:isolate;overflow:hidden}
+.top.practice-top>*{position:relative;z-index:1}
+.top.practice-top.practice-entering{background:var(--bg)}
+.top.practice-top.practice-entering::before{content:"";position:absolute;left:calc(50% + var(--practice-shift-x,0px));top:50%;z-index:0;width:var(--practice-wave-size,220vw);height:var(--practice-wave-size,220vw);background:var(--acc);border-radius:50%;transform:translate3d(-50%,-50%,0) scale(var(--practice-start-scale,.025));transform-origin:center;will-change:transform;backface-visibility:hidden;animation:practice-bar-spread .9s cubic-bezier(.22,1,.36,1) forwards}
+.top.practice-top.practice-entering>*{animation:practice-bar-content .32s ease-out .18s both}
+.top.practice-top.practice-exiting{background:var(--bg);pointer-events:none}
+.top.practice-top.practice-exiting::before{content:"";position:absolute;left:calc(50% + var(--practice-shift-x,0px));top:50%;z-index:0;width:var(--practice-wave-size,220vw);height:var(--practice-wave-size,220vw);background:var(--acc);border-radius:50%;transform:translate3d(-50%,-50%,0) scale(1);transform-origin:center;will-change:transform;backface-visibility:hidden;animation:practice-bar-collapse .78s cubic-bezier(.64,0,.78,0) forwards}
+.top.practice-top.practice-exiting>*{animation:practice-bar-content-out .28s ease-in .12s forwards}
+@keyframes practice-bar-spread{
+  from{transform:translate3d(-50%,-50%,0) scale(var(--practice-start-scale,.025))}
+  to{transform:translate3d(-50%,-50%,0) scale(1)}
+}
+@keyframes practice-bar-content{from{opacity:.15;transform:translate3d(0,2px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes practice-bar-collapse{
+  from{transform:translate3d(-50%,-50%,0) scale(1)}
+  to{transform:translate3d(-50%,-50%,0) scale(var(--practice-start-scale,.025))}
+}
+@keyframes practice-bar-content-out{to{opacity:0;transform:translate3d(0,1px,0)}}
+.practice-top-title{min-width:0;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:1px;line-height:1.15}
+.practice-top-title strong{font-size:16px;font-weight:750;letter-spacing:-.015em}
+.practice-top-title span{display:block;width:100%;overflow:hidden;color:color-mix(in srgb,var(--accink) 78%,transparent);font-size:12px;font-weight:550;white-space:nowrap;text-overflow:ellipsis}
+.top.practice-top button,.top.practice-top .practice-icon.active{border-color:transparent;background:color-mix(in srgb,var(--accink) 15%,transparent);color:var(--accink)}
+.top.practice-top button:hover{background:color-mix(in srgb,var(--accink) 22%,transparent)}
+.top.practice-top .settings-icon:focus-visible,.top.practice-top button:focus-visible{outline-color:color-mix(in srgb,var(--accink) 55%,transparent)}
 .top h1{font-size:22px;font-weight:700;letter-spacing:-.024em;line-height:1.15}
 .top .brand-stack h1{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
 .active-group-title{font-size:14px;font-weight:600;letter-spacing:-.006em}
 @media(max-width:480px){.top .brand-stack h1{font-size:24px}.top h1{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.top.practice-top.practice-entering::before,.top.practice-top.practice-entering>*,.top.practice-top.practice-exiting::before,.top.practice-top.practice-exiting>*{animation:none}.top.practice-top.practice-entering{background:var(--acc)}}
 .swipe-preview-head{margin-bottom:12px}
 
 /* ---------- Buttons ---------- */
@@ -827,8 +857,8 @@ input[type=checkbox],input[type=radio],input[type=range]{padding:0;border:0;back
 .mut{letter-spacing:-.006em}
 
 /* ---------- Chord charts: paper, notation untouched ---------- */
-.line{background:var(--card);border-color:var(--hair);border-radius:var(--r-md);box-shadow:var(--shadow-1)}
-.std-chart{background:var(--card);border-color:var(--hair);border-radius:var(--r-md);box-shadow:var(--shadow-1)}
+.line{background:var(--card);border-color:var(--hair);border-radius:var(--r-md);box-shadow:none}
+.std-chart{background:var(--card);border-color:var(--hair);border-radius:var(--r-md);box-shadow:none}
 .std-chords{font-weight:700}
 .sec{letter-spacing:-.01em}
 .bar.sel{outline-width:2px}
@@ -1118,7 +1148,7 @@ var CH=/^[A-G][#b]?(?:maj|min|dim|aug|sus|add|alt|m|M|ø|°|\+|-|\d|#|b|\(|\)|,)
 var LS="chordbook:v1",songs=[],personalGroups=[],view="list",cur=null,mode="view",isCreatingSong=false,editSnapshot=null,msg="",sel=null,sent={},col=null,ready=false,syncMsg="Local only",ft=null,grp=null,qry="",managing=false,gform=null,zoom=1,defaultZoom=1,gedit=false,cloudOpen=false,settingsOpen=false,displayPrefs={},allSort="az";
 var addOpen=false,addView="picker",sidebarOpen=false,toolsPage=false,tunerOpen=false,metronomeOpen=false,scaleToolOpen=false,scaleRoot=0,scaleType="major",scaleAccidental="sharp",chordToolStage="home",chordInstrument="guitar",chordRoot=0,groupSongPickerOpen=false,groupPickerQuery="",groupPickerSort="az",groupPickerTab="available";
 /* ---------- Practice mode (hold a chord to see its diagram) ---------- */
-var practiceMode=false,practiceHold=null,practiceState=null,practiceCache={};
+var practiceMode=false,practiceHeaderAnimate=false,practiceHeaderExiting=false,practiceHeaderOrigin=null,practiceHeaderTimer=0,practiceHold=null,practiceState=null,practiceCache={};
 var PRACTICE_ICON='<svg viewBox="0 0 127 128" fill="none" aria-hidden="true"><path d="M110.883 2.12891C112.297 2.10974 118.458 4.93014 119.841 5.7666C121.992 7.06816 124.107 12.4185 124.682 14.7871C124.859 15.5188 124.966 16.5111 124.543 17.1807C123.626 18.6336 109.796 31.0743 108.011 32.1504C106.916 32.8107 105.591 32.7575 104.381 33.042C103.55 33.2371 103 33.715 102.382 34.2734C98.2315 38.0238 94.3433 42.5155 90.4111 46.5283L83.2344 53.8477C82.2367 54.8666 79.8157 57.225 79.1709 58.2656L79.1367 58.3213C79.6045 59.3823 80.6521 61.0603 81.2725 62.0908C82.9729 64.9163 83.7406 67.1406 84.3984 70.3428C86.0326 76.5999 82.6847 84.8235 77.0449 87.9238C69.4742 92.0856 65.5251 93.5195 64.0615 102.959C63.5065 106.538 61.4836 112.924 59.2695 116.05C49.1197 130.377 33.4481 130.881 19.6631 121.324C18.6525 120.592 17.6677 119.825 16.7119 119.022C8.59904 112.259 1.23845 102.965 0.129883 92.0781C-1.12152 79.7862 6.8407 69.1314 18.2871 65.2461C23.0636 63.6248 28.09 63.7535 32.2051 60.6982C36.5738 57.4673 37.1973 52 40.6621 47.8975C46.9751 40.4228 56.9907 40.8384 64.8311 45.6221C66.1861 46.4487 67.5248 47.1366 68.7812 48.207C76.6353 41.1792 83.916 33.2223 91.5947 25.9834C92.1619 25.4487 93.0338 24.5999 93.458 23.9902C94.5001 22.4926 94.2599 20.3127 95.2734 18.7754C99.6384 13.4765 104.182 8.16969 108.9 3.17969C109.454 2.59456 110.133 2.31421 110.883 2.12891ZM24.1846 87.6992C23.7084 87.5463 23.218 87.5725 22.7256 87.5986C21.7265 87.9861 20.8419 88.4256 20.3994 89.4678C20.1735 90 20.1309 90.7161 20.3555 91.2568C20.9991 92.8058 34.8002 106.86 36.333 107.451C36.7397 107.608 37.2086 107.567 37.6357 107.541C38.6593 107.101 39.5396 106.604 39.9707 105.503C40.149 105.047 40.2211 104.381 40.0244 103.924C39.3307 102.313 25.6455 88.1701 24.1846 87.6992ZM61.5264 74.9648C60.6839 69.0343 55.1808 64.918 49.2539 65.7852C43.3619 66.6473 39.2758 72.1114 40.1133 78.0068C40.951 83.9021 46.3971 88.0109 52.2959 87.1982C58.2297 86.3804 62.3687 80.8951 61.5264 74.9648Z" fill="currentColor"/><path d="M122.943 22.0663C124.624 21.6063 126.362 22.5902 126.833 24.2691C127.303 25.9478 126.33 27.6916 124.655 28.1728C122.964 28.6583 121.201 27.6749 120.726 25.981C120.251 24.287 121.246 22.5305 122.943 22.0663Z" fill="currentColor"/><path d="M115.256 29.4352C116.983 29.171 118.598 30.3576 118.861 32.0849C119.124 33.8123 117.937 35.426 116.21 35.6888C114.483 35.9513 112.871 34.7651 112.607 33.0387C112.344 31.3123 113.53 29.6992 115.256 29.4352Z" fill="currentColor"/><path d="M101.462 0.0312707C103.162 -0.208729 104.741 0.958302 105.011 2.65424C105.281 4.35033 104.142 5.94971 102.451 6.2494C101.33 6.44799 100.19 6.02627 99.4678 5.14658C98.7457 4.26674 98.5546 3.0658 98.9679 2.00549C99.3814 0.945022 100.335 0.190177 101.462 0.0312707Z" fill="currentColor"/><path d="M93.9683 8.49125C95.6073 8.11297 97.2514 9.10094 97.6867 10.7258C98.1219 12.3506 97.1919 14.0281 95.5831 14.5198C94.4914 14.8536 93.3047 14.5648 92.4881 13.767C91.6717 12.9692 91.3556 11.7894 91.664 10.6903C91.9723 9.59109 92.8559 8.74797 93.9683 8.49125Z" fill="currentColor"/></svg>';
 var practiceNoticeTimer=0;
 function practiceNotice(on){
@@ -2256,19 +2286,20 @@ function songZoom(s){
 /* ---------- animated reader settings panel ---------- */
 function setSettingsOpen(on){
   settingsOpen=!!on;
-  var c=document.getElementById("settingsCollapse"),b=document.getElementById("settog");
+  var c=document.getElementById("settingsCollapse"),b=document.getElementById("settog"),t=document.querySelector("#app>.top");
   if(b)b.setAttribute("aria-expanded",settingsOpen?"true":"false");
+  if(t)t.classList.toggle("settings-attached",settingsOpen);
   if(!c)return;
   c.classList.toggle("open",settingsOpen);
   if(settingsOpen){c.removeAttribute("inert");c.removeAttribute("aria-hidden")}
   else{c.setAttribute("inert","");c.setAttribute("aria-hidden","true")}
 }
-/* A tap on the chord area folds the panel back up; scrolling or dragging to read does not. */
+/* A tap outside the floating settings panel closes it without moving the chart. */
 var tapStart=null;
 document.addEventListener("pointerdown",function(e){tapStart={x:e.clientX,y:e.clientY}},true);
 document.addEventListener("click",function(e){
   if(!settingsOpen||view!=="song"||mode!=="view")return;
-  var t=e.target;if(!t||!t.closest||!t.closest("#cw"))return;
+  var t=e.target;if(!t||!t.closest||t.closest("#settingsCollapse")||t.closest("#settog"))return;
   if(tapStart&&(Math.abs(e.clientX-tapStart.x)>10||Math.abs(e.clientY-tapStart.y)>10))return;
   var sl=window.getSelection?String(window.getSelection()):"";if(sl&&sl.length>0)return;
   setSettingsOpen(false);
@@ -3750,8 +3781,11 @@ function drawMain(){
   var s=song();if(!s){view="list";return draw()}
   if(window.__lastSongRendered!==s.id){settingsOpen=false;window.__lastSongRendered=s.id}
   if(!isAdmin()&&mode==="edit")mode="view";
-  var h=isCreatingSong?'<div class="top create-song-top"><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>':mode==="edit"?'<div class="top create-song-top"><h1>'+esc(s.title||"Untitled")+'</h1><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>':"<div class=\"top\"><button id=\"back\">\u2190</button><h1>"+esc(s.title||"Untitled")+"</h1><button id=\"settog\" class=\"settings-icon\" aria-label=\"Display settings\" aria-expanded=\""+(settingsOpen?"true":"false")+"\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" aria-hidden=\"true\"><path d=\"M5 9 L12 16 L19 9\"/></svg></button>"+practiceBtnHTML(s)+fsBtn()+(isAdmin()&&!practiceMode?"<button id=\"tog\" class=\"p\">Edit</button>":"")+"</div>";
-  if(practiceMode&&mode!=="edit"&&!isCreatingSong)h+='<div class="practice-mode-banner" role="status"><span class="practice-mode-mark" aria-hidden="true"></span><span class="practice-mode-copy"><b>Practice mode</b><span>Tap a bar to cue · Hold a chord for fingering</span></span><button type="button" class="practice-mode-exit" id="practiceExit">Exit</button></div>';
+  var h,practiceOriginAttr=practiceHeaderOrigin?' style="--practice-shift-x:'+practiceHeaderOrigin.shiftX+'px;--practice-wave-size:'+practiceHeaderOrigin.waveSize+'px;--practice-start-scale:'+practiceHeaderOrigin.startScale+'"':'';
+  if(isCreatingSong)h='<div class="top create-song-top"><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>';
+  else if(mode==="edit")h='<div class="top create-song-top"><h1>'+esc(s.title||"Untitled")+'</h1><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>';
+  else if(practiceMode)h='<div class="top practice-top'+(practiceHeaderAnimate?' practice-entering':'')+(practiceHeaderExiting?' practice-exiting':'')+(settingsOpen?' settings-attached':'')+'"'+practiceOriginAttr+'><div class="practice-top-title"><strong>Practice Mode</strong><span title="'+esc(s.title||"Untitled")+'">'+esc(s.title||"Untitled")+'</span></div><button id="settog" class="settings-icon" aria-label="Display settings" aria-expanded="'+(settingsOpen?'true':'false')+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true"><path d="M5 9 L12 16 L19 9"/></svg></button>'+practiceBtnHTML(s)+fsBtn()+'</div>';
+  else h="<div class=\"top"+(settingsOpen?" settings-attached":"")+"\"><button id=\"back\">\u2190</button><h1>"+esc(s.title||"Untitled")+"</h1><button id=\"settog\" class=\"settings-icon\" aria-label=\"Display settings\" aria-expanded=\""+(settingsOpen?"true":"false")+"\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" aria-hidden=\"true\"><path d=\"M5 9 L12 16 L19 9\"/></svg></button>"+practiceBtnHTML(s)+fsBtn()+(isAdmin()?"<button id=\"tog\" class=\"p\">Edit</button>":"")+"</div>";
   h+=tempoHTML(s);
   var prefs=getDisplayPrefs(s),shownKey=displayKey(s),p=parseKey(shownKey),shownBars=displayBars(s);
   var viewSwitchLocked=!(songHasChord(s)&&songHasStandard(s));
@@ -3829,9 +3863,19 @@ function drawMain(){
   var tpEl=document.getElementById("tempo");if(tpEl)tpEl.oninput=function(){if(mode!=="edit")return;s.tempo=this.value.trim();save()};
   var settog=document.getElementById("settog");if(settog)settog.onclick=function(){setSettingsOpen(!settingsOpen)};
   var prBtn=document.getElementById("practiceBtn");if(prBtn)prBtn.onclick=function(){
-    practiceMode=!practiceMode;cancelPracticeHold();
-    draw();
-    practiceNotice(practiceMode);
+    if(practiceHeaderExiting)return;
+    var br=prBtn.getBoundingClientRect(),tr=prBtn.closest(".top").getBoundingClientRect();
+    var wave=Math.ceil(Math.max(tr.width*2.2,tr.height*2.2));
+    practiceHeaderOrigin={shiftX:Math.round((br.left+br.width/2)-(tr.left+tr.width/2)),waveSize:wave,startScale:Math.max(.005,Math.min(br.width,br.height)/wave).toFixed(5)};
+    cancelPracticeHold();
+    if(practiceMode){
+      settingsOpen=false;practiceHeaderExiting=true;draw();
+      var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      clearTimeout(practiceHeaderTimer);practiceHeaderTimer=setTimeout(function(){practiceMode=false;practiceHeaderExiting=false;practiceHeaderOrigin=null;draw();practiceNotice(false)},reduce?0:810);
+      return;
+    }
+    practiceMode=true;practiceHeaderAnimate=true;draw();
+    practiceHeaderAnimate=false;practiceHeaderOrigin=null;practiceNotice(true);
   };
   var prExit=document.getElementById("practiceExit");if(prExit)prExit.onclick=function(){
     practiceMode=false;cancelPracticeHold();draw();practiceNotice(false);
@@ -4048,19 +4092,27 @@ document.addEventListener('touchend',function(e){
 },{passive:true,capture:true});
 document.addEventListener('touchcancel',function(){if(swipeState)finishSwipe(swipeState,false,170)},{passive:true,capture:true});
 /* ---------- Floating transpose control (View mode) ---------- */
-var xposeFab,fabExpanded,fabScrollY;
+var xposeFab,fabExpanded,fabScrollY,xposeIdleTimer=0,xposeInteracting=false;
 function xposeShift(d){
   var s=song();if(!s)return;
   var o=parseKey(displayKey(s)),n=N[((idx(o.r)+d)%12+12)%12];
   var p=getDisplayPrefs(s);p.key=n+(o.m?"m":"");saveDisplayPrefs();draw();
   fabScrollY=window.scrollY;
+  armXposeIdle();
 }
 function setXposeExpanded(on){
   if(!xposeFab)return;
+  clearTimeout(xposeIdleTimer);xposeIdleTimer=0;
   on=!!on;fabExpanded=on;fabScrollY=window.scrollY;
   xposeFab.classList.toggle("expanded",on);
   xposeFab.setAttribute("aria-expanded",on?"true":"false");applyXposePos();
   Array.prototype.forEach.call(xposeFab.querySelectorAll("button"),function(b){b.tabIndex=on?0:-1});
+  if(on)armXposeIdle();
+}
+function armXposeIdle(){
+  clearTimeout(xposeIdleTimer);xposeIdleTimer=0;
+  if(!fabExpanded||xposeInteracting)return;
+  xposeIdleTimer=setTimeout(function(){if(fabExpanded&&!xposeInteracting)setXposeExpanded(false)},2000);
 }
 var XPOSE_KEY=LS+":xpose",XPOSE_H=84,XPOSE_HX=136,xposePos,xposeDim,fabJustDragged=false,xposeSnapToken=0;
 function loadXposePos(){
@@ -4174,7 +4226,16 @@ function updateXposeFab(){
   if(!visible){if(xposeFab){setXposeExpanded(false);xposeFab.classList.remove("show","dragging");setXposeDim(false)}return}
   ensureXposeFab().classList.add("show");
 }
-// Collapse again when the reader taps elsewhere or scrolls.
+// Pause auto-collapse while the reader is pressing, transposing, or dragging.
+document.addEventListener("pointerdown",function(e){
+  if(!e.target||!e.target.closest||!e.target.closest("#xposeFab"))return;
+  xposeInteracting=true;clearTimeout(xposeIdleTimer);xposeIdleTimer=0;
+},true);
+["pointerup","pointercancel"].forEach(function(name){document.addEventListener(name,function(){
+  if(!xposeInteracting)return;
+  xposeInteracting=false;setTimeout(armXposeIdle,0);
+},true)});
+// Collapse again after inactivity, an outside tap, or a scroll.
 window.addEventListener("resize",function(){applyXposePos()});
 document.addEventListener("pointerdown",function(e){
   if(!fabExpanded)return;
