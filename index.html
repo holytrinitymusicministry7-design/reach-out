@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Chordbook</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#161615" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Chordbook">
@@ -14,10 +14,10 @@
 <link rel="icon" href="icon-192.png">
 <script>try{var __t=localStorage.getItem("chordbook:v1:theme");if(__t)document.documentElement.setAttribute("data-theme",__t)}catch(e){}</script>
 <style>
-:root{--bg:#f7f5f0;--card:#fff;--ink:#1c1b1a;--mut:#6b6862;--line:#dedad2;--acc:#2f5d50;--accink:#fff;--bar:#fbfaf7;
+:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d1f;--mut:#6e6e73;--line:#e5e5ea;--line-strong:#d2d2d7;--fill:rgba(120,120,128,.14);--acc:#2f5d50;--accink:#fff;--bar:#fbfbfd;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#201f1e;--ink:#f0eee9;--mut:#9b978f;--line:#363431;--acc:#6fb8a4;--accink:#102019;--bar:#1a1918;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#161615;--card:#201f1e;--ink:#f0eee9;--mut:#9b978f;--line:#363431;--acc:#6fb8a4;--accink:#102019;--bar:#1a1918;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--card:#1c1c1e;--ink:#f5f5f7;--mut:#98989d;--line:#38383a;--line-strong:#48484a;--fill:rgba(120,120,128,.32);--acc:#6fb8a4;--accink:#102019;--bar:#2c2c2e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#000;--card:#1c1c1e;--ink:#f5f5f7;--mut:#98989d;--line:#38383a;--line-strong:#48484a;--fill:rgba(120,120,128,.32);--acc:#6fb8a4;--accink:#102019;--bar:#2c2c2e;color-scheme:dark}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -153,7 +153,7 @@ textarea{font-family:ui-monospace,Menlo,Consolas,monospace;min-height:210px;resi
 .add-modal .mh{padding:18px 0 12px}
 .add-modal-title{font-size:clamp(26px,4.6vw,42px);font-weight:800;margin:0;letter-spacing:-.02em}
 .add-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:14px 0 20px}
-.add-card{min-height:290px;background:#176253;color:#fff;border:0;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:18px 12px;font-weight:800;font-size:clamp(20px,2.8vw,30px);text-align:center;box-shadow:none}
+.add-card{min-height:290px;background:var(--acc);color:#fff;border:0;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:18px 12px;font-weight:800;font-size:clamp(20px,2.8vw,30px);text-align:center;box-shadow:none}
 .add-card:hover{filter:brightness(1.05)}.add-card:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .add-card svg{width:82px;height:82px;display:block;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .add-subnav{display:flex;align-items:center;gap:10px;margin:0 0 8px;padding:0 0 8px;border-bottom:1px solid var(--line)}
@@ -575,8 +575,8 @@ body.swiping{overflow-x:hidden}
 .category-field select{font:inherit;font-size:14px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text)}
 
 .chart-editor-shell{margin-top:18px;background:var(--card);border-radius:14px;overflow:hidden}
-.chart-editor-tabs{display:grid;grid-template-columns:1fr 1fr;background:#f3f3f3}
-.chart-editor-tabs button{border:0;border-radius:0;background:#f3f3f3;color:var(--ink);padding:18px 10px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:84px;cursor:pointer}
+.chart-editor-tabs{display:grid;grid-template-columns:1fr 1fr;background:#ececf0}
+.chart-editor-tabs button{border:0;border-radius:0;background:#ececf0;color:var(--ink);padding:18px 10px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:84px;cursor:pointer}
 .chart-editor-tabs button.active{background:var(--card);color:var(--ink)}
 .chart-editor-tabs button strong{font-size:24px;font-weight:800;line-height:1.15}
 .chart-editor-tabs button span{font-size:15px;font-weight:400;color:var(--ink)}
@@ -585,8 +585,8 @@ body.swiping{overflow-x:hidden}
 .chart-editor-body .pal{margin:12px 0 16px}
 .chart-editor-body textarea{border-radius:14px;padding:16px 18px;font-size:18px;line-height:1.55;min-height:300px}
 @media(max-width:760px){.chart-editor-tabs button{min-height:70px;padding:14px 8px}.chart-editor-tabs button strong{font-size:20px}.chart-editor-tabs button span{font-size:13px}.chart-editor-body{padding:16px 14px 20px}}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .chart-editor-tabs,:root:not([data-theme="light"]) .chart-editor-tabs button{background:#2a2928}:root:not([data-theme="light"]) .chart-editor-tabs button.active{background:var(--card)}}
-:root[data-theme="dark"] .chart-editor-tabs,:root[data-theme="dark"] .chart-editor-tabs button{background:#2a2928}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .chart-editor-tabs,:root:not([data-theme="light"]) .chart-editor-tabs button{background:#2c2c2e}:root:not([data-theme="light"]) .chart-editor-tabs button.active{background:var(--card)}}
+:root[data-theme="dark"] .chart-editor-tabs,:root[data-theme="dark"] .chart-editor-tabs button{background:#2c2c2e}
 :root[data-theme="dark"] .chart-editor-tabs button.active{background:var(--card)}
 .category-editor-field{margin:14px 0 10px;padding:0;border:0;border-radius:0;background:transparent}
 .category-editor-field .category-field{font-size:13px;font-weight:650;color:var(--text);gap:8px}
@@ -669,6 +669,187 @@ body.pb-on{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
 .practice-inv button small{font-size:11px;font-weight:500;opacity:.75}
 .practice-inv button.active{background:var(--acc);color:var(--accink);border-color:var(--acc)}
 @media(prefers-reduced-motion:reduce){.practice-card{transition:none}#cc .practice-holding .ch{transition:none}}
+
+/* =====================================================================
+   Apple-style refresh  (tokens documented in DESIGN.md)
+   Everything below is presentation only. Change a token in :root and the
+   whole app follows. Delete this block to return to the original look.
+   ===================================================================== */
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",system-ui,"Segoe UI",Roboto,sans-serif;
+  --ease:cubic-bezier(.32,.72,0,1);
+  --r-sm:10px;--r-md:14px;--r-lg:20px;--r-xl:28px;
+  --shadow-1:0 1px 2px rgba(0,0,0,.04),0 2px 10px rgba(0,0,0,.04);
+  --shadow-2:0 10px 40px rgba(0,0,0,.14);
+  --hair:color-mix(in srgb,var(--line) 70%,transparent);
+  /* variables the app referenced but never defined */
+  --text:var(--ink);--muted:var(--mut);--panel:var(--card);--soft:var(--fill);--danger:#d70015;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--shadow-1:none;--shadow-2:0 10px 40px rgba(0,0,0,.6);--danger:#ff453a}}
+:root[data-theme="dark"]{--shadow-1:none;--shadow-2:0 10px 40px rgba(0,0,0,.6);--danger:#ff453a}
+
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);line-height:1.47;letter-spacing:-.011em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 45%,transparent) transparent}
+::selection{background:color-mix(in srgb,var(--acc) 28%,transparent)}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--acc) 55%,transparent);outline-offset:2px}
+h1,h2,h3{font-weight:700;letter-spacing:-.022em}
+
+/* ---------- Top bar: sticky, translucent ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin:0 -14px 12px;padding:10px 14px;gap:10px;
+  background:color-mix(in srgb,var(--bg) 78%,transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);
+  box-shadow:0 .5px 0 var(--line)}
+.top h1{font-size:22px;font-weight:700;letter-spacing:-.024em;line-height:1.15}
+.top .brand-stack h1{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.active-group-title{font-size:14px;font-weight:600;letter-spacing:-.006em}
+@media(max-width:480px){.top .brand-stack h1{font-size:24px}.top h1{font-size:20px}}
+.swipe-preview-head{margin-bottom:12px}
+
+/* ---------- Buttons ---------- */
+button{background:var(--fill);border-color:transparent;border-radius:12px;padding:9px 14px;font-weight:500;letter-spacing:-.011em;
+  transition:background-color .2s var(--ease),scale .2s var(--ease),filter .2s var(--ease),box-shadow .2s var(--ease)}
+button:active{scale:.97}
+@media(hover:hover){button:hover{filter:brightness(.97)}}
+@media (prefers-color-scheme:dark){@media(hover:hover){:root:not([data-theme="light"]) button:hover{filter:brightness(1.15)}}}
+@media(hover:hover){:root[data-theme="dark"] button:hover{filter:brightness(1.15)}}
+button.p{background:var(--acc);color:var(--accink);border-color:transparent;border-radius:980px;padding:9px 18px;font-weight:600}
+@media(hover:hover){button.p:hover{filter:none;background:color-mix(in srgb,var(--acc) 86%,#000)}}
+button.d{color:var(--danger)}
+button:disabled{opacity:.4}
+.settings-icon,#navOpen,#add.add-icon,.sidebar-close,.practice-close,.pb-x{border-radius:50%}
+#navOpen svg,.settings-icon svg,#add.add-icon svg{stroke-width:2}
+.top .edit-group-top{border-radius:980px;font-weight:600}
+
+/* ---------- Inputs ---------- */
+input,select,textarea{background:var(--card);border:1px solid var(--line-strong);border-radius:12px;padding:10px 12px;
+  transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 22%,transparent)}
+input::placeholder,textarea::placeholder{color:color-mix(in srgb,var(--mut) 75%,transparent)}
+input[type=checkbox],input[type=radio],input[type=range]{padding:0;border:0;background:none;box-shadow:none;accent-color:var(--acc)}
+.category-editor-field select,.category-editor-field select:hover,.category-editor-field select:focus,.category-editor-field select:active{
+  border:1px solid var(--line-strong)!important;background-color:var(--card)!important;color:var(--ink)!important;border-radius:12px!important}
+.category-editor-field select:focus{border-color:var(--acc)!important;box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 22%,transparent)!important}
+
+/* ---------- Cards & surfaces ---------- */
+.song,.box,.sheetpanel,.setting-panel,.tuner-card,.tn-card,.chord-tool-controls,.chord-card,.tools-card,.chart-editor-shell,.bass-chart-card{border-color:var(--hair);box-shadow:var(--shadow-1)}
+.song{border-radius:var(--r-md);padding:14px 16px;transition:background-color .2s var(--ease),scale .2s var(--ease)}
+.song:active{scale:.985}
+@media(hover:hover){.song:hover{background:color-mix(in srgb,var(--card) 94%,var(--ink))}}
+.song b{font-weight:600;letter-spacing:-.015em}
+.key{background:color-mix(in srgb,var(--acc) 13%,transparent);color:var(--acc);border-radius:980px;padding:3px 11px;font-weight:600;letter-spacing:-.006em}
+.box,.sheetpanel{border-radius:18px;padding:16px}
+.sheetpanel{border-color:color-mix(in srgb,var(--acc) 45%,transparent)}
+.setting-panel{border-radius:var(--r-lg)}
+.setting-section-title{font-size:12px;letter-spacing:.06em;font-weight:600}
+.chord-card{border-radius:var(--r-md)}
+.song-sort-bar select{border-radius:980px;padding:7px 14px;background:var(--fill);border-color:transparent;font-size:14px}
+.sheetmeta span{border-radius:980px;border-color:transparent;background:var(--fill)}
+.mut{letter-spacing:-.006em}
+
+/* ---------- Chord charts: paper, notation untouched ---------- */
+.line{background:var(--card);border-color:var(--hair);border-radius:var(--r-md);box-shadow:var(--shadow-1)}
+.std-chart{background:var(--card);border-color:var(--hair);border-radius:var(--r-md);box-shadow:var(--shadow-1)}
+.std-chords{font-weight:700}
+.sec{letter-spacing:-.01em}
+.bar.sel{outline-width:2px}
+.beat-dot{opacity:.35}
+
+/* ---------- Segmented controls ---------- */
+:root{--seg-thumb:#fff;--seg-thumb-ink:var(--ink)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--seg-thumb:#636366}}
+:root[data-theme="dark"]{--seg-thumb:#636366}
+.practice-tabs,.chord-instrument-tabs,.tuner-mode-tabs,.group-picker-switch,.chord-style-switch{background:var(--fill);border-color:transparent}
+.practice-tabs button,.chord-instrument-tabs button,.tuner-mode-tabs button,.group-picker-switch button,.chord-style-switch button{background:transparent;filter:none;font-weight:600;color:var(--mut)}
+.practice-tabs button.active,.chord-instrument-tabs button.active,.tuner-mode-tabs button.active,.group-picker-switch button.active,.chord-style-switch button.active{
+  background:var(--seg-thumb);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14),0 3px 8px rgba(0,0,0,.06)}
+.chord-style-switch.disabled button.active{background:var(--seg-thumb);color:var(--mut)}
+.chord-root-keys button{background:var(--fill);border-radius:12px;font-weight:600}
+.chord-root-keys button.active{background:var(--acc);color:var(--accink);box-shadow:none}
+.transpose-control,.zoom-control{border-color:var(--line-strong);border-radius:12px}
+.transpose-control button,.zoom-control button{background:transparent;color:var(--acc);filter:none}
+.font-pick{border-radius:12px;background:var(--card)}
+.font-opt.on .font-pick{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.chart-editor-shell{border-radius:var(--r-lg)}
+
+/* ---------- Overlays, sheets, materials ---------- */
+.ov,#groupSongPicker.ov{background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%)}
+.modal{border:0;border-radius:var(--r-xl) var(--r-xl) 0 0;box-shadow:var(--shadow-2)}
+@media (min-width:600px){.modal{border-radius:var(--r-xl)}}
+.mh{background:color-mix(in srgb,var(--bg) 85%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+#groupSongPicker .group-picker-modal{border-radius:var(--r-xl);border-color:transparent;box-shadow:var(--shadow-2)}
+.group-picker-item{border-radius:var(--r-md);border-color:var(--hair)}
+.practice-card,.pb-sheet .pb-card{border-radius:var(--r-xl);border-color:transparent;box-shadow:var(--shadow-2)}
+.practice-dim.open,.pb-sheet{-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%)}
+.practice-visual,.practice-inv button{border-radius:var(--r-md)}
+.pr-notice{border-radius:var(--r-xl);border-color:transparent;background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%)}
+.practice-title{letter-spacing:-.03em}
+
+/* ---------- Sidebar drawer ---------- */
+.sidebar-backdrop{background:rgba(0,0,0,.32);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.sidebar-drawer{background:color-mix(in srgb,var(--card) 84%,transparent);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+  border-right:0;border-radius:0 var(--r-xl) var(--r-xl) 0;box-shadow:var(--shadow-2)}
+.sidebar-head-label{font-size:12px;letter-spacing:.07em}
+#gb.sidebar-group-list>button{border-radius:12px;font-weight:500;letter-spacing:-.014em}
+#gb.sidebar-group-list>button.p{font-weight:600;border-radius:12px}
+#gb.sidebar-group-list>button.sidebar-new-group{background:var(--fill);color:var(--acc);font-weight:600}
+#gb.sidebar-group-list>button:not([data-g]){background:var(--fill);border-color:transparent}
+.sidebar-tools-button{border-color:transparent;background:var(--fill);border-radius:14px}
+.sidebar-tools-button.active{background:var(--acc);color:var(--accink)}
+.sidebar-bottom{border-top-color:var(--hair)}
+.sidebar-cloud-button,.sidebar-theme-button{background:transparent}
+.sidebar-theme-track{width:51px;height:31px;padding:2px;background:color-mix(in srgb,var(--mut) 35%,transparent);transition:background .3s var(--ease)}
+.sidebar-theme-track>span{width:27px;height:27px;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .3s var(--ease)}
+.sidebar-theme-button.is-dark .sidebar-theme-track>span{transform:translateX(20px)}
+
+/* ---------- Tools home, add sheet, empty states ---------- */
+.tools-card{border-radius:var(--r-xl);background:var(--card);box-shadow:var(--shadow-1);transition:translate .3s var(--ease),box-shadow .3s var(--ease),scale .2s var(--ease)}
+@media(hover:hover){.tools-card:hover{translate:0 -3px;box-shadow:var(--shadow-2);filter:none}}
+.tools-card svg{stroke:var(--acc)}
+#addOverlay .add-card{background:var(--card);border:0;border-radius:var(--r-xl);box-shadow:var(--shadow-1);font-weight:700;letter-spacing:-.022em}
+#addOverlay .add-card:hover{background:var(--card);border:0;translate:0 -3px;box-shadow:var(--shadow-2)}
+#addOverlay .add-card svg{background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc);box-shadow:none;border-radius:22px}
+.add-modal-title{font-weight:700;letter-spacing:-.035em}
+.group-empty-state{border:1px solid var(--hair);background:var(--card);border-radius:var(--r-xl)}
+.group-empty-icon{background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc);border-radius:22px}
+.group-empty-state h2{letter-spacing:-.03em;font-weight:700}
+.group-add-song-row button{border-radius:980px}
+
+/* ---------- Tuner ---------- */
+.tn-card{border-radius:var(--r-xl)}
+.tn-note{font-family:var(--font);font-weight:600;letter-spacing:-.045em}
+.tn-unit{letter-spacing:.14em;font-weight:600}
+.tn-start{border-radius:980px;box-shadow:0 8px 24px color-mix(in srgb,var(--acc) 35%,transparent)}
+.tn-start.stop{background:var(--danger);border-color:transparent;box-shadow:0 8px 24px color-mix(in srgb,var(--danger) 35%,transparent)}
+.tn-field select,.tn-box{border-radius:var(--r-md);background:var(--fill);border-color:transparent}
+.tn-meter{background:var(--fill);border-color:transparent}
+.tuner-display,.tuner-card{border-radius:var(--r-lg)}
+
+/* ---------- Practice playback bar ---------- */
+.pb-bar{background:color-mix(in srgb,var(--bar) 82%,transparent);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);border-top-color:var(--hair)}
+.pb-play{box-shadow:0 8px 22px color-mix(in srgb,var(--acc) 40%,transparent)}
+.pb-eq{background:var(--fill);border-color:transparent}
+.pb-tempo b{font-weight:700;letter-spacing:-.03em}
+#xposeFab{box-shadow:0 2px 10px rgba(0,0,0,.16)}
+
+/* ---------- Dark mode: sheets sit one step above the black page ---------- */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .modal,:root:not([data-theme="light"]) .practice-card,:root:not([data-theme="light"]) .pb-sheet .pb-card{--bg:#1c1c1e;--card:#2c2c2e;--bar:#3a3a3c;--fill:rgba(120,120,128,.36)}}
+:root[data-theme="dark"] .modal,:root[data-theme="dark"] .practice-card,:root[data-theme="dark"] .pb-sheet .pb-card{--bg:#1c1c1e;--card:#2c2c2e;--bar:#3a3a3c;--fill:rgba(120,120,128,.36)}
+
+/* ---------- Editor tabs ---------- */
+.chart-editor-tabs strong{letter-spacing:-.02em}
+
+@media(prefers-reduced-motion:reduce){
+  button,input,select,textarea,.song,.tools-card,.sidebar-theme-track,.sidebar-theme-track>span{transition:none!important}
+  button:active,.song:active{scale:1}
+  .tools-card:hover,#addOverlay .add-card:hover{translate:none}
+}
+</style>
+<style>
+.gtag{margin-left:auto;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em;background:var(--fill);color:var(--acc);flex:none}
+#gb.sidebar-group-list>button{gap:10px}
+#gb.sidebar-group-list>button.p .gtag{background:rgba(255,255,255,.22);color:var(--accink)}
+.group-live-box{border-color:var(--acc)}
 </style>
 </head>
 <body>
@@ -1455,9 +1636,9 @@ function load(){
   try{var s=localStorage.getItem(LS);if(s)songs=JSON.parse(s)}catch(e){}
   try{personalGroups=JSON.parse(localStorage.getItem(LS+":personalGroups")||"[]");if(!Array.isArray(personalGroups))personalGroups=[]}catch(e){personalGroups=[]}
   // Migrate non-Sunday groups out of the cloud-synced song collection into device-local storage.
-  var legacyGroups=songs.filter(function(x){return x.g&&!x.del&&String(x.title||"").toLowerCase()!=="sunday"});
+  var legacyGroups=songs.filter(function(x){return x.g&&!x.del&&!x.live&&String(x.title||"").toLowerCase()!=="sunday"});
   legacyGroups.forEach(function(x){if(!personalGroups.some(function(p){return p.id===x.id}))personalGroups.push({id:x.id,g:1,localGroup:1,title:x.title||"Untitled",members:Array.isArray(x.members)?x.members:[]})});
-  songs=songs.filter(function(x){return !(x.g&&!x.del&&String(x.title||"").toLowerCase()!=="sunday")});
+  songs=songs.filter(function(x){return !(x.g&&!x.del&&!x.live&&String(x.title||"").toLowerCase()!=="sunday")});
   try{localStorage.setItem(LS+":personalGroups",JSON.stringify(personalGroups))}catch(e){}
   try{sent=JSON.parse(localStorage.getItem(LS+":sent")||"{}")}catch(e){}
   try{var z=parseFloat(localStorage.getItem(LS+":zoom"));if(z>=0.5&&z<=2.5){zoom=z;defaultZoom=z}}catch(e){}
@@ -1467,7 +1648,7 @@ function load(){
 }
 function sig(s){
   if(s.del)return JSON.stringify([s.id,"x"]);
-  if(s.g){var ga=[s.id,s.title,s.members||[],1];if(s.o!=null)ga.push("o"+s.o);return JSON.stringify(ga)}
+  if(s.g){var ga=[s.id,s.title,s.members||[],1];if(s.live)ga.push("live");if(s.o!=null)ga.push("o"+s.o);return JSON.stringify(ga)}
   var a=[s.id,s.title,s.artist,s.key,s.chart,s.pl||4];
   // Keep the legacy signature unchanged for existing Chord-mode songs, so this upgrade does not mark every song as newly edited.
   if(s.viewMode&&s.viewMode!=="chord")a.push("vm"+s.viewMode);
@@ -1511,11 +1692,11 @@ async function syncNow(){
  if(syncBusy){syncAgain=true;return} syncBusy=true;status("☁ Syncing with Firebase…");var ids=[];
  try{
   var rm=await sbList(),rmap={},want=[];rm.forEach(function(r){rmap[r.id]=r.u||0});
-  rm.forEach(function(r){var d=r.data;if(!d||!d.id||(d.g&&String(d.title||"").toLowerCase()!=="sunday"))return;var l=songs.find(function(x){return x.id===d.id});if(!l||(r.u||0)>(l.u||0)){d.u=r.u;var j=songs.findIndex(function(x){return x.id===d.id});if(j>=0)songs[j]=d;else songs.push(d);sent[d.id]=sig(d);ids.push(d.id)}});
+  rm.forEach(function(r){var d=r.data;if(!d||!d.id||!syncable(d))return;var l=songs.find(function(x){return x.id===d.id});if(!l||(r.u||0)>(l.u||0)){d.u=r.u;var j=songs.findIndex(function(x){return x.id===d.id});if(j>=0)songs[j]=d;else songs.push(d);sent[d.id]=sig(d);ids.push(d.id)}});
   if(isAdmin()){
    var batch=FBDB.batch(),count=0;
-   songs.forEach(function(l){if(l.g&&String(l.title||"").toLowerCase()!=="sunday")return;if(!(l.id in rmap)||(l.u||0)>(rmap[l.id]||0)){var data=JSON.parse(JSON.stringify(l));data.u=l.u||Date.now();batch.set(FBDB.collection("songs").doc(String(l.id)),data);count++;if(count>=400){/* batch committed below in chunks */}}});
-   if(count){var pending=[];songs.forEach(function(l){if(l.g&&String(l.title||"").toLowerCase()!=="sunday")return;if(!(l.id in rmap)||(l.u||0)>(rmap[l.id]||0))pending.push(l)});for(var i=0;i<pending.length;i+=400){var b=FBDB.batch();pending.slice(i,i+400).forEach(function(l){var data=JSON.parse(JSON.stringify(l));data.u=l.u||Date.now();b.set(FBDB.collection("songs").doc(String(l.id)),data)});await b.commit()}}
+   songs.forEach(function(l){if(!syncable(l))return;if(!(l.id in rmap)||(l.u||0)>(rmap[l.id]||0)){var data=JSON.parse(JSON.stringify(l));data.u=l.u||Date.now();batch.set(FBDB.collection("songs").doc(String(l.id)),data);count++;if(count>=400){/* batch committed below in chunks */}}});
+   if(count){var pending=[];songs.forEach(function(l){if(!syncable(l))return;if(!(l.id in rmap)||(l.u||0)>(rmap[l.id]||0))pending.push(l)});for(var i=0;i<pending.length;i+=400){var b=FBDB.batch();pending.slice(i,i+400).forEach(function(l){var data=JSON.parse(JSON.stringify(l));data.u=l.u||Date.now();b.set(FBDB.collection("songs").doc(String(l.id)),data)});await b.commit()}}
   }
   songs.forEach(function(x){sent[x.id]=sig(x)});store();status("☁ Synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+(isAdmin()?"":" · view-only account"));if(ids.length)afterRemote(ids);
  }catch(e){store();var m=String(e&&e.message||e);status(/permission|insufficient/i.test(m)?"Firebase denied access. Check the published Firestore rules and approved UID.":"Firebase sync problem: "+m.slice(0,180));}
@@ -1524,7 +1705,7 @@ async function syncNow(){
 function syncErr(e){return "Firebase sync problem: "+String(e&&e.message||e).slice(0,200)}
 /* ---------- Automatic cloud sync (push on save + live updates from other devices) ---------- */
 var pushBusy=false,pushAgain=false,liveUnsub=null,liveFirst=true;
-function syncable(l){return !(l.g&&String(l.title||"").toLowerCase()!=="sunday")}
+function syncable(l){return !l.g||(!l.localGroup&&(!!l.live||String(l.title||"").toLowerCase()==="sunday"))}
 async function pushSongs(list){
   for(var i=0;i<list.length;i+=400){
     var b=FBDB.batch();
@@ -1884,13 +2065,17 @@ function realSongs(){return songs.filter(function(s){return !s.g&&!s.del})}
 function isSundayG(x){return String((x&&x.title)||"").trim().toLowerCase()==="sunday"}
 function sundayKeeper(){var keep=null;songs.forEach(function(x){if(x.g&&!x.del&&!x.localGroup&&isSundayG(x)&&(!keep||(x.members||[]).length>(keep.members||[]).length))keep=x});return keep}
 function groups(){
-  // Sunday is the only shared group, and only ONE Sunday is ever shown.
-  var keep=sundayKeeper(),list=keep?[keep]:[],haveSunday=!!keep;
+  // Shared groups: Sunday (always live) plus any group the admin has published ("live").
+  // Personal groups are device-local drafts. The admin sees a published group via its local draft, not twice.
+  var keep=sundayKeeper(),list=keep?[keep]:[],haveSunday=!!keep,linked={};
+  personalGroups.forEach(function(p){if(p.liveId)linked[p.liveId]=1});
+  songs.forEach(function(x){if(x.g&&x.live&&!x.del&&!x.localGroup&&!isSundayG(x)){if(isAdmin()&&linked[x.id])return;list.push(x)}});
   personalGroups.forEach(function(p){
     if(!p.g||p.del)return;
     if(isSundayG(p)){if(haveSunday)return;haveSunday=true}
     list.push(p)});
-  return list.sort(function(a,b){if(isSundayG(a))return -1;if(isSundayG(b))return 1;if(a.o!=null&&b.o!=null)return a.o-b.o;return (a.title||"").localeCompare(b.title||"")});
+  function rank(x){return isSundayG(x)?0:(isLiveG(x)?1:2)}
+  return list.sort(function(a,b){var ra=rank(a),rb=rank(b);if(ra!==rb)return ra-rb;if(a.o!=null&&b.o!=null)return a.o-b.o;return (a.title||"").localeCompare(b.title||"")});
 }
 // One-time/idempotent cleanup: merge duplicate Sunday groups into one and remove the extras.
 function cleanDupSunday(){
@@ -1914,15 +2099,53 @@ function gById(id){return groups().find(function(s){return s.id===id})}
 function isPersonalGroup(g){return !!(g&&g.localGroup)}
 function savePersonalGroups(){try{localStorage.setItem(LS+":personalGroups",JSON.stringify(personalGroups))}catch(e){}}
 function isFixedGroup(g){return !g||!isPersonalGroup(g)}
+function isLiveG(g){return !!(g&&g.live&&!g.localGroup)}
+function canEditGroup(g){return !!g&&(isPersonalGroup(g)||(isAdmin()&&!isLiveG(g)))}
+function liveDoc(id){return id?(songs.find(function(x){return x.id===id&&x.g&&x.live&&!x.del&&!x.localGroup})||null):null}
+function pubMembers(g){var have={};realSongs().forEach(function(x){have[x.id]=1});return (g.members||[]).filter(function(id){return have[id]})}
+function liveUpToDate(g,lv){return !!lv&&String(lv.title||"")===String(g.title||"")&&JSON.stringify(lv.members||[])===JSON.stringify(pubMembers(g))}
+function publishGroup(g){
+  if(!isAdmin()||!isPersonalGroup(g))return;
+  if(isSundayG(g)){toast("Sunday is a reserved group name. Rename this group first.",3200);return}
+  var mem=pubMembers(g),first=!liveDoc(g.liveId);
+  if(!window.confirm((first?'Publish "':'Update live group "')+(g.title||"Untitled")+'" for all users? ('+mem.length+' song'+(mem.length===1?'':'s')+')'))return;
+  var id=g.liveId||("live-"+g.id),i=songs.findIndex(function(x){return x.id===id}),doc={id:id,g:1,live:1,title:g.title||"Untitled",members:mem,u:Date.now()};
+  if(i>=0)songs[i]=doc;else songs.push(doc);
+  g.liveId=id;savePersonalGroups();save();schedule(200);draw();
+  toast(first?"Group is now live for everyone":"Live group updated",2500);
+}
+function takeGroupOffline(g){
+  var id=isLiveG(g)?g.id:g.liveId;if(!isAdmin()||!id)return;
+  if(!window.confirm('Take "'+(g.title||"Untitled")+'" offline? Users will no longer see it.'))return;
+  killItem(id);
+  if(isPersonalGroup(g)){delete g.liveId;savePersonalGroups()}else grp=null;
+  save();schedule(200);draw();toast("Group taken offline",2500);
+}
+function copyLiveToDraft(lv){
+  if(!isAdmin()||!isLiveG(lv))return;
+  var ng={id:"local-group-"+uid(),g:1,localGroup:1,title:lv.title||"Untitled",members:(lv.members||[]).slice(),liveId:lv.id};
+  personalGroups.push(ng);grp=ng.id;managing=false;gedit=false;savePersonalGroups();draw();
+  toast("Copy created. Edit it, then press Update Live Group.",3500);
+}
+function publishBoxHTML(g){
+  var lv=liveDoc(g.liveId),same=liveUpToDate(g,lv);
+  var head=lv?'\u25CF Live for everyone':'Only on this device';
+  var note=lv?(same?'Everyone sees this group exactly as it is now.':'You have changes that other people can\'t see yet.'):'Songs you add or remove stay private until you publish.';
+  return '<div class="box group-live-box"><b>'+head+'</b><div class="mut" style="margin:4px 0 0">'+note+'</div><div class="row" style="margin:10px 0 0">'+(lv&&same?'<button type="button" disabled>Up to date</button>':'<button type="button" class="p" id="gpub">'+(lv?'Update Live Group':'Publish to Everyone')+'</button>')+(lv?'<button type="button" class="d" id="gunpub">Take Offline</button>':'')+'</div></div>';
+}
+function liveOnlyBoxHTML(g){
+  return '<div class="box group-live-box"><b>\u25CF Live for everyone</b><div class="mut" style="margin:4px 0 0">This group is published. To change it, make a copy you can edit, then press Update Live Group.</div><div class="row" style="margin:10px 0 0"><button type="button" class="p" id="gcopy">Edit a Copy</button><button type="button" class="d" id="gunpub">Take Offline</button></div></div>';
+}
+
 function inG(g,sid){return (g.members||[]).indexOf(sid)>=0}
-function toggleG(g,sid){if(!g)return;if(isPersonalGroup(g)){g.members=g.members||[];var pi=g.members.indexOf(sid);if(pi>=0)g.members.splice(pi,1);else g.members.push(sid);savePersonalGroups();return}if(!isAdmin())return;g.members=g.members||[];var i=g.members.indexOf(sid);if(i>=0)g.members.splice(i,1);else g.members.push(sid);save()}
+function toggleG(g,sid){if(!g)return;if(isPersonalGroup(g)){g.members=g.members||[];var pi=g.members.indexOf(sid);if(pi>=0)g.members.splice(pi,1);else g.members.push(sid);savePersonalGroups();return}if(!canEditGroup(g))return;g.members=g.members||[];var i=g.members.indexOf(sid);if(i>=0)g.members.splice(i,1);else g.members.push(sid);save()}
 /* ---------- theme ---------- */
 var SUN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 var MOON='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
 function curTheme(){return document.documentElement.getAttribute("data-theme")||(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}
 function applyTheme(t){
   document.documentElement.setAttribute("data-theme",t);
-  var c=t==="dark"?"#161615":"#f7f5f0";
+  var c=t==="dark"?"#000000":"#f5f5f7";
   document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)});
 }
 function themeBtn(){
@@ -1982,10 +2205,10 @@ function placeOrder(all,neu,m){
   byId[m].o=v;
   if(prev!=null&&next!=null&&Math.abs(next-prev)<1e-6)neu.forEach(function(id,ix){byId[id].o=(ix+1)*1000});
 }
-function applyGroupOrder(order,m){var g=gById(m);if(!g||(!isPersonalGroup(g)&&!isAdmin()))return;placeOrder(groups(),order,m);if(isPersonalGroup(g))savePersonalGroups();else save();renderChips()}
+function applyGroupOrder(order,m){var g=gById(m);if(!canEditGroup(g)){renderChips();return}placeOrder(groups(),order,m);if(isPersonalGroup(g))savePersonalGroups();else save();renderChips()}
 function applyOrder(ids,m){
   var g=grp?gById(grp):null;
-  if(g){if(!isPersonalGroup(g)&&!isAdmin())return;
+  if(g){if(!canEditGroup(g))return;
     var mem=(g.members||[]).slice(),slots=[];
     mem.forEach(function(id,ix){if(ids.indexOf(id)>=0)slots.push(ix)});
     slots.forEach(function(ix,n){mem[ix]=ids[n]});
@@ -2002,13 +2225,13 @@ function applyOrder(ids,m){
 var DR=null,CD=null,press=null,dragEnded=0;
 function cancelPress(){if(press){clearTimeout(press.t);press=null}}
 function startPress(e,el){
-  if(!isAdmin()||managing||(e.button&&e.button>0))return;
+  if(!canEditGroup(grp?gById(grp):null)||managing||(e.button&&e.button>0))return;
   cancelPress();
   var y0=e.clientY;
   press={x:e.clientX,y:e.clientY,t:setTimeout(function(){beginDrag(el,e.pointerId,y0)},380)};
 }
 function beginDrag(el,pid,y0){
-  if(!isAdmin()){press=null;return}
+  if(!canEditGroup(grp?gById(grp):null)){press=null;return}
   press=null;
   var list=document.getElementById("sl");if(!list)return;
   var rows=[].slice.call(list.querySelectorAll(".song")),i=rows.indexOf(el);
@@ -2071,13 +2294,12 @@ function chipTargets(box,skip){
   return [].slice.call(box.querySelectorAll("[data-g]")).filter(function(c){var v=c.dataset.g;return v&&v!=="+"&&c!==skip});
 }
 function startChipPress(e,b){
-  if(!isAdmin()||gform||(e.button&&e.button>0))return;
+  if(gform||(e.button&&e.button>0))return;
   cancelPress();
   var x0=e.clientX,y0=e.clientY;
   press={x:x0,y:y0,t:setTimeout(function(){beginChipDrag(b,x0,y0)},380)};
 }
 function beginChipDrag(el,x0,y0){
-  if(!isAdmin()){press=null;return}
   press=null;
   var box=document.getElementById("gb");if(!box)return;
   if(chipTargets(box,null).length<2)return;
@@ -2116,7 +2338,7 @@ function endChipDrag(){
 }
 function chipsHTML(){
   var h='<button type="button" data-g=""'+(!toolsPage&&!grp?' class="p"':'')+'>ALL</button>';
-  groups().forEach(function(x){h+='<button type="button" data-g="'+x.id+'"'+(!toolsPage&&grp===x.id?' class="p"':'')+'>'+esc(x.title||"Untitled")+'</button>'});
+  groups().forEach(function(x){var tag=isLiveG(x)?(isAdmin()?"Live":"Shared"):((isAdmin()&&isPersonalGroup(x)&&liveDoc(x.liveId))?"Live":"");h+='<button type="button" data-g="'+x.id+'"'+(!toolsPage&&grp===x.id?' class="p"':'')+'><span>'+esc(x.title||"Untitled")+'</span>'+(tag?'<span class="gtag">'+tag+'</span>':'')+'</button>'});
   {
     if(gform==="new"){
       h+='<div class="sidebar-new-group-form" role="group" aria-label="Create a new group"><strong>New Group</strong><input id="gn" placeholder="Group name, e.g. Sunday set" maxlength="60" aria-label="New group name"><div class="row"><button type="button" class="p" id="gok">Save</button><button type="button" id="gno">Cancel</button></div></div>';
@@ -2128,13 +2350,14 @@ function chipsHTML(){
 }
 function gboxHTML(){
   var g=grp?gById(grp):null;
-  if(g&&!isPersonalGroup(g)&&!isAdmin())return "";
   if(gform==="new")return ""; // New-group entry lives in the sidebar.
   if(!g)return "";
+  if(isLiveG(g))return isAdmin()?liveOnlyBoxHTML(g):"";
+  if(!canEditGroup(g))return "";
   if(gform==="rename")return '<div class="box"><b>Rename group</b><input id="gn" value="'+esc(g.title)+'" maxlength="60"><div class="row"><button class="p" id="gok">Save</button><button id="gno">Cancel</button></div></div>';
   if(managing)return '<div class="box"><div class="mut" style="margin:2px 0 10px">Tap songs to add or remove them from this group.</div><div class="row" style="margin:0"><button id="gadd" class="p">Done adding songs</button></div></div>';
   if(gedit)return '<div class="box"><div class="row" style="margin:0"><button id="gren">Rename</button><button id="gdel" class="d">Delete group</button><button id="gedone">Done</button></div></div>';
-  return "";
+  return (isAdmin()&&isPersonalGroup(g))?publishBoxHTML(g):"";
 }
 function songCategory(s){return ["Lyrics","Lyrics with chords","Chords"].indexOf(s.category)>=0?s.category:"Lyrics with chords";}
 function categoryBadgeHTML(s){var c=songCategory(s),cls=c==="Lyrics"?"cat-lyrics":c==="Chords"?"cat-chords":"cat-lyrics-chords";return '<span class="category-badge '+cls+'">'+esc(c)+'</span>';}
@@ -2144,22 +2367,22 @@ function listHTML(){
   var list=base.filter(function(s){return !q||((s.title||"")+" "+(s.artist||"")+" "+normKey(displayKey(s))+" "+(s.key||"")).toLowerCase().indexOf(q)>=0});
   if(!list.length){
     if(q)return '<div class="mut" style="margin:14px 0">No songs match your search.</div>';
-    if(g)return '<section class="group-empty-state"><div class="group-empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h2>No songs in this group yet</h2><p>Add a new song or upload a music sheet.</p>'+(isAdmin()?'<button type="button" class="p" id="groupAddSong">＋ &nbsp; Add Song</button>':'')+'</section>';
+    if(g)return '<section class="group-empty-state"><div class="group-empty-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><h2>No songs in this group yet</h2><p>'+(canEditGroup(g)?'Tap Add Songs to pick songs from your library.':'The admin hasn\'t added any songs here yet.')+'</p>'+(canEditGroup(g)?'<button type="button" class="p" id="groupAddSong">＋ &nbsp; Add Songs</button>':'')+'</section>';
     return '<div class="mut" style="margin:14px 0">No songs yet.</div>';
   }
-  var rmOn=!!(g&&(isAdmin()||isPersonalGroup(g))&&gedit&&!managing);
-  var hint=(isAdmin()&&g&&!managing&&list.length>1)?'<div class="mut" style="margin:0 0 8px;font-size:13px">Tip: hold a song, then drag it up or down to reorder this group.</div>':'';
+  var rmOn=!!(canEditGroup(g)&&gedit&&!managing);
+  var hint=(canEditGroup(g)&&!managing&&list.length>1)?'<div class="mut" style="margin:0 0 8px;font-size:13px">Tip: hold a song, then drag it up or down to reorder this group.</div>':'';
   if(rmOn)hint+='<div class="mut" style="margin:0 0 8px;font-size:13px">Tap the minus icon to take a song out of this group. It stays in All songs.</div>';
   var songsHTML=list.map(function(s){
-    var chk=isAdmin()&&g&&managing?'<input type="checkbox" style="width:auto;margin-right:12px;pointer-events:none" tabindex="-1"'+(inG(g,s.id)?' checked':'')+'>':'';
+    var chk=canEditGroup(g)&&managing?'<input type="checkbox" style="width:auto;margin-right:12px;pointer-events:none" tabindex="-1"'+(inG(g,s.id)?' checked':'')+'>':'';
     var rm=rmOn?'<button class="d rm" data-rm="'+s.id+'" aria-label="Remove from group" style="padding:6px;line-height:0;border-radius:50%;margin-left:10px;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></button>':'';
     return '<div class="song" data-id="'+s.id+'"><div style="display:flex;align-items:center">'+chk+'<div><b>'+esc(s.title||"Untitled")+'</b><br><small>'+esc(s.artist||"\u2014")+'</small></div></div><div style="display:flex;align-items:center;gap:10px">'+categoryBadgeHTML(s)+rm+'</div></div>';
   }).join("");
-  var addSongRow=(isAdmin()&&g&&!managing&&!gedit)?'<div class="group-add-song-row"><button type="button" id="groupAddSong">＋ &nbsp; Add Song</button></div>':'';
+  var addSongRow=(canEditGroup(g)&&!managing&&!gedit)?'<div class="group-add-song-row"><button type="button" id="groupAddSong">＋ &nbsp; Add Songs</button></div>':'';
   return hint+songsHTML+addSongRow;
 }
 function groupSongPickerHTML(){
-  var g=grp?gById(grp):null;if(!g||!isAdmin())return "";
+  var g=grp?gById(grp):null;if(!canEditGroup(g))return "";
   var all=realSongs().filter(function(s){return !s.del;});
   var query=String(groupPickerQuery||"").trim().toLocaleLowerCase();
   all=all.filter(function(s){return !query||[s.title,s.artist,normKey(s.key)].join(" ").toLocaleLowerCase().indexOf(query)>=0;});
@@ -2184,14 +2407,14 @@ function bindChips(){
       if(v==="+"){}
       if(v==="+"){gform="new";managing=false;gedit=false;sidebarOpen=true;draw();return}
       stopTuner(false);stopMetronome(false);toolsPage=false;tunerOpen=false;metronomeOpen=false;chordToolStage="home";grp=v||null;managing=false;gedit=false;gform=null;sidebarOpen=false;draw()};
-    if((isAdmin()||isPersonalGroup(gById(b.dataset.g)))&&b.dataset.g&&b.dataset.g!=="+")b.onpointerdown=function(e){startChipPress(e,b)};
+    if(b.dataset.g&&b.dataset.g!=="+"&&canEditGroup(gById(b.dataset.g)))b.onpointerdown=function(e){startChipPress(e,b)};
   });
   if($("gedit")&&isAdmin())$("gedit").onclick=function(){gedit=true;sidebarOpen=false;draw()};
   if($("gedone"))$("gedone").onclick=function(){gedit=false;draw()};
   if($("gadd"))$("gadd").onclick=function(){managing=!managing;if(!managing)gedit=false;draw()};
 }
 function removeFromGroup(id){
-  var g=grp?gById(grp):null;if(!g||(!isPersonalGroup(g)&&!isAdmin()))return;
+  var g=grp?gById(grp):null;if(!canEditGroup(g))return;
   var i=(g.members||[]).indexOf(id);if(i<0)return;
   g.members.splice(i,1);save();renderList();renderChips();
   toast("Removed from "+(g.title||"group"));
@@ -2203,7 +2426,7 @@ function bindList(){
       if(Date.now()-dragEnded<400)return;
       if(g&&managing){toggleG(g,el.dataset.id);renderList();renderChips();return}
       cur=el.dataset.id;view="song";mode="view";draw()};
-    if(g&&(isAdmin()||isPersonalGroup(g)))el.onpointerdown=function(e){startPress(e,el)};
+    if(canEditGroup(g))el.onpointerdown=function(e){startPress(e,el)};
   });
   document.querySelectorAll("#sl .rm").forEach(function(b){
     b.onpointerdown=function(e){e.stopPropagation()};
@@ -2227,6 +2450,9 @@ function bindBox(){
     return;
   }
   if(!g)return;
+  if($("gpub"))$("gpub").onclick=function(){publishGroup(g)};
+  if($("gunpub"))$("gunpub").onclick=function(){takeGroupOffline(g)};
+  if($("gcopy"))$("gcopy").onclick=function(){copyLiveToDraft(g)};
   if($("gedit")&&(isAdmin()||isPersonalGroup(g)))$("gedit").onclick=function(){gedit=true;sidebarOpen=false;draw()};
   if($("gedone"))$("gedone").onclick=function(){gedit=false;draw()};
   if($("gadd"))$("gadd").onclick=function(){managing=!managing;if(!managing)gedit=false;draw()};
@@ -2246,10 +2472,10 @@ function bindBox(){
         armTimer=setTimeout(function(){armed=false;btn.textContent="Delete group"},4000);
         return}
       clearTimeout(armTimer);
-      var name=g.title||"Group";
+      var name=g.title||"Group",hadLive=!!(isPersonalGroup(g)&&liveDoc(g.liveId));
       if(isPersonalGroup(g)){personalGroups=personalGroups.filter(function(x){return x.id!==g.id});savePersonalGroups()}
       else{killItem(g.id)}
-      grp=null;managing=false;gedit=false;gform=null;save();draw();toast("Deleted "+name)};
+      grp=null;managing=false;gedit=false;gform=null;save();draw();toast("Deleted "+name+(hadLive?" (the live copy is still online)":""),hadLive?3500:undefined)};
   }
 }
 function bindTop(){
@@ -2258,7 +2484,7 @@ function bindTop(){
   var sort=document.getElementById("allSort");
   if(sort)sort.onchange=function(){allSort=this.value==="recent"?"recent":"az";try{localStorage.setItem(LS+":allSort",allSort)}catch(e){}renderList()};
   var editGroupTop=document.getElementById("editGroupTop");
-  if(editGroupTop)editGroupTop.onclick=function(){if(!grp||!gById(grp)||(!isPersonalGroup(gById(grp))&&!isAdmin()))return;gedit=true;managing=false;gform=null;sidebarOpen=false;draw()};
+  if(editGroupTop)editGroupTop.onclick=function(){if(!canEditGroup(grp?gById(grp):null))return;gedit=true;managing=false;gform=null;sidebarOpen=false;draw()};
   bindChips();bindList();bindBox();
 }
 function songGroupsHTML(s){
@@ -3120,7 +3346,7 @@ function drawMain(){
   // Admin-only edit states must not persist if the session changes to Guest or signed-out.
   try{if(cleanDupSunday())save()}catch(e){}
   var _ag=grp?gById(grp):null;
-  if(!isAdmin()&&!(_ag&&isPersonalGroup(_ag))){gedit=false;managing=false;if(gform!=="new")gform=null;}
+  if(!canEditGroup(_ag)){gedit=false;managing=false;if(gform!=="new")gform=null;}
   if(grp&&!gById(grp)){grp=null;managing=false}
   if(view!=="list"){cloudOpen=false;sidebarOpen=false}
   document.body.style.overflow=(cloudOpen||addOpen||sidebarOpen||groupSongPickerOpen)?"hidden":"";
@@ -3136,23 +3362,23 @@ function drawMain(){
   if(view==="list"){
     var activeGroupForHeader=grp?gById(grp):null;
     var activeGroupTitle=activeGroupForHeader?(activeGroupForHeader.title||"Untitled"):"All";
-    var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle" aria-live="polite">'+esc(activeGroupTitle)+'</div></div>'+((grp&&gById(grp)&&(isAdmin()||isPersonalGroup(gById(grp)))&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top">Edit Group</button>':'')+fsBtn()+(isAdmin()?'<button class="settings-icon add-icon" id="add" aria-label="Add new song" title="Add new song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>':'')+'</div>';
+    var h='<div class="top"><button type="button" id="navOpen" aria-label="Open navigation sidebar" title="Groups and settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle" aria-live="polite">'+esc(activeGroupTitle)+'</div></div>'+((canEditGroup(grp?gById(grp):null)&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top">Edit Group</button>':'')+fsBtn()+(isAdmin()?'<button class="settings-icon add-icon" id="add" aria-label="Add new song" title="Add new song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>':'')+'</div>';
     h+='<div class="mut" id="sync" style="margin:-4px 0 10px">'+esc(syncMsg)+'</div>';
     h+='<input id="q" type="search" placeholder="Search songs by title, artist or key" value="'+esc(qry)+'" aria-label="Search songs" style="margin-bottom:10px">';
     h+=allSortBarHTML()+gboxHTML()+'<div id="sl">'+listHTML()+'</div>';
     if(cloudOpen)h+=modalHTML();
     if(addOpen&&isAdmin())h+=addModalHTML();
-    if(groupSongPickerOpen&&isAdmin())h+=groupSongPickerHTML();
+    if(groupSongPickerOpen&&canEditGroup(grp?gById(grp):null))h+=groupSongPickerHTML();
     h+=sidebarHTML();
     a.innerHTML=h;
     bindTop();bindFS();bindTheme();bindCloud();bindModal();bindMusicSheet();bindAddModal();bindSidebar();
-     var groupAddSongBtn=document.getElementById("groupAddSong");if(groupAddSongBtn)groupAddSongBtn.onclick=function(){if(!isAdmin()||!grp)return;groupSongPickerQuery="";groupPickerTab="available";groupSongPickerOpen=true;draw()};
+     var groupAddSongBtn=document.getElementById("groupAddSong");if(groupAddSongBtn)groupAddSongBtn.onclick=function(){if(!canEditGroup(grp?gById(grp):null))return;groupPickerQuery="";groupPickerTab="available";groupSongPickerOpen=true;draw()};
     var groupPickerClose=document.getElementById("groupPickerClose");if(groupPickerClose)groupPickerClose.onclick=function(){groupSongPickerOpen=false;draw()};
     var groupPickerOverlay=document.getElementById("groupSongPicker");if(groupPickerOverlay)groupPickerOverlay.onclick=function(e){if(e.target===groupPickerOverlay){groupSongPickerOpen=false;draw()}};
     var groupPickerSearch=document.getElementById("groupPickerSearch");if(groupPickerSearch)groupPickerSearch.oninput=function(){var pos=this.selectionStart;groupPickerQuery=this.value;draw();var next=document.getElementById("groupPickerSearch");if(next){next.focus();try{next.setSelectionRange(pos,pos)}catch(e){}}};
     var groupPickerSortEl=document.getElementById("groupPickerSort");if(groupPickerSortEl)groupPickerSortEl.onchange=function(){groupPickerSort=this.value;draw()};
     document.querySelectorAll("[data-group-picker-tab]").forEach(function(b){b.onclick=function(){groupPickerTab=b.dataset.groupPickerTab;draw()}});
-    document.querySelectorAll("[data-group-toggle-existing]").forEach(function(b){b.onclick=function(){var g=grp?gById(grp):null;if(!g||(!isAdmin()&&!isPersonalGroup(g)))return;var wasAdded=inG(g,b.dataset.groupToggleExisting);toggleG(g,b.dataset.groupToggleExisting);save();draw();toast(wasAdded?"Song removed from "+(g.title||"group"):"Song added to "+(g.title||"group"))}});
+    document.querySelectorAll("[data-group-toggle-existing]").forEach(function(b){b.onclick=function(){var g=grp?gById(grp):null;if(!canEditGroup(g))return;var wasAdded=inG(g,b.dataset.groupToggleExisting);toggleG(g,b.dataset.groupToggleExisting);save();draw();toast(wasAdded?"Song removed from "+(g.title||"group"):"Song added to "+(g.title||"group"))}});
     var addBtn=document.getElementById("add");if(addBtn)addBtn.onclick=function(){if(!isAdmin())return;sidebarOpen=false;addOpen=true;addView="picker";sheetOpen=false;draw()};
     return;
   }
