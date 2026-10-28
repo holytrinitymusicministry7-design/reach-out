@@ -819,9 +819,9 @@ h1,h2,h3{font-weight:700;letter-spacing:-.022em}
 
 /* ---------- Top bar: sticky, translucent ---------- */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;margin:0 -14px 12px;padding:10px 14px;gap:10px;
-  background:color-mix(in srgb,var(--bg) 78%,transparent);
-  -webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);
-  box-shadow:0 1px 0 var(--line),0 5px 14px rgba(0,0,0,.045)}
+  background:var(--bg);
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  box-shadow:none}
 .top.settings-attached{background:var(--bg);box-shadow:none}
 .top.practice-top,.top.practice-top.settings-attached{background:var(--acc);color:var(--accink);box-shadow:0 1px 0 color-mix(in srgb,var(--accink) 18%,transparent)}
 .top.practice-top{isolation:isolate;overflow:hidden}
@@ -882,6 +882,9 @@ input[type=checkbox],input[type=radio],input[type=range]{padding:0;border:0;back
 
 /* ---------- Cards & surfaces ---------- */
 .song,.box,.sheetpanel,.setting-panel,.tuner-card,.tn-card,.chord-tool-controls,.chord-card,.tools-card,.chart-editor-shell,.bass-chart-card{border-color:var(--hair);box-shadow:var(--shadow-1)}
+/* Song list cards and its search field: flat surfaces with no visible border or shadow. */
+#sl .song{border-color:transparent!important;box-shadow:none!important}
+#q,#q:hover,#q:focus,#q:active{border-color:transparent!important;box-shadow:none!important;outline:none!important}
 .song{border-radius:var(--r-md);padding:14px 16px;transition:background-color .2s var(--ease),scale .2s var(--ease)}
 .song:active{scale:.985}
 @media(hover:hover){.song:hover{background:color-mix(in srgb,var(--card) 94%,var(--ink))}}
@@ -1147,7 +1150,7 @@ button:disabled{opacity:.42;box-shadow:none;cursor:not-allowed}
 /* Align Upload Sheet / Paste from Word dialog headers and close control */
 #addOverlay .mh.add-flow-head{
   display:grid !important;
-  grid-template-columns:44px minmax(0,1fr) 44px !important;
+  grid-template-columns:minmax(0,1fr) 44px !important;
   align-items:center !important;
   column-gap:14px !important;
   min-height:76px;
@@ -1188,7 +1191,7 @@ button:disabled{opacity:.42;box-shadow:none;cursor:not-allowed}
   stroke-width:2.5 !important; stroke-linecap:round !important; stroke-linejoin:round !important;
 }
 @media(max-width:680px){
-  #addOverlay .mh.add-flow-head{grid-template-columns:38px minmax(0,1fr) 38px !important;column-gap:10px !important;min-height:68px;padding:12px 0 !important}
+  #addOverlay .mh.add-flow-head{grid-template-columns:minmax(0,1fr) 38px !important;column-gap:10px !important;min-height:68px;padding:12px 0 !important}
   #addOverlay .add-flow-head .add-flow-back,#addOverlay .add-flow-head #addClose{width:38px !important;height:38px !important;min-width:38px !important;min-height:38px !important}
   #addOverlay .add-flow-heading h2{font-size:20px !important;line-height:1.2 !important}
   #addOverlay .add-flow-heading p{font-size:12px !important;line-height:1.35 !important}
@@ -1678,7 +1681,27 @@ function pbSkip(x,n){
 }
 function pbNextBar(bi,n){
   var bars=pbBars(),el=bars[bi],x;
-  if(el&&el.classList.contains("re")){var g=pbGroup(bi),d=pbTaken[bi]||0;if(g&&d<g.count){var s=pbSecStart(g.name);if(s>=0){pbTaken[bi]=d+1;return pbSkip(s,n)}}}
+  if(el&&el.classList.contains("re")){
+    var g=pbGroup(bi),d=pbTaken[bi]||0,sectionTarget=g?pbSecStart(g.name):-1;
+    /* Section-directed endings keep their existing behavior. */
+    if(g&&sectionTarget>=0){
+      if(d<g.count){pbTaken[bi]=d+1;return pbSkip(sectionTarget,n)}
+      delete pbTaken[bi];
+    }else{
+      /* Plain |: ... :| repeats once, returning to the nearest preceding |:.
+         Stop searching if another repeat ending is crossed, so sequential repeat
+         groups remain independent. */
+      var start=-1;
+      for(var j=bi;j>=0;j--){
+        if(j<bi&&bars[j].classList.contains("re"))break;
+        if(bars[j].classList.contains("rs")){start=j;break;}
+      }
+      if(start>=0){
+        if(d<1){pbTaken[bi]=d+1;return start;}
+        delete pbTaken[bi];
+      }
+    }
+  }
   x=pbSkip(bi+1,n);if(x>=n){x=0;pbTaken={}}return x;
 }
 function pbRun(){
@@ -2864,7 +2887,20 @@ function groupManageHTML(){
   }
   return '<div class="ov" id="groupManageOverlay"><section class="group-manage-modal" role="dialog" aria-modal="true" aria-labelledby="groupManageTitle"><div class="group-manage-head"><span class="group-manage-head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2.5"/></svg></span><div class="group-manage-head-copy"><h2 id="groupManageTitle">Manage group</h2><p>Update the group details, songs, and sharing.</p></div><button type="button" class="group-manage-close" id="groupManageClose" aria-label="Close">×</button></div><div class="group-manage-section"><label class="group-manage-label" for="groupManageName">Group name</label><div class="group-manage-name-row"><input id="groupManageName" value="'+esc(g.title||"")+'" maxlength="60"><button type="button" class="p" id="groupManageSave">Save name</button></div></div><div class="group-manage-section group-manage-songs"><div><b>Songs in this group</b><span>'+count+' song'+(count===1?'':'s')+' · Add new songs or remove existing ones.</span></div><button type="button" id="groupManageSongs">Manage songs</button></div>'+sharing+'<div class="group-manage-section group-manage-danger"><b>Delete this group</b><p>The songs will stay safely in All Songs. Only the group will be removed.</p><button type="button" id="groupManageDelete">Delete group</button></div></section></div>';
 }
-function songCategory(s){return ["Lyrics","Lyrics with chords","Chords"].indexOf(s.category)>=0?s.category:"Lyrics with chords";}
+function songCategory(s){
+  /* Derive the label from the actual saved chart content, not the manually selected category. */
+  var std=String((s&&s.standardText)||"").replace(/\\r\\n?/g,"\\n").trim();
+  var lines=std?std.split("\\n"):[];
+  var hasLyrics=lines.some(function(line){
+    var v=String(line||"").trim();
+    return !!v&&!/^\\[[^\\]]+\\]$/.test(v)&&!isStandardChordLine(v);
+  });
+  var hasChordLines=lines.some(function(line){return isStandardChordLine(line);});
+  var hasChords=!!String((s&&s.chart)||"").trim()||hasChordLines;
+  if(hasLyrics&&hasChords)return "Lyrics with Chords";
+  if(hasLyrics)return "Lyrics";
+  return "Chords";
+}
 function categoryBadgeHTML(s){var c=songCategory(s),cls=c==="Lyrics"?"cat-lyrics":c==="Chords"?"cat-chords":"cat-lyrics-chords";return '<span class="category-badge '+cls+'">'+esc(c)+'</span>';}
 function listHTML(){
   var g=grp?gById(grp):null,q=qry.trim().toLowerCase();
@@ -3026,7 +3062,7 @@ function musicSheetBox(){
     if(sheetRaw)out+='<details><summary>Review AI reading and notes</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto">'+esc(sheetRaw)+'</pre></details>';
   }
   var busy=sheetBusy||sheetAIBusy;
-  return '<div class="import-workspace"><div class="import-panel"><div class="import-grid"><div class="import-field"><label for="sheettitle">Song title <span class="mut">(optional)</span></label><input id="sheettitle" placeholder="e.g. Amazing Grace" value="'+esc(sheetTitle)+'"></div><div class="import-field"><label for="sheetartist">Artist or composer <span class="mut">(optional)</span></label><input id="sheetartist" placeholder="e.g. John Newton" value="'+esc(sheetArtist)+'"></div></div><label class="import-file" for="sheetfile"><input type="file" id="sheetfile" accept="image/png,image/jpeg,image/webp,image/bmp,.pdf,application/pdf" '+(busy?'disabled':'')+'><span class="import-file-content"><span class="import-file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5m0 0L8 9m4-4 4 4M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15"/></svg></span><b>Choose a file to upload</b><small>JPG, PNG, WEBP, BMP or PDF · up to 15 MB</small></span></label><p class="import-filename" id="sheetfilename">'+esc(sheetFile?sheetFile.name:'Up to 8 PDF pages will be processed.')+'</p><div class="import-field"><label for="sheetimportmode">What should we extract?</label><select id="sheetimportmode" '+(busy?'disabled':'')+'><option value="lyrics-only" '+(sheetImportMode==='lyrics-only'?'selected':'')+'>Lyrics only</option><option value="lyrics-chords" '+(sheetImportMode==='lyrics-chords'?'selected':'')+'>Lyrics with chords</option><option value="chords-only" '+(sheetImportMode==='chords-only'?'selected':'')+'>Chords only</option></select></div><p class="import-status" id="sheetstatus">'+esc(sheetStatus||'Choose a file and import format, then extract with AI.')+'</p><div class="import-actions"><button id="sheetcancel" class="secondary-action" '+(busy?'disabled':'')+'>Back to options</button><button id="sheetextract" '+(busy?'disabled':'')+'>Basic OCR</button><button class="p" id="sheetai" '+(busy?'disabled':'')+'>Extract with AI</button></div>'+out+'<p class="import-note">AI extraction uses Gemini. Always review the generated chart before saving.</p></div></div>';
+  return '<div class="import-workspace"><div class="import-panel"><div class="import-grid"><div class="import-field"><label for="sheettitle">Song title <span class="mut">(optional)</span></label><input id="sheettitle" placeholder="e.g. Amazing Grace" value="'+esc(sheetTitle)+'"></div><div class="import-field"><label for="sheetartist">Artist or composer <span class="mut">(optional)</span></label><input id="sheetartist" placeholder="e.g. John Newton" value="'+esc(sheetArtist)+'"></div></div><label class="import-file" for="sheetfile"><input type="file" id="sheetfile" accept="image/png,image/jpeg,image/webp,image/bmp,.pdf,application/pdf" '+(busy?'disabled':'')+'><span class="import-file-content"><span class="import-file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5m0 0L8 9m4-4 4 4M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15"/></svg></span><b>Choose a file to upload</b><small>JPG, PNG, WEBP, BMP or PDF · up to 15 MB</small></span></label><p class="import-filename" id="sheetfilename">'+esc(sheetFile?sheetFile.name:'Up to 8 PDF pages will be processed.')+'</p><div class="import-field"><label for="sheetimportmode">What should we extract?</label><select id="sheetimportmode" '+(busy?'disabled':'')+'><option value="" '+(!sheetImportMode?'selected':'')+' disabled>— Select what to extract —</option><option value="lyrics-only" '+(sheetImportMode==='lyrics-only'?'selected':'')+'>Lyrics only</option><option value="lyrics-chords" '+(sheetImportMode==='lyrics-chords'?'selected':'')+'>Lyrics with chords</option><option value="chords-only" '+(sheetImportMode==='chords-only'?'selected':'')+'>Chords only</option></select></div><p class="import-status" id="sheetstatus">'+esc(sheetStatus||'Choose a file and import format, then extract with AI.')+'</p><div class="import-actions"><button id="sheetcancel" class="secondary-action" '+(busy?'disabled':'')+'>Back to options</button><button id="sheetextract" '+(busy?'disabled':'')+'>Basic OCR</button><button class="p" id="sheetai" '+(busy?'disabled':'')+'>Extract with AI</button></div>'+out+'<p class="import-note">AI extraction uses Gemini. Always review the generated chart before saving.</p></div></div>';
 }
 function setSheetStatus(text){sheetStatus=text;var el=document.getElementById('sheetstatus');if(el)el.textContent=text}
 function loadSheetScript(src,globalName){
@@ -3108,6 +3144,16 @@ async function processMusicSheet(){
   finally{sheetBusy=false;if(worker){try{await worker.terminate()}catch(e){}}draw()}
 }
 async function processMusicSheetAI(){
+  var selectedImportMode=(document.getElementById('sheetimportmode')||{}).value||'';
+  if(!selectedImportMode){
+    sheetImportMode='';
+    setSheetStatus('Please select what should be extracted before starting AI extraction.');
+    var modeSelect=document.getElementById('sheetimportmode');
+    if(modeSelect){modeSelect.focus();modeSelect.setAttribute('aria-invalid','true');}
+    return;
+  }
+  var activeModeSelect=document.getElementById('sheetimportmode');
+  if(activeModeSelect)activeModeSelect.removeAttribute('aria-invalid');
   if(!isAdmin()){setSheetStatus('Sign in as Admin to use AI extraction.');return}
   if(!sheetFile){setSheetStatus('Choose a music sheet image or PDF first.');return}
   if(sheetFile.size>15*1024*1024){setSheetStatus('The selected file is larger than 15 MB. Choose a smaller file.');return}
@@ -3148,13 +3194,13 @@ async function processMusicSheetAI(){
 }
 function bindMusicSheet(){
   var $=function(id){return document.getElementById(id)};
-  if($('sheetopen'))$('sheetopen').onclick=function(){sheetOpen=true;sheetFile=null;sheetTitle='';sheetArtist='';sheetDraft='';sheetRaw='';sheetProcessed=false;sheetMethod='ocr';sheetDetectedKey='C';sheetTimeSignature='4/4';sheetAIConfidence=null;sheetAINotes='';sheetImportMode='lyrics-chords';sheetCancelRequested=false;sheetStatus='Choose a file, then extract its lyrics and/or chords.';draw()};
+  if($('sheetopen'))$('sheetopen').onclick=function(){sheetOpen=true;sheetFile=null;sheetTitle='';sheetArtist='';sheetDraft='';sheetRaw='';sheetProcessed=false;sheetMethod='ocr';sheetDetectedKey='C';sheetTimeSignature='4/4';sheetAIConfidence=null;sheetAINotes='';sheetImportMode='';sheetCancelRequested=false;sheetStatus='Choose a file and select what to extract before starting AI extraction.';draw()};
   if($('sheettitle'))$('sheettitle').oninput=function(){sheetTitle=this.value};if($('sheetartist'))$('sheetartist').oninput=function(){sheetArtist=this.value};
-  if($('sheetfile'))$('sheetfile').onchange=function(){sheetFile=this.files&&this.files[0]||null;sheetDraft='';sheetRaw='';sheetProcessed=false;sheetMethod='ocr';sheetDetectedKey='C';sheetTimeSignature='4/4';sheetAIConfidence=null;sheetAINotes='';setSheetStatus(sheetFile?'Selected '+sheetFile.name+'. Choose AI extraction for better context-aware reading, or basic OCR as fallback.':'Choose a music sheet image or PDF.');var n=$('sheetfilename');if(n)n.textContent=sheetFile?sheetFile.name:'Accepted: JPG, PNG, WEBP, BMP, and PDF (up to 8 pages processed).'};
-  if($('sheetimportmode'))$('sheetimportmode').onchange=function(){sheetImportMode=this.value};
+  if($('sheetfile'))$('sheetfile').onchange=function(){sheetFile=this.files&&this.files[0]||null;sheetImportMode='';sheetDraft='';sheetRaw='';sheetProcessed=false;sheetMethod='ocr';sheetDetectedKey='C';sheetTimeSignature='4/4';sheetAIConfidence=null;sheetAINotes='';setSheetStatus(sheetFile?'Selected '+sheetFile.name+'. Choose AI extraction for better context-aware reading, or basic OCR as fallback.':'Choose a music sheet image or PDF.');var n=$('sheetfilename');if(n)n.textContent=sheetFile?sheetFile.name:'Accepted: JPG, PNG, WEBP, BMP, and PDF (up to 8 pages processed).'};
+  if($('sheetimportmode'))$('sheetimportmode').onchange=function(){sheetImportMode=this.value;this.removeAttribute('aria-invalid');};
   if($('sheetcancelbusy'))$('sheetcancelbusy').onclick=function(){sheetCancelRequested=true;sheetTaskId++;sheetAIBusy=false;sheetProcessed=false;sheetStatus='Extraction cancelled.';draw()};
   if($('sheetai'))$('sheetai').onclick=processMusicSheetAI;if($('sheetextract'))$('sheetextract').onclick=processMusicSheet;
-  if($('sheetcancel'))$('sheetcancel').onclick=function(){if(sheetBusy||sheetAIBusy)return;sheetOpen=false;sheetFile=null;sheetStatus='';addView='picker';draw()};if($('sheetchart'))$('sheetchart').oninput=function(){sheetDraft=this.value};
+  if($('sheetcancel'))$('sheetcancel').onclick=function(){if(sheetBusy||sheetAIBusy)return;sheetOpen=false;sheetFile=null;sheetStatus='';addOpen=false;addView='picker';draw()};if($('sheetchart'))$('sheetchart').oninput=function(){sheetDraft=this.value};
   if($('sheetcreate'))$('sheetcreate').onclick=function(){
     if(!isAdmin())return toast('Sign in as Admin to save songs.',2500);var chart=$('sheetchart')?$('sheetchart').value.trim():sheetDraft.trim();if(!chart)return toast('The chart is empty. Enter or extract some chords first.',3000);
     var title=($('sheettitle')?$('sheettitle').value:'').trim()||sheetTitle.trim()||String(sheetFile&&sheetFile.name||'Imported Sheet').replace(/\.[^.]+$/,'');var artist=($('sheetartist')?$('sheetartist').value:'').trim()||sheetArtist.trim()||'Unknown artist';
@@ -3229,23 +3275,12 @@ function bindSidebar(){
   if(ex)ex.onclick=exitToolsToSongs;
 }
 function addModalHTML(){
-  if(!addOpen)return '';
+  if(!addOpen || addView==='picker')return '';
   var busy=sheetBusy||sheetAIBusy;
-  var title=addView==='sheet'?'Upload music sheet':addView==='paste'?'Paste from Word':'Add Song to Chordbook';
-  var body='';
-  if(addView==='picker'){
-    body='<div class="add-grid">'+
-      '<button type="button" class="add-card" id="addNewFile"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 5h15l10 10v27H13a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4z"/><path d="M28 5v11h10"/></svg><span>Blank Chart<small>Start from scratch with an interactive bar editor.</small></span></button>'+
-      '<button type="button" class="add-card" id="addUploadImage"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 31V5"/><path d="m12 17 12-12 12 12"/><path d="M6 31v9a3 3 0 0 0 3 3h30a3 3 0 0 0 3-3v-9"/></svg><span>Upload Sheet<small>Photo, scan, or PDF of a chord chart.</small></span></button>'+
-      '<button type="button" class="add-card" id="addPasteText"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="8" width="28" height="34" rx="3"/><path d="M18 8V5h12v3"/><path d="M16 20h16M16 27h16M16 34h10"/></svg><span>Paste from Word<small>Import many songs at once from formatted text.</small></span></button>'+
-      '</div>';
-  }else if(addView==='paste'){
-    body=bulkPasteBox();
-  }else{
-    body=musicSheetBox();
-  }
+  var title=addView==='sheet'?'Upload music sheet':'Paste from Word';
+  var body=addView==='paste'?bulkPasteBox():musicSheetBox();
   var closeIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>';
-  var head=addView==='picker'?'<div class="mh"><div><h2 class="add-modal-title" id="addModalTitle">'+title+'</h2><p class="add-modal-subtitle">Choose how you would like to add your song.</p></div><button type="button" id="addClose" aria-label="Close Add New Song">'+closeIcon+'</button></div>':'<div class="mh add-flow-head"><button type="button" class="add-flow-back" id="addBack" '+(busy?'disabled':'')+' aria-label="Back to all options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div class="add-flow-heading"><h2 id="addModalTitle">'+title+'</h2><p>'+(addView==='sheet'?'Turn a photo, scan, or PDF into an editable chart.':'Import multiple songs from formatted text.')+'</p></div><button type="button" id="addClose" '+(busy?'disabled':'')+' aria-label="Close">'+closeIcon+'</button></div>';
+  var head='<div class="mh add-flow-head"><div class="add-flow-heading"><h2 id="addModalTitle">'+title+'</h2><p>'+(addView==='sheet'?'Turn a photo, scan, or PDF into an editable chart.':'Import multiple songs from formatted text.')+'</p></div><button type="button" id="addClose" '+(busy?'disabled':'')+' aria-label="Close">'+closeIcon+'</button></div>';
   return '<div class="ov" id="addOverlay"><div class="modal add-modal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">'+head+body+'</div></div>';
 }
 
@@ -3305,7 +3340,7 @@ function bindBulkPaste(){
   };
 }
 function resetMusicSheetTool(){
-  sheetOpen=true;sheetFile=null;sheetTitle='';sheetArtist='';sheetDraft='';sheetRaw='';sheetProcessed=false;sheetMethod='ocr';sheetDetectedKey='C';sheetTimeSignature='4/4';sheetAIConfidence=null;sheetAINotes='';sheetImportMode='lyrics-chords';sheetCancelRequested=false;sheetStatus='Choose a file, then extract its lyrics and/or chords.';
+  sheetOpen=true;sheetFile=null;sheetTitle='';sheetArtist='';sheetDraft='';sheetRaw='';sheetProcessed=false;sheetMethod='ocr';sheetDetectedKey='C';sheetTimeSignature='4/4';sheetAIConfidence=null;sheetAINotes='';sheetImportMode='';sheetCancelRequested=false;sheetStatus='Choose a file and select what to extract before starting AI extraction.';
 }
 function closeAddModal(){
   if(sheetBusy||sheetAIBusy){toast('Please wait for the current task to finish before closing.',2500);return}
@@ -3316,11 +3351,7 @@ function bindAddModal(){
   var overlay=$('addOverlay');if(!overlay)return;
   if($('addClose'))$('addClose').onclick=closeAddModal;
   overlay.onclick=function(e){if(e.target===overlay)closeAddModal()};
-  if($('addNewFile'))$('addNewFile').onclick=addBlankChart;
-  if($('addPasteText'))$('addPasteText').onclick=addPasteSongs;
   bindBulkPaste();
-  if($('addUploadImage'))$('addUploadImage').onclick=addUploadSheet;
-    if($('addBack'))$('addBack').onclick=function(){if(addView==='paste'){addView='picker';draw();return}if(sheetBusy||sheetAIBusy)return toast('Please wait for the current task to finish.',2500);addView='picker';sheetOpen=false;draw()};
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&addOpen){e.preventDefault();closeAddModal()}});
 
@@ -3994,9 +4025,7 @@ function drawMain(){
     return;
   }
   if(view==="list"){
-    var activeGroupForHeader=grp?gById(grp):null;
-    var activeGroupTitle=activeGroupForHeader?(activeGroupForHeader.title||"Untitled"):"All";
-    var h='<div class="top"><div class="brand-stack"><h1>Chordbook</h1><div class="active-group-title" id="activeGroupTitle" aria-live="polite">'+esc(activeGroupTitle)+'</div></div>'+((canEditGroup(grp?gById(grp):null)&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top" aria-label="Manage group">Manage</button>':'')+fsBtn()+appMenuBtn()+'</div>';
+    var h='<div class="top"><div class="brand-stack"><h1>Chordbook</h1></div>'+((canEditGroup(grp?gById(grp):null)&&!gedit&&!managing)?'<button type="button" id="editGroupTop" class="edit-group-top" aria-label="Manage group">Manage</button>':'')+fsBtn()+appMenuBtn()+'</div>';
     h+='<div class="mut" id="sync" style="margin:-4px 0 10px">'+esc(syncMsg)+'</div>';
     h+='<div class="sticky-tools"><input id="q" type="search" placeholder="Search songs by title, artist or key" value="'+esc(qry)+'" aria-label="Search songs" style="margin-bottom:10px">'+groupBarHTML()+'</div>';
     h+=allSortBarHTML()+gboxHTML()+groupActionBarHTML()+'<div id="sl">'+listHTML()+'</div>';
@@ -4016,7 +4045,7 @@ function drawMain(){
     var groupPickerSortEl=document.getElementById("groupPickerSort");if(groupPickerSortEl)groupPickerSortEl.onchange=function(){groupPickerSort=this.value;draw()};
     document.querySelectorAll("[data-group-picker-tab]").forEach(function(b){b.onclick=function(){groupPickerTab=b.dataset.groupPickerTab;draw()}});
     document.querySelectorAll("[data-group-toggle-existing]").forEach(function(b){b.onclick=function(){var g=grp?gById(grp):null;if(!canEditGroup(g))return;var wasAdded=inG(g,b.dataset.groupToggleExisting);toggleG(g,b.dataset.groupToggleExisting);save();draw();toast(wasAdded?"Song removed from "+(g.title||"group"):"Song added to "+(g.title||"group"))}});
-    var addBtn=document.getElementById("add");if(addBtn)addBtn.onclick=function(){if(!isAdmin())return;sidebarOpen=false;addOpen=true;addView="picker";sheetOpen=false;draw()};
+    var addBtn=document.getElementById("add");if(addBtn)addBtn.onclick=function(){if(!isAdmin())return;sidebarOpen=false;addOpen=false;addView="picker";sheetOpen=false;fabOpen=true;draw()};
     return;
   }
   var s=song();if(!s){view="list";return draw()}
@@ -4033,7 +4062,7 @@ function drawMain(){
   var standardMode=(mode==="edit"||isCreatingSong)?s.viewMode==="standard":readerViewMode(s)==="standard";
   if(mode==="edit"||isCreatingSong){
     h+='<div class="row song-metadata"><input id="ti" aria-label="Song title" placeholder="Title" value="'+esc(s.title)+'"><input id="ar" aria-label="Artist or composer" placeholder="Artist / composer" value="'+esc(s.artist)+'"></div>';
-    if(!standardMode){h+='<div class="category-editor-field"><label class="category-field">Category<select id="songCategory"><option'+(songCategory(s)==="Lyrics"?' selected':'')+'>Lyrics</option><option'+(songCategory(s)==="Lyrics with chords"?' selected':'')+'>Lyrics with chords</option><option'+(songCategory(s)==="Chords"?' selected':'')+'>Chords</option></select></label></div>'; }
+    /* Song category is calculated automatically from lyrics/chord content. */
   }
   if(mode==="edit"){
     // Edit mode: one unified panel with musical controls on the left and display controls on the right.
@@ -4056,17 +4085,17 @@ function drawMain(){
     h+='<div class="settings-collapse'+(settingsOpen?' open':'')+'" id="settingsCollapse"'+(settingsOpen?'':' inert aria-hidden="true"')+'><div class="settings-collapse-inner">';
     h+='<div class="setting-panel" id="settings">';
     h+='<section class="setting-section setting-chart-section"><div class="setting-quick-head"><div class="setting-section-title">Chart Layout</div>'+(isAdmin()&&!practiceMode?'<button type="button" class="setting-edit-action" id="tog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.8 4.8L8 20l11-11-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Edit song</button>':'')+'</div><div class="setting-layout-controls">';
-    h+='<div class="setting-field"><label for="pl">Bars per line</label><select id="pl"><option value="auto"'+(shownBars==="auto"?' selected':'')+'>Auto</option>'+[1,2,3,4,5,6,8].map(function(k){return '<option'+(k===shownBars?' selected':'')+'>'+k+'</option>'}).join('')+'</select></div>';
-    h+='<div class="setting-field"><label>View</label><div class="chord-style-switch'+(viewSwitchLocked?' disabled':'')+'" role="group" aria-label="Song view"><button type="button" id="viewModeStandard" class="'+(standardMode?"active":"")+'" aria-pressed="'+(standardMode?'true':'false')+'"'+(viewSwitchLocked?' disabled':'')+'>Standard</button><button type="button" id="viewModeChord" class="'+(!standardMode?"active":"")+'" aria-pressed="'+(!standardMode?'true':'false')+'"'+(viewSwitchLocked?' disabled':'')+'>Chord</button></div>'+(viewSwitchLocked?'<p class="setting-help">'+(songHasChord(s)?'Only a Chord chart is saved for this song.':songHasStandard(s)?'Only a Standard chart is saved for this song.':'No chart is saved for this song yet.')+'</p>':'')+'</div>';
+    h+='<div class="setting-field"><label for="pl">Measures per row</label><select id="pl"><option value="auto"'+(shownBars==="auto"?' selected':'')+'>Auto</option>'+[1,2,3,4,5,6,8].map(function(k){return '<option'+(k===shownBars?' selected':'')+'>'+k+'</option>'}).join('')+'</select></div>';
+    h+='<div class="setting-field"><label>View</label><div class="chord-style-switch'+(viewSwitchLocked?' disabled':'')+'" role="group" aria-label="Song view"><button type="button" id="viewModeStandard" class="'+(standardMode?"active":"")+'" aria-pressed="'+(standardMode?'true':'false')+'"'+(viewSwitchLocked?' disabled':'')+'>Lyrics</button><button type="button" id="viewModeChord" class="'+(!standardMode?"active":"")+'" aria-pressed="'+(!standardMode?'true':'false')+'"'+(viewSwitchLocked?' disabled':'')+'>Chord</button></div>'+(viewSwitchLocked?'<p class="setting-help">'+(songHasChord(s)?'Only a Chord chart is saved for this song.':songHasStandard(s)?'Only a Lyrics chart is saved for this song.':'No chart is saved for this song yet.')+'</p>':'')+'</div>';
     if(!standardMode)h+='<div class="setting-field"><label>Chord detail</label><div class="chord-style-switch" role="group" aria-label="Chord view detail"><button type="button" id="chordStyleStandard" class="'+(effChordStyle(s)==="standard"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="standard"?'true':'false')+'">Standard</button><button type="button" id="chordStyleDetailed" class="'+(effChordStyle(s)==="detailed"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="detailed"?'true':'false')+'">Detailed</button></div></div>';
-    if(standardMode){var lo=!!prefs.lyricsOnly;h+='<div class="setting-field"><label>Show</label><div class="chord-style-switch" role="group" aria-label="Standard view content"><button type="button" id="showLyricsChords" class="'+(!lo?"active":"")+'" aria-pressed="'+(!lo?'true':'false')+'">Lyrics + chords</button><button type="button" id="showLyricsOnly" class="'+(lo?"active":"")+'" aria-pressed="'+(lo?'true':'false')+'">Lyrics only</button></div></div>';}
+    if(standardMode){var lo=!!prefs.lyricsOnly;h+='<div class="setting-field"><label>Show</label><div class="chord-style-switch" role="group" aria-label="Lyrics view content"><button type="button" id="showLyricsChords" class="'+(!lo?"active":"")+'" aria-pressed="'+(!lo?'true':'false')+'">Lyrics + chords</button><button type="button" id="showLyricsOnly" class="'+(lo?"active":"")+'" aria-pressed="'+(lo?'true':'false')+'">Lyrics only</button></div></div>';}
     h+='</div></section></div>';
     h+='</div></div>';
   }
   if(mode==="edit"||isCreatingSong){
-    h+='<div class="chart-editor-shell"><div class="chart-editor-tabs" role="tablist" aria-label="Chart editor mode"><button type="button" id="editorTabStandard" role="tab" aria-selected="'+(standardMode?'true':'false')+'" class="'+(standardMode?'active':'')+'"><strong>Standard</strong><span>Chords above lyrics</span></button><button type="button" id="editorTabChords" role="tab" aria-selected="'+(!standardMode?'true':'false')+'" class="'+(!standardMode?'active':'')+'"><strong>Chords</strong><span>Bar charts</span></button></div><div class="chart-editor-body">';
+    h+='<div class="chart-editor-shell"><div class="chart-editor-tabs" role="tablist" aria-label="Chart editor mode"><button type="button" id="editorTabStandard" role="tab" aria-selected="'+(standardMode?'true':'false')+'" class="'+(standardMode?'active':'')+'"><strong>Lyrics</strong><span>Chords above lyrics</span></button><button type="button" id="editorTabChords" role="tab" aria-selected="'+(!standardMode?'true':'false')+'" class="'+(!standardMode?'active':'')+'"><strong>Chords</strong><span>Bar charts</span></button></div><div class="chart-editor-body">';
     if(standardMode){
-      h+='<div class="std-edit-note mut">Example format:\n[Verse 1]\nG       D\nAmazing grace, how sweet the sound\nG       C       G\nThat saved a wretch like me</div><textarea id="standardChart" aria-label="Standard chart with chords and lyrics" spellcheck="false" style="min-height:300px;white-space:pre;overflow:auto" placeholder="[Verse 1]&#10;G       D&#10;Amazing grace, how sweet the sound&#10;G       C       G&#10;That saved a wretch like me">'+esc(displayStandard(s))+'</textarea>';
+      h+='<div class="std-edit-note mut">Example format:\n[Verse 1]\nG       D\nAmazing grace, how sweet the sound\nG       C       G\nThat saved a wretch like me</div><textarea id="standardChart" aria-label="Lyrics chart with chords and lyrics" spellcheck="false" style="min-height:300px;white-space:pre;overflow:auto" placeholder="[Verse 1]&#10;G       D&#10;Amazing grace, how sweet the sound&#10;G       C       G&#10;That saved a wretch like me">'+esc(displayStandard(s))+'</textarea>';
     }else{
       h+='<div class="mut">Tap chords to add them (display key of '+esc(normKey(displayKey(s)))+'). Tap a bar below to add repeats or an ending label, and rename sections right on the chart. In the text: | splits bars, |: and :| are repeats, &lt;1.&gt; is an ending, [A] is a section, {2/4} before a bar changes the time signature from that bar.</div><div class="pal" id="pal">'+palette(displayKey(s)).map(function(c){return '<button data-i="'+esc(c)+' ">'+fmt(c)+'</button>'}).join('')+'<button data-i="| ">|</button><button data-i="\n| ">↵ line</button><button data-i="[B]\n| ">[ ] section</button><button data-i="% ">%</button></div>';
       h+='<textarea id="ch" spellcheck="false">'+esc(displayChart(s))+'</textarea>';
@@ -4074,7 +4103,7 @@ function drawMain(){
     h+='</div></div>';
   }
   var preview=standardMode?standardHTML((mode==="edit"||isCreatingSong)?displayStandard(s):standardTextForView(s),getDisplayPrefs(s).lyricsOnly&&songHasStandard(s)?"No lyrics found in this chart. Switch to Lyrics + chords to see it.":""):((effChordStyle(s)==="standard")?chartHTMLStandard(displayChart(s),mode!=="edit",mode==="edit",displayBars(s),s.ts):chartHTML(displayChart(s),mode!=="edit",mode==="edit",displayBars(s),s.ts));
-  h+='<div id="cw"><div id="cc"'+(practiceMode&&mode!=="edit"&&!isCreatingSong?' class="practice-on"':'')+'>'+preview+'</div><div id="bp">'+(mode==="edit"?(standardMode?'<div class="mut">Standard mode keeps chord and lyric lines together as editable text.</div>':panelHTML(s)):"")+'</div></div>';
+  h+='<div id="cw"><div id="cc"'+(practiceMode&&mode!=="edit"&&!isCreatingSong?' class="practice-on"':'')+'>'+preview+'</div><div id="bp">'+(mode==="edit"?(standardMode?'<div class="mut">Lyrics mode keeps chord and lyric lines together as editable text.</div>':panelHTML(s)):"")+'</div></div>';
   if(mode==="edit"&&!isCreatingSong)h+='<div class="row" style="margin-top:24px;padding-top:14px;border-top:1px solid var(--line)"><button class="d" id="del" style="margin-left:auto">Delete Song</button></div>';
   a.innerHTML=h;
   zoom=songZoom(s);
@@ -4603,8 +4632,13 @@ draw=function(){
       mobileNavKey(Object.assign({},current,{cur:0}))===mobileNavKey(Object.assign({},next,{cur:0}));
     var practiceOffOnly=current&&current.practice&&!next.practice&&
       mobileNavKey(Object.assign({},current,{practice:false}))===mobileNavKey(next);
+    /* Saving or cancelling song editing returns to the same song page.
+       Replace the edit history entry so the phone Back button goes to the song list,
+       rather than reopening the editor. */
+    var editToSongView=current&&current.view==="song"&&current.mode==="edit"&&
+      next.view==="song"&&next.mode==="view"&&current.cur===next.cur;
     /* Leaving practice with the on-screen button: reuse the entry so Back does not re-open practice. */
-    if(sameSongView||practiceOffOnly)history.replaceState({chordbook:next},"");
+    if(sameSongView||practiceOffOnly||editToSongView)history.replaceState({chordbook:next},"");
     else history.pushState({chordbook:next},"");
   }
 };
