@@ -1198,6 +1198,28 @@ button:disabled{opacity:.42;box-shadow:none;cursor:not-allowed}
 }
 </style>
 
+<style id="autoscroll-fab-style">
+#autoScrollFab{position:fixed;right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:40;width:44px;padding:5px 0 12px;border-radius:999px;background:color-mix(in srgb,var(--card) 72%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);box-shadow:0 2px 10px rgba(0,0,0,.12);display:none;flex-direction:column;align-items:center;gap:10px;opacity:.6;transition:opacity .2s ease,box-shadow .2s ease;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+#autoScrollFab.show{display:flex}
+#autoScrollFab.playing{opacity:.8}
+#autoScrollFab.dragging{opacity:.95;box-shadow:0 6px 18px rgba(0,0,0,.28)}
+#autoScrollFab #asPlay{width:34px;height:34px;min-height:0;min-width:0;padding:0;margin:0;border:0;border-radius:50%;background:var(--acc);color:var(--accink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
+#autoScrollFab #asPlay:active{transform:scale(.92)}
+#autoScrollFab #asPlay svg{width:16px;height:16px;fill:currentColor;stroke:none}
+#autoScrollFab #asPlay .ic-pause{display:none}
+#autoScrollFab.playing #asPlay .ic-play{display:none}
+#autoScrollFab.playing #asPlay .ic-pause{display:block}
+#asTrack{position:relative;width:32px;height:var(--as-h,128px);cursor:pointer;touch-action:none;outline:none;flex:0 0 auto}
+#asTrack::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;border-radius:2px;background:var(--line-strong)}
+#asFill{position:absolute;left:50%;top:0;width:3px;margin-left:-1.5px;border-radius:2px;background:var(--acc);height:0;pointer-events:none}
+#asThumb{position:absolute;left:50%;top:0;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:var(--card);border:3px solid var(--acc);box-shadow:0 1px 4px rgba(0,0,0,.25);box-sizing:border-box;pointer-events:none;transition:transform .12s ease}
+#autoScrollFab.dragging #asThumb{transform:scale(1.2)}
+#asTrack:focus-visible #asThumb{outline:3px solid var(--ink);outline-offset:2px}
+#asBubble{position:absolute;right:100%;margin-right:12px;top:0;transform:translateY(-50%);min-width:28px;padding:3px 9px;border-radius:999px;background:var(--ink);color:var(--bg);font:700 13px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-align:center;opacity:0;pointer-events:none;transition:opacity .15s ease}
+#autoScrollFab.dragging #asBubble{opacity:1}
+@media (max-height:560px){#autoScrollFab{--as-h:72px;bottom:calc(12px + env(safe-area-inset-bottom,0px))}}
+@media (prefers-reduced-motion:reduce){#autoScrollFab,#asThumb,#asBubble{transition:none}}
+</style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
@@ -1209,17 +1231,27 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/fireba
 import { getAI, getGenerativeModel, GoogleAIBackend } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-ai.js';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app-check.js';
 const cfg={apiKey:"AIzaSyAKznDtIpTNIWxWr5p45D0NJmCU1LAThZQ",authDomain:"chordbook-a8789.firebaseapp.com",projectId:"chordbook-a8789",storageBucket:"chordbook-a8789.firebasestorage.app",messagingSenderId:"600798197648",appId:"1:600798197648:web:d8ab752607ef1973b06515",measurementId:"G-YV5M3XPQ9Q"};
+/* ---- Firebase App Check configuration (edit these three values) ----
+   APPCHECK_SITE_KEY   : public reCAPTCHA Enterprise site key registered for Chordbook Web in
+                         Firebase console > App Check. Required for production (APPCHECK_DEBUG=false).
+   APPCHECK_DEBUG      : true = use a debug token (testing). Set to false for the live site.
+   APPCHECK_DEBUG_TOKEN: optional fixed UUID (generate one at uuidgenerator.net). Register the SAME value in
+                         Firebase console > App Check > Apps > Chordbook Web > Manage debug tokens.
+                         Leave '' to let the browser generate one (printed in the DevTools console). */
+const APPCHECK_SITE_KEY='PASTE_RECAPTCHA_ENTERPRISE_SITE_KEY_HERE';
+const APPCHECK_DEBUG=true;
+const APPCHECK_DEBUG_TOKEN='';
 try {
-  // LOCAL DEVELOPMENT ONLY: enables Firebase App Check debug mode.
-  // Keep this debug build private; remove/replace for production deployment.
-  self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
   const aiApp=initializeApp(cfg,'chordbook-ai');
-  // Replace the placeholder with the public reCAPTCHA Enterprise site key
-  // used when registering Chordbook Web in Firebase App Check.
-  const appCheck=initializeAppCheck(aiApp,{
-    provider:new ReCaptchaEnterpriseProvider('PASTE_RECAPTCHA_ENTERPRISE_SITE_KEY_HERE'),
-    isTokenAutoRefreshEnabled:true
-  });
+  const siteKeyReady=APPCHECK_SITE_KEY&&!/^PASTE_/.test(APPCHECK_SITE_KEY);
+  if(APPCHECK_DEBUG){
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN=APPCHECK_DEBUG_TOKEN||true;
+    initializeAppCheck(aiApp,{provider:new ReCaptchaEnterpriseProvider(siteKeyReady?APPCHECK_SITE_KEY:'debug-placeholder'),isTokenAutoRefreshEnabled:true});
+  }else if(siteKeyReady){
+    initializeAppCheck(aiApp,{provider:new ReCaptchaEnterpriseProvider(APPCHECK_SITE_KEY),isTokenAutoRefreshEnabled:true});
+  }else{
+    console.warn('Chordbook: App Check is not configured (no reCAPTCHA Enterprise site key). AI requests will fail if App Check enforcement is ON for Firebase AI Logic.');
+  }
   const ai=getAI(aiApp,{backend:new GoogleAIBackend()});
   // Use the current lightweight model for lower latency on sheet extraction.
   const model=getGenerativeModel(ai,{model:'gemini-3.5-flash-lite',generationConfig:{responseMimeType:'application/json'}});
@@ -1233,6 +1265,7 @@ try {
       try { result=await model.generateContent(parts); break; }
       catch(e){
         lastError=e;const msg=String((e&&e.message)||e);
+        if(/app ?check/i.test(msg)||(/\b40[13]\b/.test(msg)&&/token/i.test(msg)))throw new Error('Firebase App Check rejected this request, so AI extraction is blocked. Site owner: register this browser\'s App Check debug token (printed in the DevTools console as "App Check debug token") in Firebase console > App Check > Apps > Manage debug tokens, or set a valid reCAPTCHA Enterprise site key and turn APPCHECK_DEBUG off. Original error: '+msg);
         const transient=/\b(408|429|500|502|503|504)\b|deadline|timed? ?out|temporar|unavailable|fetch-error/i.test(msg);
         if(!transient||attempt===2){
           if(/deadline|timed? ?out|\b503\b|unavailable/i.test(msg))throw new Error('Gemini is taking too long or is temporarily busy. Chordbook retried automatically. Please try again in a minute; large sheets are processed in smaller batches. Original error: '+msg);
@@ -1600,7 +1633,7 @@ function pbInfo(sym){
 }
 function pbChords(bi){var bars=pbBars(),j=bi,t;while(j>=0&&bars[j]){t=(bars[j].getAttribute("data-c")||"").split(/\s+/).filter(Boolean);if(t.length===1&&t[0]==="%"){j--;continue}return t}return[]}
 function pbBus(){
-  var m=pbCtx.createGain();m.gain.value=.85;m.connect(pbCtx.destination);pbMaster=m;pbG={};
+  var m=pbCtx.createGain(),cp=pbCtx.createDynamicsCompressor();cp.threshold.value=-12;cp.knee.value=24;cp.ratio.value=3;cp.attack.value=.004;cp.release.value=.18;m.gain.value=.85;m.connect(cp);cp.connect(pbCtx.destination);pbMaster=m;pbG={};
   PB_KEYS.forEach(function(x){pbG[x]=pbCtx.createGain()});
   ["d","b","c","m"].forEach(function(x){pbG[x].connect(m)});["k","s","h"].forEach(function(x){pbG[x].connect(pbG.d)});
   pbNoise=pbCtx.createBuffer(1,pbCtx.sampleRate,pbCtx.sampleRate);var d=pbNoise.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;
@@ -1613,7 +1646,102 @@ function pbDrum(k,t,v){
   else if(k==="s"){pbNz(t,v*.7,"bandpass",1800,.16,pbG.s);var o2=pbCtx.createOscillator(),g2=pbCtx.createGain();o2.type="triangle";o2.frequency.value=190;g2.gain.setValueAtTime(v*.4,t);g2.gain.exponentialRampToValueAtTime(.001,t+.1);o2.connect(g2);g2.connect(pbG.s);o2.start(t);o2.stop(t+.12)}
   else pbNz(t,v*.35,"highpass",7000,.06,pbG.h);
 }
-function pbTone(bass,t,midi,dur,v,to){
+/* ---- MusyngKite SoundFont sampler (gleitz/midi-js-soundfonts) ----
+   Bass and chord instruments are streamed on first Play, decoded, and cached in the browser (Cache API).
+   Until they are ready, or if loading fails, the original built-in synth is used. Drums stay synthesized. */
+var PB_SF_BASE='https://gleitz.github.io/midi-js-soundfonts/MusyngKite/',PB_SF_CACHE='chordbook-musyngkite-v1',
+PB_RANGE={b:[26,56],c:[52,88]},pbSF={},pbDecCtx=null,
+PB_VOICES={
+"Swing":{c:"electric_guitar_jazz",b:"acoustic_bass"},
+"Jazz":{c:"acoustic_grand_piano",b:"acoustic_bass"},
+"Ballad":{c:"acoustic_grand_piano",b:"electric_bass_finger"},
+"Rock":{c:"electric_guitar_clean",b:"electric_bass_pick"},
+"Pop":{c:"acoustic_guitar_steel",b:"electric_bass_finger"},
+"Reggae":{c:"electric_guitar_muted",b:"electric_bass_finger"},
+"Bossa Nova":{c:"acoustic_guitar_nylon",b:"acoustic_bass"},
+"Funk":{c:"electric_guitar_muted",b:"electric_bass_finger"},
+"Blues Shuffle":{c:"electric_guitar_clean",b:"electric_bass_finger"},
+"Country":{c:"acoustic_guitar_steel",b:"acoustic_bass"},
+"Waltz (3/4)":{c:"acoustic_guitar_nylon",b:"acoustic_bass"},
+"Latin":{c:"acoustic_guitar_nylon",b:"electric_bass_finger"},
+"Disco":{c:"electric_guitar_muted",b:"electric_bass_finger"}};
+function pbNoteMidi(n){var m=/^([A-G])([b#]?)(-?\d)$/.exec(n);if(!m)return -1;return 12*(parseInt(m[3],10)+1)+{C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]]+(m[2]==="#"?1:m[2]==="b"?-1:0)}
+function pbB64(b){var s=atob(b),n=s.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=s.charCodeAt(i);return u.buffer}
+function pbDecode(ab){
+  var C=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!C)return Promise.reject(new Error("no audio"));
+  if(!pbDecCtx)pbDecCtx=new C(1,1,44100);
+  return new Promise(function(res,rej){var r=pbDecCtx.decodeAudioData(ab,res,rej);if(r&&r.catch)r.catch(rej)});
+}
+var PB_SF_URLS=[
+function(n){return PB_SF_BASE+n+"-mp3.js"},
+function(n){return "https://cdn.jsdelivr.net/gh/gleitz/midi-js-soundfonts@gh-pages/MusyngKite/"+n+"-mp3.js"},
+function(n){return "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/gh-pages/MusyngKite/"+n+"-mp3.js"}];
+async function pbFetchSF(inst){
+  var cache=null,key=PB_SF_URLS[0](inst),errs=[];
+  try{if(window.caches)cache=await caches.open(PB_SF_CACHE)}catch(e){}
+  if(cache){try{var hit=await cache.match(key);if(hit){var ct=await hit.text();if(ct.indexOf("base64,")>0)return ct}}catch(e){}}
+  for(var i=0;i<PB_SF_URLS.length;i++){
+    for(var a=0;a<2;a++){
+      var ctl=window.AbortController?new AbortController():null,tm=ctl?setTimeout(function(){ctl.abort()},90000):0,url=PB_SF_URLS[i](inst);
+      try{
+        var res=await fetch(url,{mode:"cors",signal:ctl?ctl.signal:undefined});
+        if(!res.ok)throw new Error("HTTP "+res.status);
+        var copy=res.clone(),txt=await res.text();
+        if(txt.indexOf("base64,")<0)throw new Error("Unexpected response");
+        clearTimeout(tm);
+        if(cache){try{await cache.put(key,copy)}catch(e){}}
+        return txt;
+      }catch(err){clearTimeout(tm);errs.push(url.replace(/^https:\/\//,"").split("/")[0]+": "+((err&&err.message)||err));await new Promise(function(r){setTimeout(r,800)})}
+    }
+  }
+  throw new Error(errs.join(" | "));
+}
+function pbLoadInst(inst,kind){
+  var e=pbSF[inst];
+  if(e&&(e.state==="loading"||e.state==="ready"))return e.p;
+  if(e&&e.state==="error"&&Date.now()-e.at<20000)return e.p;
+  e=pbSF[inst]={state:"loading",b:{},at:0};
+  e.p=(async function(){
+    try{
+      var txt=await pbFetchSF(inst),r=PB_RANGE[kind],jobs=[],m,
+      re=/"([A-G][b#]?-?\d)"\s*:\s*"data:audio\/[a-z0-9.+-]+;base64,([^"]+)"/g;
+      while((m=re.exec(txt))){var mi=pbNoteMidi(m[1]);if(mi>=r[0]&&mi<=r[1])jobs.push([mi,m[2]])}
+      txt=null;if(!jobs.length)throw new Error("No samples found in soundfont file");
+      await Promise.all(jobs.map(function(j){return pbDecode(pbB64(j[1])).then(function(buf){e.b[j[0]]=buf},function(){})}));
+      if(!Object.keys(e.b).length)throw new Error("Could not decode samples");
+      /* Measure loudness (RMS of each note's first 0.5 s, median across notes) so every instrument can be levelled automatically. */
+      var rs=[];Object.keys(e.b).forEach(function(k){try{var bf=e.b[k],d=bf.getChannelData(0),n=Math.min(d.length,Math.floor(bf.sampleRate*.5)),sum=0;for(var q=0;q<n;q++)sum+=d[q]*d[q];if(n)rs.push(Math.sqrt(sum/n))}catch(x){}});
+      rs.sort(function(x,y){return x-y});e.rms=rs.length?Math.max(rs[Math.floor(rs.length/2)],.003):.05;e.k=kind;
+      e.state="ready";
+    }catch(err){e.state="error";e.at=Date.now();console.warn("Chordbook: could not load MusyngKite "+inst,err)}
+  })();
+  return e.p;
+}
+function pbEnsureVoices(){
+  var v=PB_VOICES[pbMix.style]||PB_VOICES.Rock;
+  /* One download at a time (chords first) is far more reliable on mobile connections than two large parallel fetches. */
+  var p=pbLoadInst(v.c,"c");pbSndNote();
+  return p.then(function(){pbSndNote();return pbLoadInst(v.b,"b")}).then(pbSndNote,pbSndNote);
+}
+function pbSndNote(){
+  var el=document.getElementById("pbSndNote");if(!el)return;
+  var v=PB_VOICES[pbMix.style]||PB_VOICES.Rock,a=pbSF[v.b],c=pbSF[v.c],st=(a&&a.state)==="ready"&&(c&&c.state)==="ready"?"ready":((a&&a.state)==="error"||(c&&c.state)==="error")?"error":((a||c)?"loading":"idle");
+  el.textContent=st==="ready"?"Sounds: MusyngKite SoundFont":st==="loading"?"Loading MusyngKite sounds\u2026 using built-in synth until ready":st==="error"?"MusyngKite sounds unavailable \u2014 using built-in synth":"Sounds: MusyngKite SoundFont (loads on first play)";
+}
+function pbVoice(k){var v=PB_VOICES[pbMix.style]||PB_VOICES.Rock,n=v[k],e=pbSF[n];return e&&e.state==="ready"?n:null}
+function pbSample(inst,t,midi,dur,v,to){
+  var e=pbSF[inst],buf=e.b[midi],rate=1;
+  if(!buf){var best=null,bd=99,k,d;for(k in e.b){d=Math.abs(k-midi);if(d<bd){bd=d;best=k}}if(best===null)return false;buf=e.b[best];rate=Math.pow(2,(midi-best)/12)}
+  var s=pbCtx.createBufferSource(),g=pbCtx.createGain(),L=Math.max(dur,.12);
+  s.buffer=buf;s.playbackRate.value=rate;
+  var amp=Math.min(60,Math.max(.3,(e.k==="b"?.30:.16)/(e.rms||.05)))*(v/(e.k==="b"?.5:.07));
+  g.gain.setValueAtTime(amp,t);g.gain.setTargetAtTime(0,t+L,.07);
+  s.connect(g);g.connect(to);s.start(t);s.stop(t+L+.6);
+  return true;
+}
+function pbTone(bass,t,midi,dur,v,to,idx){
+  var inst=pbVoice(bass?"b":"c");
+  if(inst&&pbSample(inst,t+(bass||!/guitar/.test(inst)?0:(idx||0)*.011),midi,dur,v,to))return;
   var o=pbCtx.createOscillator(),g=pbCtx.createGain(),f=pbCtx.createBiquadFilter(),L=Math.max(dur,.12);
   o.type=bass?"triangle":"sawtooth";o.frequency.value=440*Math.pow(2,(midi-69)/12);f.type="lowpass";f.frequency.value=bass?700:1800;
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+L);
@@ -1630,7 +1758,7 @@ function pbTick(time,bi,beat,sub){
   if(c!==pbLastCk){if(pbLastCk!==null&&!v(st.c[pi])&&pbCur.c){pbCur.c.gain.setTargetAtTime(0,t,.04);pbCur.c=null}pbLastCk=c}
   if(inf){
     var bc=st.b[pi];if(bc!=="."){var off={"0":0,"5":7,"8":12,t:inf.th,a:9}[bc]||0;pbTone(true,t,28+pbMod(inf.bass-4,12)+(bc==="0"?0:off),sd*3.5,.5,pbHit("b",t))}
-    if(v(st.c[pi])){var cg=pbHit("c",t),base=55+pbMod(inf.pc-7,12);inf.iv.slice(0,5).forEach(function(x){pbTone(false,t,base+x,st.d*sd,.07,cg)})}
+    if(v(st.c[pi])){var cg=pbHit("c",t),base=55+pbMod(inf.pc-7,12);inf.iv.slice(0,5).forEach(function(x,ix){pbTone(false,t,base+x,st.d*sd,.07,cg,ix)})}
   }
   var id=setTimeout(function(){pbVis=pbVis.filter(function(x){return x!==id});if(!pbPlaying)return;if(sub===0){pbShown=bi;pbShownBeat=beat;pbMark(bi,beat);pbSquares(beat,n)}},Math.max(0,(time-pbCtx.currentTime)*1000));
   pbVis.push(id);
@@ -1736,12 +1864,12 @@ function pbRenderMix(){
   var opts=Object.keys(PB_STY).map(function(k){return '<option'+(k===pbMix.style?" selected":"")+'>'+k+'</option>'}).join("");
   s.innerHTML='<div class="metro-card pb-card pb-mixer-card" role="dialog" aria-modal="true" aria-labelledby="pbMixTitle">'
    +'<div class="pb-mix-head"><span class="pb-mix-head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M12 4v16M18 4v16"/><path d="M3.5 14h5M9.5 8h5M15.5 16h5"/></svg></span><div class="pb-mix-head-copy"><h2 id="pbMixTitle">Playback mixer</h2><p>Balance your practice band and choose a groove.</p></div><button type="button" id="pbX" class="pb-x" aria-label="Close">'+PB_CLOSE+'</button></div>'
-   +'<div class="pb-mix-body"><div class="pb-style-card"><div><label for="pbStyle">Backing style</label><small>Sets the groove and accompaniment pattern.</small></div><select id="pbStyle">'+opts+'</select></div>'
+   +'<div class="pb-mix-body"><div class="pb-style-card"><div><label for="pbStyle">Backing style</label><small>Sets the groove and accompaniment pattern.</small><small id="pbSndNote" style="display:block;margin-top:2px"></small></div><select id="pbStyle">'+opts+'</select></div>'
    +'<div class="pb-mix-section-head"><span>Instrument levels</span><button type="button" id="pbEqBtn" class="pb-drum-toggle" aria-expanded="'+(pbEqOn?"true":"false")+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M12 4v16M18 4v16"/><path d="M3.5 14h5M9.5 8h5M15.5 16h5"/></svg><span>'+(pbEqOn?"Hide drum controls":"Drum controls")+'</span></button></div>'
    +'<div class="pb-channel-list">'+row("Drums",0,"drums")+(pbEqOn?'<div class="pb-drum-submix"><div class="pb-drum-submix-label">Drum kit balance</div>'+row("Kick",4,"kick")+row("Snare",5,"snare")+row("Hi-hat",6,"hat")+'</div>':"")+row("Bass",1,"bass")+row("Chords",2,"chords")+row("Metronome",3,"metro")+'</div></div></div>';
   var $=function(id){return document.getElementById(id)};
   s.onclick=function(e){if(e.target===s)pbCloseSheet()};$("pbX").onclick=pbCloseSheet;
-  $("pbStyle").onchange=function(){pbMix.style=this.value;pbSaveMix();pbSaveStyle(cur,this.value)};
+  pbSndNote();$("pbStyle").onchange=function(){pbMix.style=this.value;pbSaveMix();pbSaveStyle(cur,this.value);pbEnsureVoices()};
   $("pbEqBtn").onclick=function(){pbEqOn=!pbEqOn;pbRenderMix()};
   s.querySelectorAll("[data-pbv]").forEach(function(r){r.oninput=function(){var i=+r.getAttribute("data-pbv");pbMix.v[i]=+r.value;var o=s.querySelector('[data-pbo="'+i+'"]');if(o)o.textContent=r.value+"%";pbApplyMix();pbSaveMix()}});
   s.querySelectorAll("[data-pbm]").forEach(function(b){b.onclick=function(){var i=+b.getAttribute("data-pbm");pbMix.mu[i]=pbMix.mu[i]?0:1;pbApplyMix();pbSaveMix();pbRenderMix()}});
@@ -1750,7 +1878,7 @@ async function pbToggle(){
   if(pbPlaying){pbPause();return}
   var AC=window.AudioContext||window.webkitAudioContext;if(!AC){toast("Your browser does not support Web Audio.",3000);return}
   try{pbCtx=new AC();if(pbCtx.state==="suspended")await pbCtx.resume()}catch(e){pbCtx=null;toast("Could not start audio. Check your browser audio settings.",3500);return}
-  pbBus();pbPlaying=true;pbBeat=0;pbSub=0;pbCountTotal=pbCount=pbBeatsOf(pbBars()[pbBar]);pbNext=pbCtx.currentTime+.08;pbTimer=setInterval(pbRun,25);pbRun();pbUI();
+  pbBus();pbEnsureVoices();pbPlaying=true;pbBeat=0;pbSub=0;pbCountTotal=pbCount=pbBeatsOf(pbBars()[pbBar]);pbNext=pbCtx.currentTime+.08;pbTimer=setInterval(pbRun,25);pbRun();pbUI();
 }
 function pbPause(){
   var was=pbPlaying;pbPlaying=false;pbCount=0;pbCountClear();
@@ -3107,13 +3235,21 @@ function sheetNormalizeChord(token){
   if(!/^(?:|m|min|maj|M|maj7|M7|m7|min7|m9|min9|maj9|M9|7|9|11|13|6|69|add\d+|sus[24]?|dim\d*|aug|\+|ø\d*|°\d*|mMaj\d*|m7b5|\d+(?:b|#)\d*(?:sus\d+)?|(?:maj|min|add|sus|dim|aug|M|m|ø|°|\+|b|#|\d|\(|\)|,|-|\.)*)$/i.test(quality))return '';
   return m[1]+m[2]+quality+(m[4]?'/'+m[4]+m[5]:'');
 }
+function sheetCleanOcrLine(line){
+  var s=String(line||'').replace(/[\u2018\u2019\u201B\u2032]/g,"'").replace(/[\u0394\u25B3]/g,'maj7').replace(/\u00BA/g,'\u00B0').replace(/\u266F/g,'#').replace(/\u266D/g,'b');
+  s=s.replace(/[|\u2502\u00A6\uFF5C!]+/g,' ');
+  s=s.replace(/\b([A-G][#b]?)rn(?=\d|\s|\/|$|aj|in|sus|add)/g,'$1m');
+  s=s.replace(/([A-G][#b]?[A-Za-z0-9\u00B0\u00F8+()]*)\s*\/\s*([A-G][#b]?)(?![A-Za-z])/g,'$1/$2');
+  return s.replace(/\s+/g,' ').trim();
+}
 function sheetExtractChordLine(line){
-  var src=String(line||'').trim();if(!src)return [];
+  var orig=String(line||'').trim();if(!orig)return [];
+  var src=sheetCleanOcrLine(orig);if(!src)return [];
   var tokens=src.split(/\s+/).map(function(t){return t.replace(/^[\[({]+|[\])},;:!?]+$/g,'')}).filter(Boolean);
   var hits=[];tokens.forEach(function(t){var c=sheetNormalizeChord(t);if(c)hits.push({raw:t,chord:c})});
-  var explicit=/[|│()[\]]/.test(src),ratio=hits.length/Math.max(1,tokens.length);
-  if(hits.length>=2&&(ratio>=0.6||(hits.length>=3&&ratio>=0.5)))return hits.map(function(x){return x.chord});
-  if(hits.length===1&&explicit&&(/(?:[#b\d/]|m|maj|dim|aug|sus|add|°|ø|\+)/i.test(hits[0].raw)))return hits.map(function(x){return x.chord});
+  var explicit=/[|\u2502\u00A6()[\]]/.test(orig),ratio=hits.length/Math.max(1,tokens.length);
+  if(hits.length>=2&&(ratio>=0.6||(hits.length>=3&&ratio>=0.5)||(explicit&&ratio>=0.4)))return hits.map(function(x){return x.chord});
+  if(hits.length===1&&explicit&&(/(?:[#b\d/]|m|maj|dim|aug|sus|add|\u00B0|\u00F8|\+)/i.test(hits[0].raw)))return hits.map(function(x){return x.chord});
   return [];
 }
 function sheetBuildChart(lines){
@@ -3127,6 +3263,87 @@ function sheetBuildChart(lines){
   return result;
 }
 function sheetFileCanvases(){return /\.pdf$/i.test(sheetFile.name||'')||sheetFile.type==='application/pdf'?sheetCanvasesFromPDF(sheetFile):sheetCanvasFromImage(sheetFile)}
+/* ---- OCR image enhancement (used only by Basic OCR) ---- */
+function sheetOcrScaleCanvas(src){
+  var long=Math.max(src.width,src.height),k=1;
+  if(long<2200)k=Math.min(3,2800/long);
+  if(src.width*src.height*k*k>10e6)k=Math.sqrt(10e6/(src.width*src.height));
+  if(Math.abs(k-1)<.02)return src;
+  var c=document.createElement('canvas');c.width=Math.max(1,Math.round(src.width*k));c.height=Math.max(1,Math.round(src.height*k));
+  var x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(src,0,0,c.width,c.height);
+  return c;
+}
+function sheetOcrGray(canvas){
+  var w=canvas.width,h=canvas.height,d=canvas.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data,n=w*h,g=new Uint8ClampedArray(n),hist=new Uint32Array(256),i,p;
+  for(i=0,p=0;i<n;i++,p+=4){
+    var r=d[p],gr=d[p+1],b=d[p+2],a=d[p+3];
+    if(a<255){var f=a/255;r=r*f+255*(1-f);gr=gr*f+255*(1-f);b=b*f+255*(1-f)}
+    var v=(.299*r+.587*gr+.114*b+.5)|0;g[i]=v;hist[v]++;
+  }
+  var lo=0,hi=255,acc=0,cut=n*.01;
+  for(i=0;i<256;i++){acc+=hist[i];if(acc>=cut){lo=i;break}}
+  acc=0;for(i=255;i>=0;i--){acc+=hist[i];if(acc>=cut){hi=i;break}}
+  if(hi-lo>=40){var sc=255/(hi-lo);for(i=0;i<n;i++)g[i]=(g[i]-lo)*sc}
+  return {g:g,w:w,h:h};
+}
+function sheetOcrBinarize(img){
+  var g=img.g,w=img.w,h=img.h,out=new Uint8ClampedArray(w*h),W=w+1,ii=new Uint32Array(W*(h+1)),x,y,r=Math.max(12,Math.round(w/32));
+  for(y=0;y<h;y++){var row=0;for(x=0;x<w;x++){row+=g[y*w+x];ii[(y+1)*W+x+1]=ii[y*W+x+1]+row}}
+  for(y=0;y<h;y++){
+    var y1=y-r<0?0:y-r,y2=y+r>=h?h-1:y+r;
+    for(x=0;x<w;x++){
+      var x1=x-r<0?0:x-r,x2=x+r>=w?w-1:x+r,area=(x2-x1+1)*(y2-y1+1),sum=ii[(y2+1)*W+x2+1]-ii[y1*W+x2+1]-ii[(y2+1)*W+x1]+ii[y1*W+x1];
+      out[y*w+x]=(g[y*w+x]*area<=sum*.87)?0:255;
+    }
+  }
+  return out;
+}
+function sheetOcrSkew(bin,w,h){
+  var st=Math.max(1,Math.round(w/900)),xs=[],ys=[],x,y;
+  for(y=0;y<h;y+=st)for(x=0;x<w;x+=st)if(bin[y*w+x]===0){xs.push(x-w/2);ys.push(y-h/2)}
+  var n=xs.length;if(n<300)return 0;
+  var off=Math.ceil((w+h)/st)+2,hist=new Float64Array(off*2+1);
+  function score(deg){var a=deg*Math.PI/180,c=Math.cos(a),s=Math.sin(a),i,t=0;hist.fill(0);for(i=0;i<n;i++)hist[Math.round((ys[i]*c-xs[i]*s)/st)+off]++;for(i=0;i<hist.length;i++)t+=hist[i]*hist[i];return t}
+  var s0=score(0),best=0,bs=s0,d,sc;
+  for(d=-6;d<=6.001;d+=.5){sc=score(d);if(sc>bs){bs=sc;best=d}}
+  var c0=best;for(d=c0-.5;d<=c0+.5001;d+=.1){sc=score(d);if(sc>bs){bs=sc;best=d}}
+  if(bs<s0*1.03||Math.abs(best)>5.9)return 0;
+  return best;
+}
+function sheetOcrRotate(src,deg){
+  var c=document.createElement('canvas');c.width=src.width;c.height=src.height;
+  var x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.translate(c.width/2,c.height/2);x.rotate(-deg*Math.PI/180);x.drawImage(src,-src.width/2,-src.height/2);
+  return c;
+}
+function sheetOcrToCanvas(g,w,h){
+  var c=document.createElement('canvas');c.width=w;c.height=h;
+  var x=c.getContext('2d'),id=x.createImageData(w,h),d=id.data;
+  for(var i=0,p=0;i<g.length;i++,p+=4){d[p]=d[p+1]=d[p+2]=g[i];d[p+3]=255}
+  x.putImageData(id,0,0);return c;
+}
+function sheetOcrPrepare(canvas){
+  var sc=sheetOcrScaleCanvas(canvas),gi=sheetOcrGray(sc),bin=sheetOcrBinarize(gi),ang=sheetOcrSkew(bin,gi.w,gi.h);
+  if(Math.abs(ang)>=.4){sc=sheetOcrRotate(sc,ang);gi=sheetOcrGray(sc);bin=sheetOcrBinarize(gi)}
+  return {angle:ang,bin:sheetOcrToCanvas(bin,gi.w,gi.h),gray:sheetOcrToCanvas(gi.g,gi.w,gi.h)};
+}
+function sheetOcrLinesOf(data){
+  var l=((data&&data.lines)||[]).map(function(x){return x&&x.text?String(x.text).trim():''}).filter(Boolean);
+  if(!l.length&&data&&data.text)l=String(data.text).split(/\r?\n/).map(function(t){return t.trim()}).filter(Boolean);
+  return l;
+}
+function sheetOcrScore(lines,data){
+  var n=0;lines.forEach(function(l){n+=sheetExtractChordLine(l).length});
+  return {chords:n,score:n*3+((data&&data.confidence)||0)};
+}
+async function sheetCreateOcrWorker(OCR,logger){
+  var base={logger:logger,workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@v5.0.0/dist/worker.min.js',corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@v5.0.0'},lastErr=null;
+  /* Prefer the higher-accuracy "best" English model (separate cache so older cached "fast" data isn't reused); fall back to the standard model. */
+  var tries=[{langPath:'https://tessdata.projectnaptha.com/4.0.0_best',cachePath:'chordbook-tessdata-best'},{langPath:'https://tessdata.projectnaptha.com/4.0.0'}];
+  for(var i=0;i<tries.length;i++){
+    try{return await OCR.createWorker('eng',1,Object.assign({},base,tries[i]))}catch(e){lastErr=e}
+  }
+  throw lastErr||new Error('Could not start the OCR engine.');
+}
 async function processMusicSheet(){
   if(!isAdmin()){setSheetStatus('Sign in as Admin to create a song draft.');return}
   if(!sheetFile){setSheetStatus('Choose a music sheet image or PDF first.');return}
@@ -3136,10 +3353,28 @@ async function processMusicSheet(){
   try{
     setSheetStatus('Loading OCR engine…');var OCR=await loadSheetScript('https://cdn.jsdelivr.net/npm/tesseract.js@v5.0.0/dist/tesseract.min.js','Tesseract');
     var canvases=await sheetFileCanvases();setSheetStatus('Starting chord-symbol recognition…');
-    worker=await OCR.createWorker('eng',1,{logger:function(m){if(m&&m.status){var pct=typeof m.progress==='number'?' ('+Math.round(m.progress*100)+'%)':'';setSheetStatus('Reading music sheet: '+m.status+pct)}},workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@v5.0.0/dist/worker.min.js',langPath:'https://tessdata.projectnaptha.com/4.0.0',corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@v5.0.0'});
-    var lines=[],raw=[];for(var i=0;i<canvases.length;i++){setSheetStatus('Reading page '+(i+1)+' of '+canvases.length+'…');var res=await worker.recognize(canvases[i]),data=res&&res.data||{};if(data.text)raw.push('--- Page '+(i+1)+' ---\n'+data.text);(data.lines||[]).forEach(function(line){if(line&&line.text)lines.push(String(line.text).trim())})}
+    var label='';
+    worker=await sheetCreateOcrWorker(OCR,function(m){if(m&&m.status){var pct=typeof m.progress==='number'?' ('+Math.round(m.progress*100)+'%)':'';setSheetStatus((label||'Reading music sheet')+': '+m.status+pct)}});
+    var lines=[],raw=[];
+    for(var i=0;i<canvases.length;i++){
+      var pageTag='Page '+(i+1)+' of '+canvases.length;
+      setSheetStatus(pageTag+': enhancing image…');await new Promise(function(r){setTimeout(r,30)});
+      var prep=sheetOcrPrepare(canvases[i]);
+      var plan=[{img:prep.bin,psm:'6',name:'enhanced scan'},{img:prep.gray,psm:'4',name:'grayscale scan'},{img:prep.bin,psm:'11',name:'sparse text'}];
+      if(canvases.length>3)plan=plan.slice(0,2);
+      var best=null;
+      for(var k=0;k<plan.length;k++){
+        label=pageTag+' · '+plan[k].name;
+        await worker.setParameters({tessedit_pageseg_mode:plan[k].psm,preserve_interword_spaces:'1',user_defined_dpi:'300'});
+        var res=await worker.recognize(plan[k].img),data=res&&res.data||{},ln=sheetOcrLinesOf(data),sc=sheetOcrScore(ln,data);
+        if(!best||sc.score>best.sc.score)best={data:data,ln:ln,sc:sc};
+        if(sc.chords>=4&&(data.confidence||0)>=88)break;
+      }
+      prep=null;
+      if(best){if(best.data.text)raw.push('--- Page '+(i+1)+' (confidence '+Math.round(best.data.confidence||0)+'%) ---\n'+best.data.text);best.ln.forEach(function(t){lines.push(t)})}
+    }
     sheetRaw=raw.join('\n\n');sheetDraft=sheetBuildChart(lines);sheetProcessed=true;
-    sheetStatus=sheetDraft?'Basic OCR finished. Review carefully—OCR often misses symbols or confuses flats, sharps, and chord qualities.':'Basic OCR found no reliable chord progression. Try AI extraction, a clearer scan, or enter the chords manually.';
+    sheetStatus=sheetDraft?'Basic OCR finished. Review carefully—OCR can still confuse flats, sharps, and chord qualities.':'Basic OCR found no reliable chord progression. Try AI extraction, a clearer scan, or enter the chords manually.';
   }catch(e){sheetStatus=(e&&e.message)||'Could not read this music sheet. Try a JPG/PNG scan or a different PDF.';sheetProcessed=false}
   finally{sheetBusy=false;if(worker){try{await worker.terminate()}catch(e){}}draw()}
 }
@@ -4005,6 +4240,7 @@ function draw(){drawMain();try{if(mode!=="edit")decorateVolta()}catch(e){}syncPr
 function drawMain(){
   if(view!=="song")window.__lastSongRendered=null;
   try{updateXposeFab()}catch(e){}
+  try{updateAutoScrollFab()}catch(e){}
   var a=document.getElementById("app");
   if(a)a.classList.toggle("song-swipe-enabled",view==="song"&&mode==="view");
   // Admin-only edit states must not persist if the session changes to Guest or signed-out.
@@ -4324,7 +4560,7 @@ document.addEventListener('touchstart',function(e){
   var header=document.querySelector('#app .top');
   if(header){var hr=header.getBoundingClientRect();if(y>=hr.top-8&&y<=hr.bottom+8)return;}
   if(target.closest('#app .top'))return;
-  if(target.closest('#xposeFab,button,a,input,textarea,select,summary,[contenteditable="true"]'))return;
+  if(target.closest('#xposeFab,#autoScrollFab,button,a,input,textarea,select,summary,[contenteditable="true"]'))return;
   var app=document.getElementById('app');if(!app)return;
   swipeState={x:e.touches[0].clientX,y:y,start:Date.now(),width:window.innerWidth||app.getBoundingClientRect().width,app:app,moved:false,horizontal:false,direction:0,next:null,preview:null,timer:null};
 },{passive:true,capture:true});
@@ -4518,13 +4754,125 @@ window.addEventListener("scroll",function(){
   if(fabExpanded&&Math.abs(window.scrollY-(fabScrollY||0))>6)setXposeExpanded(false);
 },{passive:true});
 
+/* ---------- Floating auto-scroll control (Song view) ---------- */
+var AS_DEFAULT=.25,asFab=null,asTrack=null,asT=.25,asPlaying=false,asRaf=0,asLast=0,asPos=0,asSongId=null,asDragging=false,asTouching=false,asUserUntil=0;
+function asSpeed(){return 8*Math.pow(30,asT)}            /* px per second: 8 (slowest) to 240 (fastest) */
+function asLevel(){return Math.round(1+asT*9)}
+/* Speed is remembered per song, on this device only (stored with the song's other local display settings). */
+function asLoadFor(s){
+  var v=NaN;try{var p=s&&s.id?displayPrefs[s.id]:null;if(p)v=parseFloat(p.scrollSpeed)}catch(e){}
+  asT=isFinite(v)?Math.max(0,Math.min(1,v)):AS_DEFAULT;
+}
+function asSave(){
+  var s=song();if(!s)return;
+  getDisplayPrefs(s).scrollSpeed=Math.round(asT*1000)/1000;saveDisplayPrefs();
+}
+function asRender(){
+  if(!asFab)return;
+  var pct=(asT*100)+"%";
+  asFab.querySelector("#asThumb").style.top=pct;
+  asFab.querySelector("#asFill").style.height=pct;
+  var b=asFab.querySelector("#asBubble");b.style.top=pct;b.textContent=asLevel();
+  asTrack.setAttribute("aria-valuenow",String(asLevel()));
+  asTrack.setAttribute("aria-valuetext","Speed "+asLevel()+" of 10");
+  var pb=asFab.querySelector("#asPlay");
+  pb.setAttribute("aria-label",asPlaying?"Pause auto-scroll":"Start auto-scroll");
+  asFab.classList.toggle("playing",asPlaying);
+}
+function asSetT(t){asT=Math.max(0,Math.min(1,t));asRender()}
+function asScrollTo(y){
+  try{window.scrollTo({top:y,left:0,behavior:"instant"})}catch(e){window.scrollTo(0,y)}
+}
+function asMax(){return Math.max(0,document.documentElement.scrollHeight-window.innerHeight)}
+function asFrame(ts){
+  if(!asPlaying)return;
+  if(!asLast)asLast=ts;
+  var dt=Math.min(.1,(ts-asLast)/1000);asLast=ts;
+  var y=window.scrollY||window.pageYOffset||0;
+  var max=asMax();
+  if(asTouching||ts<asUserUntil||Math.abs(y-asPos)>1.5){  /* the reader is scrolling by hand: let them, then carry on from where they leave off */
+    if(Math.abs(y-asPos)>1.5)asUserUntil=ts+160;
+    asPos=y;
+    asRaf=requestAnimationFrame(asFrame);return;
+  }
+  asPos=Math.min(max,asPos+asSpeed()*dt);
+  asScrollTo(asPos);
+  if(asPos>=max-.5){asStop();return}                     /* reached the end of the chart */
+  asRaf=requestAnimationFrame(asFrame);
+}
+function asStart(){
+  var max=asMax();if(max<=0)return;
+  var y=window.scrollY||window.pageYOffset||0;
+  if(y>=max-2){asScrollTo(0);y=0}                        /* at the end: start over from the top */
+  asPos=y;asLast=0;asPlaying=true;asRender();
+  cancelAnimationFrame(asRaf);asRaf=requestAnimationFrame(asFrame);
+}
+function asStop(){
+  asPlaying=false;cancelAnimationFrame(asRaf);asRaf=0;asLast=0;asRender();
+}
+function asFromPointer(e){
+  var r=asTrack.getBoundingClientRect();
+  asSetT((e.clientY-r.top)/r.height);
+}
+function ensureAutoScrollFab(){
+  if(asFab&&document.body.contains(asFab))return asFab;
+  var f=document.createElement("div");
+  f.id="autoScrollFab";f.setAttribute("role","group");f.setAttribute("aria-label","Auto-scroll");
+  f.innerHTML='<button type="button" id="asPlay" aria-label="Start auto-scroll"><svg class="ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="ic-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>'
+    +'<div id="asTrack" role="slider" tabindex="0" aria-label="Auto-scroll speed" aria-orientation="vertical" aria-valuemin="1" aria-valuemax="10" aria-valuenow="3"><div id="asFill"></div><div id="asThumb"></div><div id="asBubble">3</div></div>';
+  document.body.appendChild(f);asFab=f;asTrack=f.querySelector("#asTrack");
+  f.querySelector("#asPlay").addEventListener("click",function(e){e.stopPropagation();if(asPlaying)asStop();else asStart()});
+  f.addEventListener("click",function(e){e.stopPropagation()});
+  asTrack.addEventListener("pointerdown",function(e){
+    if(e.pointerType==="mouse"&&e.button!==0)return;
+    asDragging=true;f.classList.add("dragging");
+    try{asTrack.setPointerCapture(e.pointerId)}catch(err){}
+    asFromPointer(e);if(e.cancelable)e.preventDefault();
+  });
+  asTrack.addEventListener("pointermove",function(e){if(asDragging)asFromPointer(e)});
+  function endDrag(){if(!asDragging)return;asDragging=false;f.classList.remove("dragging");asSave()}
+  asTrack.addEventListener("pointerup",endDrag);
+  asTrack.addEventListener("pointercancel",endDrag);
+  asTrack.addEventListener("lostpointercapture",endDrag);
+  asTrack.addEventListener("keydown",function(e){
+    var d=0;
+    if(e.key==="ArrowDown"||e.key==="ArrowRight")d=.1;else if(e.key==="ArrowUp"||e.key==="ArrowLeft")d=-.1;
+    else if(e.key==="Home"){asSetT(0);asSave();e.preventDefault();return}
+    else if(e.key==="End"){asSetT(1);asSave();e.preventDefault();return}
+    if(!d)return;
+    e.preventDefault();asSetT(asT+d);asSave();
+  });
+  asRender();
+  return f;
+}
+function updateAutoScrollFab(){
+  var s=(view==="song"&&mode==="view"&&!isCreatingSong&&!practiceMode)?song():null;
+  if(!s){
+    if(asPlaying)asStop();
+    asSongId=null;
+    if(asFab)asFab.classList.remove("show","dragging");
+    return;
+  }
+  if(asSongId!==null&&asSongId!==s.id&&asPlaying)asStop();  /* switched songs */
+  var fab=ensureAutoScrollFab();
+  if(asSongId!==s.id){asSongId=s.id;asLoadFor(s);asRender()}  /* load this song's saved speed */
+  fab.classList.add("show");
+}
+/* Manual scrolling does not stop auto-scroll: it just yields to the reader, then resumes.
+   Auto-scroll stops only with the pause button, when leaving the song (Back / switching songs), or at the end of the chart. */
+function asInFab(e){var t=e.target&&e.target.nodeType===1?e.target:(e.target&&e.target.parentElement);return !!(t&&t.closest&&t.closest("#autoScrollFab"))}
+document.addEventListener("touchstart",function(e){if(asPlaying&&!asInFab(e))asTouching=true},{passive:true,capture:true});
+["touchend","touchcancel"].forEach(function(n){document.addEventListener(n,function(e){if(e.touches&&e.touches.length)return;asTouching=false;asUserUntil=performance.now()+250},{passive:true,capture:true})});
+window.addEventListener("wheel",function(){if(asPlaying)asUserUntil=performance.now()+250},{passive:true});
+document.addEventListener("visibilitychange",function(){if(document.hidden&&asPlaying)asStop()});
+
 /* ---------- Two-finger pinch to zoom (View mode) ---------- */
 var pinchState=null;
 function pinchDist(t){var dx=t[0].clientX-t[1].clientX,dy=t[0].clientY-t[1].clientY;return Math.sqrt(dx*dx+dy*dy)}
 document.addEventListener("touchstart",function(e){
   if(view!=="song"||mode!=="view"||e.touches.length!==2)return;
   var t=e.target&&e.target.nodeType===1?e.target:(e.target&&e.target.parentElement);
-  if(t&&t.closest&&t.closest("#xposeFab"))return;
+  if(t&&t.closest&&t.closest("#xposeFab,#autoScrollFab"))return;
   var d=pinchDist(e.touches);if(d<10)return;
   if(swipeState)cancelSwipeImmediately();
   pinchState={d:d,z:zoom};
