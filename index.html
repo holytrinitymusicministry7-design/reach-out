@@ -2171,8 +2171,10 @@ function simplifyChart(txt,ts){
   return serialize(it);
 }
 function effChordView(s){return getDisplayPrefs(s).chordView==="simple"?"simple":"standard"}
-function viewChart(s){var t=displayChart(s);return(mode!=="edit"&&!isCreatingSong&&effChordView(s)==="simple")?simplifyChart(t,s.ts):t}
-function displayChart(s){var st=displayTranspose(s);return st?transposeText(s.chart||"",st,useFlat(displayKey(s))):(s.chart||"")}
+function viewChart(s){var t=displayChart(s,true);return(mode!=="edit"&&!isCreatingSong&&effChordView(s)==="simple")?simplifyChart(t,s.ts):t}
+/* When a song has a music score, the score is the source of truth: reading chords from it keeps every chord on the exact beat it sits on (older saved charts may have lost that). */
+function scoreChartText(s){if(s&&s.score&&typeof SCORE!=="undefined"&&SCORE.gen){try{var g=SCORE.gen(s.score);if(g&&g.chart)return g.chart}catch(e){}}return s.chart||""}
+function displayChart(s,fromScore){var base=fromScore?scoreChartText(s):(s.chart||""),st=displayTranspose(s);return st?transposeText(base,st,useFlat(displayKey(s))):base}
 function sourceChartFromDisplay(txt,s){var st=displayTranspose(s);return st?transposeText(txt,-st,useFlat(s.key||"C")):txt}
 function isStandardChordLine(line){
   var v=String(line||"").trim();if(!v||/^\[[^\]]+\]$/.test(v))return false;
@@ -5782,7 +5784,16 @@ function ui(){var p=document.getElementById('pbPlay');if(p)p.innerHTML=SW.isPlay
 /* score -> chart text, lyrics-over-chords text, key */
 function gen(S){var A=(S.L&&S.L[0])||S.ev||[],t=(S.ts||'4/4').split('/').map(Number),cap=t[0]*4/t[1],ln=function(e){return e.dur*(e.dot?1.5:1)},bars=[],cu=[],b=0,rows=[],row=null,pv='';
   A.forEach(function(e){cu.push(e);b+=ln(e);if(b>=cap-1e-6){bars.push(cu);cu=[];b=0}});if(cu.length)bars.push(cu);
-  bars.forEach(function(ev,i){var f=ev[0],cs2=ev.filter(function(e){return e.chord}).map(function(e){return e.chord}),c=cs2.length?((f.chord?'':'- ')+cs2.join(' ')):'-',same=c===pv&&c!=='-';pv=c;if(same)c='%';
+  /* Chord text for one bar that keeps each chord on the beat it really sits on (e.g. Gm on 1, Dsus4 on 4 -> "Gm - - Dsus4"). */
+  function barTok(ev){var beats=t[0]||4,bu=4/(t[1]||4),off=0,slots=[],n=0,i,k,idx,last=-1,pos=[],chs=[],def,same=true,tk=[];
+    ev.forEach(function(e){if(e.chord){idx=Math.min(beats-1,Math.max(0,Math.floor(off/bu+1e-6)));while(slots[idx]&&idx<beats-1)idx++;if(!slots[idx]){slots[idx]=e.chord;n++}}off+=ln(e)});
+    if(!n)return'-';
+    for(i=0;i<beats;i++)if(slots[i]){pos.push(i);chs.push(slots[i]);last=i}
+    def=n<=1?[0]:(n===2&&beats===6?[0,3]:(n===2&&(beats===3||beats===4)?[0,2]:chs.map(function(_,j){return Math.round(j*(beats-1)/Math.max(1,n-1))})));
+    for(k=0;k<n;k++)if(pos[k]!==def[k]){same=false;break}
+    if(same)return chs.join(' ');
+    for(i=0;i<=last;i++)tk.push(slots[i]||'-');return tk.join(' ')}
+  bars.forEach(function(ev,i){var f=ev[0],c=barTok(ev),same=c===pv&&c!=='-';pv=c;if(same)c='%';
     var o=(i==0?'{'+S.ts+'} ':'')+(f.rs?': ':'')+(f.vo?'<'+f.vo+'.> ':'')+c+(ev[ev.length-1].bl==='repend'?' :':'');
     if(f.sec){rows.push({sec:f.sec});row=null}
     if(!row||row.bars.length>=4){row={bars:[],ev:[]};rows.push(row)}row.bars.push(o);row.ev.push(ev)});
