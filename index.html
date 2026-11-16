@@ -2785,9 +2785,12 @@ function isLiveG(g){return !!(g&&g.live&&!g.localGroup)}
 function canEditGroup(g){return !!g&&(isPersonalGroup(g)||(isAdmin()&&!isLiveG(g)))}
 function liveDoc(id){return id?(songs.find(function(x){return x.id===id&&x.g&&x.live&&!x.del&&!x.localGroup})||null):null}
 function pubMembers(g){var have={};realSongs().forEach(function(x){have[x.id]=1});return (g.members||[]).filter(function(id){return have[id]})}
-function liveUpToDate(g,lv){return !!lv&&String(lv.title||"")===String(g.title||"")&&JSON.stringify(lv.members||[])===JSON.stringify(pubMembers(g))&&String(lv.notes||"")===String(g.notes||"")}
+/* Notes belong to the live group: a private draft ("Edit a Copy") always mirrors the live notes so it never shows or re-publishes stale ones. */
+function pullLiveNotes(g){if(!g||!isPersonalGroup(g)||!g.liveId)return;var lv=liveDoc(g.liveId);if(!lv)return;var n=String(lv.notes||"");if(n!==String(g.notes||"")){if(n)g.notes=n;else delete g.notes;savePersonalGroups()}}
+function liveUpToDate(g,lv){pullLiveNotes(g);return !!lv&&String(lv.title||"")===String(g.title||"")&&JSON.stringify(lv.members||[])===JSON.stringify(pubMembers(g))&&String(lv.notes||"")===String(g.notes||"")}
 function publishGroup(g){
   if(!isAdmin()||!isPersonalGroup(g))return;
+  pullLiveNotes(g);
   if(isSundayG(g)){toast("Sunday is a reserved group name. Rename this group first.",3200);return}
   var mem=pubMembers(g),first=!liveDoc(g.liveId);
   if(!window.confirm((first?'Publish "':'Update live group "')+(g.title||"Untitled")+'" for all users? ('+mem.length+' song'+(mem.length===1?'':'s')+')'))return;
@@ -3036,6 +3039,7 @@ var notesEditId=null,notesDraft="";
 function linkifyNotes(t){return esc(t).replace(/(https?:\/\/[^\s<]+)/g,function(u){var tail=(u.match(/[.,;:!?)]+$/)||[""])[0],core=tail?u.slice(0,-tail.length):u;return '<a href="'+core+'" target="_blank" rel="noopener noreferrer">'+core+'</a>'+tail})}
 function groupNotesHTML(){
   var g=grp?gById(grp):null;if(!g)return "";
+  pullLiveNotes(g);
   var can=canEditGroup(g),txt=String(g.notes||"").trim();
   if(can&&notesEditId===g.id)return '<section class="group-notes editing"><div class="group-notes-head"><b>Announcements &amp; notes</b></div><textarea id="gnText" maxlength="2000" aria-label="Group announcements and notes" placeholder="Add announcements or notes for this group&#10;e.g. Key of G \u00B7 Singer: Maria \u00B7 Keys: John \u00B7 Drums: Sam">'+esc(notesDraft)+'</textarea><div class="group-notes-actions"><button type="button" id="gnCancel">Cancel</button><button type="button" class="p" id="gnSave">Save</button></div></section>';
   if(txt)return '<section class="group-notes"><div class="group-notes-head"><b>Announcements &amp; notes</b>'+(can?'<button type="button" id="gnEdit" aria-label="Edit announcements and notes">Edit</button>':'')+'</div><div class="group-notes-body">'+linkifyNotes(txt)+'</div></section>';
@@ -3045,7 +3049,7 @@ function groupNotesHTML(){
 function bindGroupNotes(){
   var g=grp?gById(grp):null;if(!g)return;
   var $=function(id){return document.getElementById(id)};
-  var open=function(){if(!canEditGroup(g))return;notesEditId=g.id;notesDraft=String(g.notes||"");draw();var t=$("gnText");if(t){t.focus();try{t.setSelectionRange(t.value.length,t.value.length)}catch(e){}}};
+  var open=function(){if(!canEditGroup(g))return;pullLiveNotes(g);notesEditId=g.id;notesDraft=String(g.notes||"");draw();var t=$("gnText");if(t){t.focus();try{t.setSelectionRange(t.value.length,t.value.length)}catch(e){}}};
   if($("gnAdd"))$("gnAdd").onclick=open;
   if($("gnEdit"))$("gnEdit").onclick=open;
   var t=$("gnText");if(!t)return;
