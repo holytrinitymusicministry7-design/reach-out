@@ -1,5 +1,5 @@
 // Bump CACHE each time you upload a new version so phones refresh their saved copy.
-const CACHE = "chordbook-v1";
+const CACHE = "chordbook-v3";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png", "./icon-512-maskable.png"];
 
 self.addEventListener("install", e => {
