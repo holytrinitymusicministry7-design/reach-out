@@ -73,7 +73,7 @@ textarea{font-family:ui-monospace,Menlo,Consolas,monospace;min-height:210px;resi
 .line>.tsig.mid{border-left:2px solid var(--ink);padding:0 3px}
 .line>.tsig.mid+.bar{border-left:0}
 .song-tempo{margin:-6px 0 8px;font-weight:650;color:var(--mut);font-size:15px}
-.song-tempo .tempo-note{font-size:1.15em;color:var(--ink)}
+.song-tempo .tempo-note{font-size:1.15em;color:var(--ink)}.song-tempo .song-tempo-sep{margin:0 2px;opacity:.7}
 .ts-guide{margin-top:12px;font-size:13px;color:var(--mut);line-height:1.45}
 .ts-guide summary{cursor:pointer;font-weight:650;color:var(--acc)}
 .ts-guide code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:12px;color:var(--ink)}
@@ -1970,7 +1970,9 @@ function tsLine(ids,cells,marks,colOf,widthCss){
   return wrapTs('<div class="line" style="grid-template-columns:'+cols.join(" ")+';width:'+widthCss+'">'+html+'</div>',marks[ids[0]]);
 }
 function wrapTs(lineHTML,label){return label?'<div class="tsrow">'+tsigHTML(label)+lineHTML+'</div>':lineHTML}
-function tempoHTML(s){var t=String((s&&s.tempo)||"").trim();if(!t)return"";var num=/^\d{1,3}(\.\d+)?$/.test(t);return'<div class="song-tempo">'+(num?'<span class="tempo-note">\u2669</span> = '+esc(t)+' BPM':esc(t))+'</div>'}
+/* Key signature text for the song header, e.g. "G major (1\u266F)", "D minor (1\u266D)", "C major". Follows the key the reader is currently viewing (transposed key included). */
+function keySigText(k){var p=parseKey(k),i=idx(p.r);if(i<0)return"";var hasFl=p.r.length>1&&p.r.charAt(1)==="b",hasSh=p.r.length>1&&p.r.charAt(1)==="#",pc=(i+(p.m?3:0))%12,f=(pc*7)%12,v=hasFl?f-12:f;if(!hasFl&&!hasSh&&v>6)v-=12;if(v>7)v-=12;if(v<-7)v+=12;var root=p.r.replace("#","\u266F").replace(/^([A-G])b$/,"$1\u266D");return root+(p.m?" minor":" major")+(v?" ("+Math.abs(v)+(v>0?"\u266F":"\u266D")+")":"")}
+function tempoHTML(s){var t=String((s&&s.tempo)||"").trim(),pk=getDisplayPrefs(s).key,k=(pk||(s&&s.key)||"").trim(),ks=k?keySigText(k):"";if(!t&&!ks)return"";var num=/^\d{1,3}(\.\d+)?$/.test(t),tp=t?(num?'<span class="tempo-note">\u2669</span> = '+esc(t)+' BPM':esc(t)):"";return'<div class="song-tempo">'+(ks?'<span class="song-keysig">Key: '+esc(ks)+'</span>':'')+(ks&&tp?'<span class="song-tempo-sep" aria-hidden="true"> \u00B7 </span>':'')+tp+'</div>'}
 function endTxt(s,edit){s=String(s||"");return edit?s:s.replace(/\s*\(\s*\d*\s*\)\s*$/,"")}
 function chartHTMLStandard(txt,big,edit,n,ts){n=n||4;
   var out=[],tm=tsTracker(ts);
@@ -3054,7 +3056,10 @@ function bindGroupNotes(){
     var v=t.value.trim().slice(0,2000);
     if(v)g.notes=v;else delete g.notes;
     if(isPersonalGroup(g))savePersonalGroups();
-    save();notesEditId=null;notesDraft="";draw();toast(v?"Notes saved":"Notes cleared");
+    /* Announcements are time-sensitive: if this group is already published, push the notes to the live copy right away (songs/title stay private until "Update for everyone"). */
+    var lvn=isPersonalGroup(g)&&isAdmin()&&g.liveId?liveDoc(g.liveId):null;
+    if(lvn){if(v)lvn.notes=v;else delete lvn.notes;lvn.u=Date.now()}
+    save();if(lvn)schedule(200);notesEditId=null;notesDraft="";draw();toast(lvn?(v?"Notes saved and live for everyone":"Notes cleared for everyone"):(v?"Notes saved":"Notes cleared"));
   };
 }
 function groupManageHTML(){
@@ -4329,7 +4334,7 @@ function drawMain(){
     var vOpts=[];if(songHasStandard(s))vOpts.push(["standard","Lyrics"]);if(songHasChord(s))vOpts.push(["chord","Chords"]);if(s.score)vOpts.push(["score","Score"]);
     var vCur=scoreViewOn(s)?"score":(standardMode?"standard":"chord");
     h+='<div class="setting-field" style="grid-column:1/-1"><label>View</label><div class="chord-style-switch'+(vOpts.length<2?' disabled':'')+'" id="viewModeSwitch" role="group" aria-label="View">'+vOpts.map(function(o){return '<button type="button" data-view="'+o[0]+'" class="'+(o[0]===vCur?'active':'')+'" aria-pressed="'+(o[0]===vCur?'true':'false')+'"'+(vOpts.length<2?' disabled':'')+'>'+o[1]+'</button>'}).join('')+'</div>'+(vOpts.length<2?'<p class="setting-help">'+(songHasChord(s)?'Only a Chord chart is saved for this song.':songHasStandard(s)?'Only a Lyrics chart is saved for this song.':'No chart is saved for this song yet.')+'</p>':'')+'</div>';
-    if(vCur==="score"){var ssz=Math.round((getDisplayPrefs(s).scoreSize||defScoreSize())*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreSize">Note size <span id="scoreSizeVal" style="font-weight:500;color:var(--mut)">'+ssz+'%</span></label><input type="range" id="scoreSize" min="60" max="180" step="5" value="'+ssz+'" style="width:100%;min-height:32px"></div>';var ssp=Math.round((getDisplayPrefs(s).scoreSpacing||1)*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreSpacing">Note spacing <span id="scoreSpacingVal" style="font-weight:500;color:var(--mut)">'+ssp+'%</span></label><input type="range" id="scoreSpacing" min="60" max="200" step="5" value="'+ssp+'" style="width:100%;min-height:32px"></div>';}
+    if(vCur==="score"){var ssz=Math.round((getDisplayPrefs(s).scoreSize||defScoreSize())*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreSize">Note size <span id="scoreSizeVal" style="font-weight:500;color:var(--mut)">'+ssz+'%</span></label><input type="range" id="scoreSize" min="60" max="180" step="5" value="'+ssz+'" style="width:100%;min-height:32px"></div>';var ssp=Math.round((getDisplayPrefs(s).scoreSpacing||1)*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreSpacing">Note spacing <span id="scoreSpacingVal" style="font-weight:500;color:var(--mut)">'+ssp+'%</span></label><input type="range" id="scoreSpacing" min="60" max="200" step="5" value="'+ssp+'" style="width:100%;min-height:32px"></div>';h+='<div class="setting-field" style="grid-column:1/-1"><label class="ck" for="scoreNames" style="display:flex;align-items:center;gap:10px;min-height:36px;cursor:pointer"><input type="checkbox" id="scoreNames"'+(getDisplayPrefs(s).noteNames?' checked':'')+' style="width:20px;height:20px;flex:none"><span>Show note names</span></label><p class="setting-help">Writes the note letter (C, D, E\u2026) inside each notehead.</p></div>';}
     if(vCur==="chord")h+='<div class="setting-field" style="grid-column:1/-1"><label>Chord view</label><div class="chord-style-switch" role="group" aria-label="Chord view"><button type="button" id="chordViewSimple" class="'+(effChordView(s)==="simple"?"active":"")+'" aria-pressed="'+(effChordView(s)==="simple"?'true':'false')+'">Simple</button><button type="button" id="chordViewStandard" class="'+(effChordView(s)==="standard"?"active":"")+'" aria-pressed="'+(effChordView(s)==="standard"?'true':'false')+'">Standard</button></div></div>';
     if(vCur==="chord")h+='<div class="setting-field"><label>Chord detail</label><div class="chord-style-switch" role="group" aria-label="Chord view detail"><button type="button" id="chordStyleStandard" class="'+(effChordStyle(s)==="standard"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="standard"?'true':'false')+'">Standard</button><button type="button" id="chordStyleDetailed" class="'+(effChordStyle(s)==="detailed"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="detailed"?'true':'false')+'">Detailed</button></div></div>';
     if(vCur==="chord")h+='<div class="setting-field"><label for="pl">Measures per row</label><select id="pl"><option value="auto"'+(shownBars==="auto"?' selected':'')+'>Auto</option>'+[1,2,3,4,5,6,8].map(function(k){return '<option'+(k===shownBars?' selected':'')+'>'+k+'</option>'}).join('')+'</select></div>';
@@ -4405,6 +4410,7 @@ function drawMain(){
   var slc=document.getElementById("showLyricsChords");if(slc)slc.onclick=function(){getDisplayPrefs(s).lyricsOnly=false;saveDisplayPrefs();draw()};
   var slo=document.getElementById("showLyricsOnly");if(slo)slo.onclick=function(){getDisplayPrefs(s).lyricsOnly=true;saveDisplayPrefs();draw()};
   var ssp0=document.getElementById("scoreSpacing");if(ssp0){ssp0.oninput=function(){var v=(+this.value)/100,lb=document.getElementById("scoreSpacingVal");if(lb)lb.textContent=this.value+"%";getDisplayPrefs(s).scoreSpacing=v;SW.setSpacing(v)};ssp0.onchange=function(){saveDisplayPrefs()}}
+  var snm=document.getElementById("scoreNames");if(snm){snm.onchange=function(){getDisplayPrefs(s).noteNames=this.checked;SW.setNames(this.checked);saveDisplayPrefs()}}
   var ssl=document.getElementById("scoreSize");if(ssl){ssl.oninput=function(){var v=(+this.value)/100,lb=document.getElementById("scoreSizeVal");if(lb)lb.textContent=this.value+"%";getDisplayPrefs(s).scoreSize=v;SW.setScale(v)};ssl.onchange=function(){saveDisplayPrefs()}}
   var cv0=document.getElementById("chordViewSimple");if(cv0)cv0.onclick=function(){getDisplayPrefs(s).chordView="simple";saveDisplayPrefs();draw()};
   var cv1=document.getElementById("chordViewStandard");if(cv1)cv1.onclick=function(){getDisplayPrefs(s).chordView="standard";saveDisplayPrefs();draw()};
@@ -5180,7 +5186,7 @@ if("serviceWorker" in navigator)window.addEventListener("load",function(){naviga
 (function(){
 
 
-const EMB=false,$=id=>document.getElementById('sw_'+id),L='CDEFGAB',SEMI=[0,2,4,5,7,9,11],SH=170;let W=1000,NZ=1,NS=1,SPR=1,SPF=1;
+const EMB=false,$=id=>document.getElementById('sw_'+id),L='CDEFGAB',SEMI=[0,2,4,5,7,9,11],SH=170;let W=1000,NZ=1,NS=1,SPR=1,SPF=1,NN=false;const stemX=()=>RO&&NN?8.6:5.6;
 const KEYS={Cb:-7,Gb:-6,Db:-5,Ab:-4,Eb:-3,Bb:-2,F:-1,C:0,G:1,D:2,A:3,E:4,B:5,'F#':6,'C#':7},SH_O=[38,35,39,36,33,37,34],FL_O=[34,37,33,36,32,35,31];
 /* Engraved notation glyphs as vector paths (outlines from GNU FreeSerif, 1000 units/em, y-up).
    Drawn as paths so they look identical on every device instead of depending on installed fonts. */
@@ -5223,7 +5229,7 @@ function layout(){const [nu,de]=TS(),cap=nu*4/de,A=S.L,multi=A.some((a,i)=>i&&a.
    if(m.f0)m.f0.mx=xs;if(m.l0)m.l0.me=cx+m.tail*sf;m.xs=xs;m.xe=xs+m.w*sf;x=m.xe});
   s.items=s.lay[0]});
  return out}
-function noteSvg(it,top,bd){const e=it.e,x=it.x,on=((it.i==sel&&it.ly==cl)||(it.i==pi&&it.ly==0));const sup=e.rest&&it.ly>0;if(sup&&RO&&!on)return'';let o=`<g style="color:${on?'var(--sw-acc)':LC[it.ly||0]}${sup&&!on?';opacity:.28':''}">`;
+function noteSvg(it,top,bd){const e=it.e,x=it.x,nmv=RO&&NN&&!e.rest,hrx=nmv?9:6.3,hry=nmv?6.8:4.7,lw=nmv?14:10,stx=nmv?8.6:5.6,on=((it.i==sel&&it.ly==cl)||(it.i==pi&&it.ly==0));const sup=e.rest&&it.ly>0;if(sup&&RO&&!on)return'';let o=`<g style="color:${on?'var(--sw-acc)':LC[it.ly||0]}${sup&&!on?';opacity:.28':''}">`;
  if(on)o+=`<rect x="${x-it.w/2}" y="${top-40}" width="${it.w}" height="150" fill="currentColor" opacity=".09" rx="4"/>`;
  if(e.chord)o+=`<text x="${x}" y="${top-24}" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" font-family="Georgia,serif">${esc(e.chord)}</text>`;
  if(e.lyric)o+=`<text x="${x}" y="${top+92}" text-anchor="middle" font-size="15" fill="#1d1b18" font-family="Georgia,serif">${esc(e.lyric)}</text>`;
@@ -5237,15 +5243,16 @@ function noteSvg(it,top,bd){const e=it.e,x=it.x,on=((it.i==sel&&it.ly==cl)||(it.
    if(d<.5)o+=`<circle cx="${x-5}" cy="${top+22}" r="2.6" fill="currentColor"/>`}
   dotY=dy-5+(it.fd===undefined?0:(it.fd?-8:8))}
  else{const y=top+40-(e.d-bd)*5,rel=e.d-bd;dotY=rel%2==0?y-3.5:y;
-  for(let k=bd-2;k>=e.d;k-=2){const ly=top+40-(k-bd)*5;o+=`<line x1="${x-10}" x2="${x+10}" y1="${ly}" y2="${ly}" stroke="#1d1b18" stroke-width="1.3"/>`}
-  for(let k=bd+10;k<=e.d;k+=2){const ly=top+40-(k-bd)*5;o+=`<line x1="${x-10}" x2="${x+10}" y1="${ly}" y2="${ly}" stroke="#1d1b18" stroke-width="1.3"/>`}
-  if(e.a!=null)o+=accSvg({1:'sharp','-1':'flat',0:'nat'}[e.a],x-10,y,'currentColor',true);
-  o+=`<ellipse cx="${x}" cy="${y}" rx="6.3" ry="4.7" transform="rotate(-20 ${x} ${y})" fill="${e.dur<=1?'currentColor':'#fffdf8'}" stroke="currentColor" stroke-width="1.6"/>`;
-  if(e.dur<4){const up=it.bm?it.bm.up:(it.fd!==undefined?it.fd:rel<4),sx=up?x+5.6:x-5.6,ey=it.bm?it.bm.y(sx):(up?y-34:y+34);
+  for(let k=bd-2;k>=e.d;k-=2){const ly=top+40-(k-bd)*5;o+=`<line x1="${x-lw}" x2="${x+lw}" y1="${ly}" y2="${ly}" stroke="#1d1b18" stroke-width="1.3"/>`}
+  for(let k=bd+10;k<=e.d;k+=2){const ly=top+40-(k-bd)*5;o+=`<line x1="${x-lw}" x2="${x+lw}" y1="${ly}" y2="${ly}" stroke="#1d1b18" stroke-width="1.3"/>`}
+  if(e.a!=null)o+=accSvg({1:'sharp','-1':'flat',0:'nat'}[e.a],x-(nmv?14:10),y,'currentColor',true);
+  o+=`<ellipse cx="${x}" cy="${y}" rx="${hrx}" ry="${hry}" transform="rotate(-20 ${x} ${y})" fill="${e.dur<=1?'currentColor':'#fffdf8'}" stroke="currentColor" stroke-width="1.6"/>`;
+  if(nmv){const ac={1:'\u266F','-1':'\u266D'}[e.a??kacc(lidx(e.d),e._k)]||'';o+=`<text x="${x}" y="${y+3.4}" text-anchor="middle" font-size="${ac?9:10.5}" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="${e.dur<=1?'#fffdf8':'currentColor'}">${L[lidx(e.d)]}${ac?`<tspan font-size="7.5" dy="-2">${ac}</tspan>`:''}</text>`}
+  if(e.dur<4){const up=it.bm?it.bm.up:(it.fd!==undefined?it.fd:rel<4),sx=up?x+stx:x-stx,ey=it.bm?it.bm.y(sx):(up?y-34:y+34);
    o+=`<line x1="${sx}" x2="${sx}" y1="${y}" y2="${ey}" stroke="currentColor" stroke-width="1.5"/>`;
    for(let f=0;f<(it.bm?0:(e.dur<=.5?1:0)+(e.dur<=.25?1:0));f++){const o2=f*8*(up?1:-1);
     o+=up?`<path d="M${sx} ${ey+o2}q12 8 7 22" fill="none" stroke="currentColor" stroke-width="2"/>`:`<path d="M${sx} ${ey+o2}q12 -8 7 -22" fill="none" stroke="currentColor" stroke-width="2"/>`}}}
- if(e.dot)o+=`<circle cx="${x+12}" cy="${dotY}" r="2" fill="currentColor"/>`;
+ if(e.dot)o+=`<circle cx="${x+(nmv?15:12)}" cy="${dotY}" r="2" fill="currentColor"/>`;
  return o+'</g>'}
 const P1=110,P2=90,PB=80;let PH=1414,c1=Math.floor((PH-P1-PB)/SH),c2=Math.floor((PH-P2-PB)/SH);
 /* Note size (view mode): lay the score out on a smaller virtual page and scale it up, so bigger notes mean fewer measures per line and per page. */
@@ -5255,6 +5262,7 @@ function render(){SPF=RO?Math.max(.6,Math.min(2,SPR||1)):1;setNZ(RO?Math.max(.5,
  for(let p=0;p<np;p++)pg[p]=`<svg data-p="${p}" viewBox="0 0 ${W*NZ} ${PH*NZ}" xmlns="http://www.w3.org/2000/svg"><rect width="${W*NZ}" height="${PH*NZ}" fill="#fffdf8"/><g transform="scale(${NZ})">`+(p==0?`<text x="${W/2}" y="52" text-anchor="middle" font-size="30" font-weight="700" font-family="Georgia,serif" fill="#1d1b18">${esc(S.title)}</text><text x="${W-40}" y="82" text-anchor="end" font-size="14" font-style="italic" font-family="Georgia,serif" fill="#1d1b18">${esc(S.composer)}</text><text x="40" y="90" font-size="14" font-family="Georgia,serif" fill="#1d1b18">\u2669 = ${S.tempo}</text>`:`<text x="${W-40}" y="50" text-anchor="end" font-size="13" font-style="italic" font-family="Georgia,serif" fill="#6b665c">${esc(S.title)}</text>`)+`<text x="${W/2}" y="${PH-36}" text-anchor="middle" font-size="13" font-family="Georgia,serif" fill="#6b665c">${p+1}</text>`;
  sys.forEach((s,si)=>{const top=yTopOf(si),n=KEYS[s.key];let o='';
   for(let i=0;i<5;i++)o+=`<line x1="40" x2="${W-40}" y1="${top+i*10}" y2="${top+i*10}" stroke="#1d1b18" stroke-width="1"/>`;
+  if(s.ms.length)o+=`<text class="sw-mnum" x="41" y="${top-8}" font-size="14" font-weight="600" font-style="italic" font-family="Georgia,serif" fill="#3d3a34">${s.ms[0].m+1}</text>`;
   o+=`<line x1="40" x2="40" y1="${top}" y2="${top+40}" stroke="#1d1b18" stroke-width="1.5"/>
 ${S.clef=='treble'?glyphSvg('treble',40,top+33,.066,'#1d1b18'):glyphSvg('bass',42,top+43.7,.06,'#1d1b18')}`;
   const ord=n>0?SH_O:FL_O,sh=S.clef=='treble'?0:14;
@@ -5460,7 +5468,7 @@ function fromXml(t){const d=new DOMParser().parseFromString(t,'application/xml')
    if(tg=='barline'){const lc=n.getAttribute('location')||'right',bs=tx(n,'bar-style'),rp=n.querySelector('repeat')?.getAttribute('direction'),en=n.querySelector('ending');
     if(en){if(en.getAttribute('type')=='start'){const tm=/\d/.exec(en.textContent||''),nm=(en.getAttribute('number')||'1').charAt(0);let v=tm?tm[0]:nm;if(!tm&&v==prevVo&&prevBack)v=String(+v+1);curVo=v}else endVo=true}
     if(lc=='left'){if(rp=='forward')rsP=true}else rb={bs,rp};return}
-   if(tg=='harmony'){if(!q(n,'root-step'))return;const al=+tx(n,'root-alter')||0,ba=+tx(n,'bass-alter')||0,k=q(n,'kind'),kt=k?.getAttribute('text'),kv=k?.textContent||'';const cs0=tx(n,'root-step')+(al>0?'#':al<0?'b':'')+(kt?kt:(KM[kv]??''))+(q(n,'bass-step')?'/'+tx(n,'bass-step')+(ba>0?'#':ba<0?'b':''):'');hs.push({t:(cur+(+tx(n,'offset')||0))/dv,c:cs0});return}
+   if(tg=='harmony'){if(!q(n,'root-step'))return;const al=+tx(n,'root-alter')||0,ba=+tx(n,'bass-alter')||0,k=q(n,'kind'),kt=k?.getAttribute('text'),kv=k?.textContent||'';const cs0=tx(n,'root-step')+(al>0?'#':al<0?'b':'')+(kt?normKind(kt,kv):(KM[kv]??''))+(q(n,'bass-step')?'/'+tx(n,'bass-step')+(ba>0?'#':ba<0?'b':''):'');hs.push({t:(cur+(+tx(n,'offset')||0))/dv,c:cs0});return}
    if(tg=='forward'){cur+=(+tx(n,'duration')||0);const v=tx(n,'voice')||'1';if(v in vm)pad(vm[v],pos[vm[v]]+(+tx(n,'duration')||0)/dv);return}
    if(tg!='note'||q(n,'chord')||q(n,'grace'))return;
    const sf=tx(n,'staff');if(sf&&sf!='1')return;
@@ -5512,7 +5520,7 @@ const tiedFrom=(i,A=S.ev)=>{const a=A[i-1],b=A[i];return !!(a&&b&&a.tie&&!a.rest
 const tieLen=(i,A=S.ev)=>{let n=len(A[i]),k=i;while(A[k+1]&&tiedFrom(k+1,A)){n+=len(A[k+1]);k++}return n};
 function beamSvg(s,top,bd){const it=s.items;it.forEach(x=>x.bm=null);let o='';const [nu,de]=TS(),gl=de==8&&nu%3==0?1.5:de==2?2:1,ky=x=>x.m+':'+Math.floor((x.pos+1e-6)/gl),el=x=>!x.e.rest&&x.e.dur<=.5,yN=x=>top+40-(x.e.d-bd)*5;
  for(let i=0;i<it.length;){let j=i;if(el(it[i]))while(j+1<it.length&&el(it[j+1])&&ky(it[j+1])==ky(it[i]))j++;
-  if(j>i){const r=it.slice(i,j+1),up=r[0].fd!==undefined?r[0].fd:r.reduce((a,x)=>a+(x.e.d-bd-4),0)<0,X=x=>x.x+(up?5.6:-5.6),tip=x=>yN(x)+(up?-34:34),x0=X(r[0]),x1=X(r[r.length-1]),dy=Math.max(-10,Math.min(10,tip(r[r.length-1])-tip(r[0])));
+  if(j>i){const r=it.slice(i,j+1),up=r[0].fd!==undefined?r[0].fd:r.reduce((a,x)=>a+(x.e.d-bd-4),0)<0,X=x=>x.x+(up?stemX():-stemX()),tip=x=>yN(x)+(up?-34:34),x0=X(r[0]),x1=X(r[r.length-1]),dy=Math.max(-10,Math.min(10,tip(r[r.length-1])-tip(r[0])));
    const base=x=>tip(r[0])+dy*(x-x0)/(x1-x0);let sh=0;r.forEach(x=>{const nd=yN(x)+(up?-26:26)-base(X(x));sh=up?Math.min(sh,nd):Math.max(sh,nd)});
    const by=x=>base(x)+sh,k=up?2.3:-2.3,ln=(a,b,off,w)=>`<line x1='${a}' y1='${by(a)+off}' x2='${b}' y2='${by(b)+off}' stroke='${LC[it[0].ly||0]}' stroke-width='${w}'/>`;
    r.forEach(x=>x.bm={up,y:by});o+=ln(x0,x1,k,4.6);
@@ -5540,7 +5548,19 @@ $('tie').onclick=()=>edit(n=>{if(!n.rest)n.tie=!n.tie});
 $('slur').onclick=()=>edit(n=>{const v=n.slur>=4?0:(n.slur||0)+1;if(v)n.slur=v;else delete n.slur});
 addEventListener('keydown',e=>{if(!swActive()||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.ctrlKey||e.metaKey)return;if(e.key=='t')$('tie').click();if(e.key=='s')$('slur').click()});
 const _p2=panel;panel=function(){_p2();const e=S.ev[sel];$('tie').classList.toggle('on',!!(e&&e.tie));$('slur').classList.toggle('on',!!(e&&e.slur));$('slurs').textContent=e&&e.slur?'Slur · '+(e.slur+1)+' notes':'Slur (S)';$('trl').textContent=((S.tr||0)>0?'+':'')+(S.tr||0)+' st'};
-const KM={major:'',minor:'m',dominant:'7','major-seventh':'maj7','minor-seventh':'m7',diminished:'dim',augmented:'aug','diminished-seventh':'dim7','half-diminished':'m7b5','suspended-fourth':'sus4','suspended-second':'sus2','major-sixth':'6','minor-sixth':'m6','dominant-ninth':'9','minor-major':'m(maj7)'};
+const KM={major:'',minor:'m',dominant:'7','major-seventh':'maj7','minor-seventh':'m7',diminished:'dim',augmented:'aug','diminished-seventh':'dim7','half-diminished':'m7b5','suspended-fourth':'sus4','suspended-second':'sus2','major-sixth':'6','minor-sixth':'m6','dominant-ninth':'9','minor-major':'m(maj7)','major-ninth':'maj9','minor-ninth':'m9','dominant-11th':'11','minor-11th':'m11','dominant-13th':'13','major-13th':'maj13','minor-13th':'m13','augmented-seventh':'7#5'};
+/* Convert jazz / symbolic chord suffixes from MusicXML into standard wording (CΔ7 -> Cmaj7, C-7 -> Cm7, Cø -> Cm7b5 ...) */
+function normKind(t,kv){
+ let s=String(t).replace(/\s+/g,'').replace(/\u266F/g,'#').replace(/\u266D/g,'b').replace(/[\u2212\u2013\u2012]/g,'-');
+ s=s.replace(/[\u0394\u2206\u25B3\u25B5\u25B2]/g,'\u0394').replace(/\u0394(?=\d)/g,'maj').replace(/\u0394/g,'maj7');
+ s=s.replace(/^(minor|min|mi|-)/,'m');
+ s=s.replace(/\u00B0/g,'dim').replace(/\u00F87?/g,'m7b5').replace(/\u00D87?/g,'m7b5');
+ s=s.replace(/^\+7$/,'7#5').replace(/^\+$/,'aug').replace(/^dom(?=\d)/,'');
+ s=s.replace(/^(Maj|MAJ|maj|Ma|MA|ma|M)(?=\d)/,'maj').replace(/^(Maj|MAJ|maj|major|Major|Ma|MA|ma|M)$/,'');
+ s=s.replace(/^mmaj7$/,'m(maj7)').replace(/^m\(?maj7\)?$/,'m(maj7)').replace(/sus(?!\d)/g,'sus4');
+ if(s===''&&KM[kv])s=KM[kv];
+ return s}
+
 function barSvg(it,nx,top){const e=it.e,ln=(x,w,d)=>`<line x1='${x}' x2='${x}' y1='${top}' y2='${top+40}' stroke='#1d1b18' stroke-width='${w}'${d?` stroke-dasharray='${d}'`:''}/>`,dots=x=>`<circle cx='${x}' cy='${top+15}' r='2' fill='#1d1b18'/><circle cx='${x}' cy='${top+25}' r='2' fill='#1d1b18'/>`;let o='';
  if(e.rs){const x=(it.mx??(it.x-it.w/2))+2;o+=ln(x,4)+ln(x+5,1.3)+dots(x+11)}
  const t=e.bl||(it.bar?'single':''),b=(it.me??it.end)+1;
@@ -5605,6 +5625,7 @@ function swChanged(){if(loading||curTr)return;clearTimeout(tmr);tmr=setTimeout((
 window.SW={onChange:null,onBar:null,onEnd:null,isPlaying:()=>playing,
  setSpacing(v,quiet){SPR=Math.max(.6,Math.min(2,+v||1));if(!quiet&&RO&&S&&$('host'))render()},
  setScale(v,quiet){NS=Math.max(.5,Math.min(2,+v||1));if(!quiet&&RO&&S&&$('host'))render()},
+ setNames(v,quiet){NN=!!v;if(!quiet&&RO&&S&&$('host'))render()},
  load(score,ro,tr){if(tmr){clearTimeout(tmr);tmr=null;if(!curTr&&!RO&&SW.onChange)SW.onChange(JSON.parse(JSON.stringify(S)))}loading=true;curTr=tr||0;RO=!!ro||!!curTr;document.getElementById('swRoot').classList.toggle('ro',RO);S=Object.assign(blank(),JSON.parse(JSON.stringify(score||{})));if(!S.L&&!S.ev)S.ev=[];bind();if(!S.mode)S.mode=detMode();cl=0;sel=-1;hist=[];fut=[];window.__bpm=0;if(curTr)transpose(curTr);{const w=$('host').parentNode.clientWidth;if(w>200){$('zoom').value=Math.max(50,Math.min(140,Math.floor((w-36)/10)));zoom()}}commit();loading=false},
  flush(){if(tmr){clearTimeout(tmr);tmr=null;if(!curTr&&!RO&&SW.onChange)SW.onChange(JSON.parse(JSON.stringify(S)))}},
  discard(){if(tmr){clearTimeout(tmr);tmr=null}},
@@ -5667,7 +5688,7 @@ function toScore(s){var it=parseChart(s.chart||''),ts=/^\d{1,2}\/\d{1,2}$/.test(
 var loadedId=null;
 /* The score is editable only on the Music Score tab of Edit song (original key). Everywhere else it is read-only. */
 function lk(s){var ed=scoreTabOn(s);return s.id+':'+(ed?0:displayTranspose(s))+':'+(ed?'e':'v')}
-function ensure(s){var ed=scoreTabOn(s),k=lk(s);if(loaded===k)return;loaded=k;loadedId=s.id;try{SW.setScale(getDisplayPrefs(s).scoreSize||defScoreSize(),true);SW.setSpacing(getDisplayPrefs(s).scoreSpacing||1,true)}catch(e){}SW.load(Object.assign({},s.score,{title:s.title||s.score.title||'',composer:s.artist||s.score.composer||''}),!ed,ed?0:displayTranspose(s))}
+function ensure(s){var ed=scoreTabOn(s),k=lk(s);if(loaded===k)return;loaded=k;loadedId=s.id;try{SW.setScale(getDisplayPrefs(s).scoreSize||defScoreSize(),true);SW.setSpacing(getDisplayPrefs(s).scoreSpacing||1,true);SW.setNames(!!getDisplayPrefs(s).noteNames,true)}catch(e){}SW.load(Object.assign({},s.score,{title:s.title||s.score.title||'',composer:s.artist||s.score.composer||''}),!ed,ed?0:displayTranspose(s))}
 SW.onChange=function(S){var s=songs.filter(function(x){return x.id===loadedId})[0];if(!s)return;var g=gen(S);
   if(S.title)s.title=S.title;if(S.composer!=null)s.artist=S.composer;
   s.key=normKey(g.key);s.chart=g.chart;s.standardText=g.std;s.tempo=String(S.tempo);s.ts=S.ts;s.score=S;save()};
