@@ -54,6 +54,9 @@ textarea{font-family:ui-monospace,Menlo,Consolas,monospace;min-height:210px;resi
 .settings-collapse.open{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:transform .24s cubic-bezier(.32,.72,0,1),opacity .2s ease,visibility 0s}
 .settings-collapse-inner{overflow:visible;min-height:0}
 .settings-collapse .setting-panel{display:block;max-height:calc(100dvh - env(safe-area-inset-top,0px) - 88px);overflow:auto;overscroll-behavior:contain;margin:0;padding:18px;border:1px solid var(--hair,var(--line));border-radius:20px;background:color-mix(in srgb,var(--card) 94%,transparent);box-shadow:0 18px 54px rgba(0,0,0,.2);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%)}
+.settings-collapse.slider-dragging .setting-panel{visibility:hidden;background:transparent!important;border-color:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.settings-collapse.slider-dragging .setting-field.sl-active{visibility:visible;border-radius:14px;background:color-mix(in srgb,var(--card) 94%,transparent);box-shadow:0 0 0 10px color-mix(in srgb,var(--card) 94%,transparent),0 10px 34px rgba(0,0,0,.28)}
+.settings-collapse.slider-dragging .setting-field.sl-active .setting-help{display:none}
 .settings-collapse .setting-chart-section{padding-top:0!important;padding-left:0;border-top:0!important;border-left:0}
 .setting-quick-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px}
 .setting-quick-head .setting-section-title{margin:0}
@@ -1249,6 +1252,16 @@ html.perf-view .song-tempo,html.perf-view #sw_status{display:none!important}
 @media (max-height:560px){#autoScrollFab{--as-h:72px;bottom:calc(12px + env(safe-area-inset-bottom,0px))}}
 @media (prefers-reduced-motion:reduce){#autoScrollFab,#asThumb,#asBubble{transition:none}}
 </style>
+<style>
+.am-user{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--bg)}
+.am-badge{display:inline-block;font-size:11px;font-weight:650;padding:2px 9px;border-radius:99px;background:var(--fill);color:var(--mut);margin-left:6px;white-space:nowrap}
+.am-badge.am-off{background:#b3402f;color:#fff}
+.am-perms{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}
+.am-perms label,.am-act{display:flex;align-items:center;gap:6px;font-size:14px;margin:6px 0}
+.am-perms input,.am-act input{width:auto}
+.am-hide{display:none!important}
+#acctOv .modal{max-height:92dvh}
+</style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
@@ -2310,7 +2323,7 @@ function sig(s){
   return JSON.stringify(a);
 }
 function store(){try{songs=songs.filter(function(x){return !(x.g&&x.localGroup)});localStorage.setItem(LS,JSON.stringify(songs));localStorage.setItem(LS+":sent",JSON.stringify(sent));localStorage.setItem(LS+":personalGroups",JSON.stringify(personalGroups))}catch(e){}}
-function killItem(id){var i=songs.findIndex(function(x){return x.id===id});if(i>=0)songs[i]={id:id,del:1,u:Date.now()}}
+function killItem(id){var i=songs.findIndex(function(x){return x.id===id});if(i>=0)songs[i]=songs[i].g?{id:id,g:1,live:1,del:1,u:Date.now()}:{id:id,del:1,u:Date.now()}}
 function save(){if(isGuest()){store();return}var now=Date.now();songs.forEach(function(s){if(sent[s.id]!==sig(s))s.u=now});store();schedule(1500)}
 function status(m){syncMsg=m;var e=document.getElementById("sync");if(e)e.textContent=m;var f=document.getElementById("dst");if(f)f.textContent=m;var l=document.getElementById("loginmsg");if(l)l.textContent=m}
 function redrawSafe(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;if(view==="song"&&!song())view="list";draw()}
@@ -2324,76 +2337,174 @@ function afterRemote(ids){
 
 /* ---------- Firebase Auth + Firestore song sync ---------- */
 var FIREBASE_CONFIG={apiKey:"AIzaSyAKznDtIpTNIWxWr5p45D0NJmCU1LAThZQ",authDomain:"chordbook-a8789.firebaseapp.com",projectId:"chordbook-a8789",storageBucket:"chordbook-a8789.firebasestorage.app",messagingSenderId:"600798197648",appId:"1:600798197648:web:d8ab752607ef1973b06515",measurementId:"G-YV5M3XPQ9Q"};
-var ADMIN_UID="y79wyxQ6TlYhEHANsSACITs2BsC3", MEMBER_UIDS=[ADMIN_UID,"KLuFQKMFCnhwmqIBV6Syd92TnPb2"];
+var ADMIN_UID="y79wyxQ6TlYhEHANsSACITs2BsC3", LEGACY_GUEST_UID="KLuFQKMFCnhwmqIBV6Syd92TnPb2";
 var FB=null,FBDB=null,FBAUTH=null;
 try{if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);FB=firebase.app();FBAUTH=firebase.auth();FBDB=firebase.firestore();}catch(e){console.error('Firebase initialization failed',e)}
 var SB={};try{SB=JSON.parse(localStorage.getItem(LS+":sb")||"{}")}catch(e){}
 var ADMIN_EMAIL="";
 function isSignedIn(){return !!(SB.uid&&SB.email)}
-function isAdmin(){return isSignedIn()&&SB.uid===ADMIN_UID}
+function isSuper(){return isSignedIn()&&(SB.role==="super"||SB.uid===ADMIN_UID)}
+function hasPerm(k){return isSuper()||(isSignedIn()&&SB.role==="editor"&&!!(SB.p&&SB.p[k]))}
+function canAdd(){return hasPerm("a")}
+function canEdit(){return hasPerm("e")}
+function canDel(){return hasPerm("d")}
+/* isAdmin() = may change anything at all (songs or this church's groups). Viewers are "guests". */
+function canGroups(){if(isSuper())return true;if(!(isSignedIn()&&SB.role==="editor"&&SB.p))return false;return SB.p.g!==undefined?!!SB.p.g:!!(SB.p.a||SB.p.e||SB.p.d)}
+function isAdmin(){return canAdd()||canEdit()||canDel()||canGroups()}
 function isGuest(){return isSignedIn()&&!isAdmin()}
 var syncBusy=false,syncAgain=false,syncT=null,tokP=null;
 function sbSave(){try{localStorage.setItem(LS+":sb",JSON.stringify(SB))}catch(e){}}
 function sbOn(){return !!(FBDB&&isSignedIn())}
 /* Firestore rejects arrays nested inside arrays (the score's voices are L:[[..],[..]]). Such fields are stored as JSON text and restored on read. */
 function fbNested(v,inArr){if(Array.isArray(v)){if(inArr)return true;for(var i=0;i<v.length;i++)if(fbNested(v[i],true))return true;return false}if(v&&typeof v==="object"){for(var k in v)if(fbNested(v[k],false))return true}return false}
-function fbEnc(l){var data=JSON.parse(JSON.stringify(l));data.u=l.u||Date.now();Object.keys(data).forEach(function(k){if(fbNested(data[k],false)){data[k+"__fbjson"]=JSON.stringify(data[k]);delete data[k]}});return data}
+function fbEnc(l){var data=JSON.parse(JSON.stringify(l));data.u=l.u||Date.now();if(l.g)data.ch=l.ch||SB.ch||"";Object.keys(data).forEach(function(k){if(fbNested(data[k],false)){data[k+"__fbjson"]=JSON.stringify(data[k]);delete data[k]}});return data}
 function fbDec(d){if(!d)return d;Object.keys(d).forEach(function(k){if(/__fbjson$/.test(k)&&typeof d[k]==="string"){try{d[k.slice(0,-8)]=JSON.parse(d[k])}catch(e){}delete d[k]}});return d}
-async function sbList(){var snap=await FBDB.collection("songs").get();return snap.docs.map(function(d){var x=fbDec(d.data()||{});return {id:d.id,u:x.u||0,data:x}})}
-function schedule(ms){clearTimeout(syncT);syncT=null;if(!sbOn()||!isAdmin())return;syncT=setTimeout(function(){syncT=null;pushPending()},ms||1500)}
-async function syncNow(){
- if(!sbOn()){status("Sign in with an approved Firebase account first.");return}
- if(!navigator.onLine){status("Offline — your songs remain saved on this device.");return}
- if(syncBusy){syncAgain=true;return} syncBusy=true;status("☁ Syncing with Firebase…");var ids=[];
- try{
-  var rm=await sbList(),rmap={},want=[];rm.forEach(function(r){rmap[r.id]=r.u||0});
-  rm.forEach(function(r){var d=r.data;if(!d||!d.id||!syncable(d))return;var l=songs.find(function(x){return x.id===d.id});if(!l||(r.u||0)>(l.u||0)){d.u=r.u;var j=songs.findIndex(function(x){return x.id===d.id});if(j>=0)songs[j]=d;else songs.push(d);sent[d.id]=sig(d);ids.push(d.id)}});
-  if(isAdmin()){
-   var batch=FBDB.batch(),count=0;
-   songs.forEach(function(l){if(!syncable(l))return;if(!(l.id in rmap)||(l.u||0)>(rmap[l.id]||0)){var data=fbEnc(l);batch.set(FBDB.collection("songs").doc(String(l.id)),data);count++;if(count>=400){/* batch committed below in chunks */}}});
-   if(count){var pending=[];songs.forEach(function(l){if(!syncable(l))return;if(!(l.id in rmap)||(l.u||0)>(rmap[l.id]||0))pending.push(l)});for(var i=0;i<pending.length;i+=400){var b=FBDB.batch();pending.slice(i,i+400).forEach(function(l){var data=fbEnc(l);b.set(FBDB.collection("songs").doc(String(l.id)),data)});await b.commit()}}
-  }
-  songs.forEach(function(x){sent[x.id]=sig(x)});store();status("☁ Synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+(isAdmin()?"":" · view-only account"));if(ids.length)afterRemote(ids);
- }catch(e){store();var m=String(e&&e.message||e);status(/permission|insufficient/i.test(m)?"Firebase denied access. Check the published Firestore rules and approved UID.":"Firebase sync problem: "+m.slice(0,180));}
- syncBusy=false;if(syncAgain){syncAgain=false;schedule(500)}
+/* ---------- Accounts, roles & churches ---------- */
+var CHURCHES=[];
+function noPerm(w){return toast(isSignedIn()?"You don't have permission to "+w+".":"Sign in to "+w+".",2500)}
+function roleLabel(){if(!isSignedIn())return "Saved on this device";if(isSuper())return "Signed in as super admin";if(isAdmin())return "Signed in \u00b7 editor";return "Signed in \u00b7 view only"}
+function permText(){if(isSuper())return "everything";var a=[];if(canGroups())a.push("groups");if(canAdd())a.push("add");if(canEdit())a.push("edit");if(canDel())a.push("delete");return a.join(", ")||"view only"}
+async function loadChurches(){
+  try{
+    if(isSuper()){var s=await FBDB.collection("churches").get();CHURCHES=s.docs.map(function(d){return {id:d.id,name:(d.data()||{}).name||d.id}}).sort(function(a,b){return a.name.localeCompare(b.name)})}
+    else if(SB.ch){var d=await FBDB.collection("churches").doc(SB.ch).get();CHURCHES=d.exists?[{id:d.id,name:(d.data()||{}).name||d.id}]:[]}
+    else CHURCHES=[];
+  }catch(e){}
+  var c=CHURCHES.find(function(x){return x.id===SB.ch});if(c){SB.chName=c.name;sbSave()}
 }
-function syncErr(e){return "Firebase sync problem: "+String(e&&e.message||e).slice(0,200)}
-/* ---------- Automatic cloud sync (push on save + live updates from other devices) ---------- */
-var pushBusy=false,pushAgain=false,liveUnsub=null,liveFirst=true;
+/* Church groups are cached on the device only for the church that is signed in. */
+function purgeChurchCache(){
+  songs=songs.filter(function(x){return !(x.g&&!x.localGroup)});
+  Object.keys(sent).forEach(function(id){if(!songs.some(function(x){return x.id===id}))delete sent[id]});
+  grp=null;store();
+}
+function syncChurchCache(){
+  var m="";try{m=localStorage.getItem(LS+":chcache")||""}catch(e){}
+  var now=SB.ch||"";
+  if(m!==now){purgeChurchCache();try{localStorage.setItem(LS+":chcache",now)}catch(e){}return true}
+  return false;
+}
+async function bootstrapOwner(user){
+  var now=Date.now(),batch=FBDB.batch(),chId="main";
+  var chSnap=await FBDB.collection("churches").limit(1).get();
+  if(chSnap.empty)batch.set(FBDB.collection("churches").doc(chId),{name:"Main Church",created:now});else chId=chSnap.docs[0].id;
+  var prof={email:user.email||"",name:"Owner",role:"super",ch:chId,p:{a:true,e:true,d:true},active:true,created:now};
+  batch.set(FBDB.collection("users").doc(user.uid),prof);
+  if(LEGACY_GUEST_UID&&LEGACY_GUEST_UID!==user.uid)batch.set(FBDB.collection("users").doc(LEGACY_GUEST_UID),{email:"(existing guest account)",name:"Existing guest",role:"viewer",ch:chId,p:{},active:true,created:now});
+  await batch.commit();
+  /* move the old shared groups (Sunday + published ones) into this church */
+  try{
+    var old=await FBDB.collection("songs").get(),mv=FBDB.batch(),n=0;
+    old.docs.forEach(function(x){var d=fbDec(x.data()||{});if(d&&d.g&&!d.del&&!d.localGroup&&(d.live||isSundayG(d))){d.ch=chId;mv.set(FBDB.collection("groups").doc(x.id),fbEnc(d));n++}});
+    if(n)await mv.commit();
+  }catch(e){}
+  return prof;
+}
+/* Reads this person's profile (role, church, permissions). Returns false if the account is not approved or was disabled. */
+async function refreshProfile(user){
+  if(!FBDB||!user)return false;
+  var d=null,offline=false;
+  try{
+    var snap=await FBDB.collection("users").doc(user.uid).get();
+    d=snap.exists?snap.data():null;
+    if(!d&&user.uid===ADMIN_UID)d=await bootstrapOwner(user);
+  }catch(e){
+    if(/permission|insufficient/i.test(String(e&&e.message||e)))d=null;else offline=true;
+  }
+  if(offline)return isSignedIn();
+  if(!d||d.active===false)return false;
+  SB.uid=user.uid;SB.email=user.email||SB.email;SB.role=user.uid===ADMIN_UID?"super":(d.role||"viewer");SB.ch=d.ch||"";SB.p=d.p||{};SB.name=d.name||"";sbSave();
+  await loadChurches();
+  syncChurchCache();
+  personalGroups.forEach(function(p){if(!p.ch)p.ch=SB.ch});savePersonalGroups();
+  return true;
+}
+async function reverify(){
+  if(!FBAUTH||!FBAUTH.currentUser||!isSignedIn()||!navigator.onLine)return;
+  var before=JSON.stringify([SB.role,SB.ch,SB.p]);
+  var ok=await refreshProfile(FBAUTH.currentUser);
+  if(!ok){stopLive();try{await FBAUTH.signOut()}catch(e){}purgeChurchCache();SB={};sbSave();try{localStorage.setItem(LS+":chcache","")}catch(e){}syncMsg="Your account is no longer active.";draw();return}
+  var after=JSON.stringify([SB.role,SB.ch,SB.p]);
+  if(liveCh!==(SB.ch||""))stopLive();
+  startLive();
+  if(before!==after)draw();
+}
+async function setWorkingChurch(id){
+  if(!isSuper()||!id||id===SB.ch)return;
+  try{await FBDB.collection("users").doc(SB.uid).update({ch:id})}catch(e){toast("Couldn't switch church.",2500);return}
+  SB.ch=id;var c=CHURCHES.find(function(x){return x.id===id});SB.chName=c?c.name:"";sbSave();
+  stopLive();syncChurchCache();draw();startLive();toast("Now working in "+(SB.chName||"this church"),2200);
+}
+
+/* ---------- Song + group sync (songs are shared by everyone, groups belong to one church) ---------- */
+function colFor(l){return l.g?"groups":"songs"}
+/* Incremental song sync: each device remembers the newest song edit it has received and only asks for newer ones.
+   A full download still happens on first use, every 7 days, and whenever "Sync Now" is pressed. */
+var SINCE_KEY=LS+":since",FULL_KEY=LS+":fullsync",SINCE_MARGIN=10*60*1000;
+function getSince(){try{return parseInt(localStorage.getItem(SINCE_KEY)||"0",10)||0}catch(e){return 0}}
+function setSince(v){try{localStorage.setItem(SINCE_KEY,String(v))}catch(e){}}
+function needFull(){var t=0;try{t=parseInt(localStorage.getItem(FULL_KEY)||"0",10)||0}catch(e){}return !getSince()||Date.now()-t>7*864e5||!songs.some(function(x){return !x.g&&x.id!=="sample-1"})}
+function markFull(){try{localStorage.setItem(FULL_KEY,String(Date.now()))}catch(e){}}
+async function sbList(){
+  var out=[],s=await FBDB.collection("songs").get();
+  s.docs.forEach(function(d){var x=fbDec(d.data()||{});if(x.g)return;out.push({id:d.id,u:x.u||0,data:x})});
+  if(SB.ch){var g=await FBDB.collection("groups").where("ch","==",SB.ch).get();g.docs.forEach(function(d){var x=fbDec(d.data()||{});if(!x.g)return;out.push({id:d.id,u:x.u||0,data:x})})}
+  return out;
+}
+function schedule(ms){clearTimeout(syncT);syncT=null;if(!sbOn()||!isAdmin())return;syncT=setTimeout(function(){syncT=null;pushPending()},ms||1500)}
 function syncable(l){return !l.g||(!l.localGroup&&(!!l.live||String(l.title||"").toLowerCase()==="sunday"))}
+function pushable(l){return syncable(l)&&(!l.g||!!SB.ch)}
 async function pushSongs(list){
   for(var i=0;i<list.length;i+=400){
     var b=FBDB.batch();
-    list.slice(i,i+400).forEach(function(l){var data=fbEnc(l);b.set(FBDB.collection("songs").doc(String(l.id)),data)});
+    list.slice(i,i+400).forEach(function(l){b.set(FBDB.collection(colFor(l)).doc(String(l.id)),fbEnc(l))});
     await b.commit();
   }
 }
-function syncedStamp(){return "☁ Synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
+function denied(e){return /permission|insufficient/i.test(String(e&&e.message||e))}
+function syncErr(e){return denied(e)?"Your account doesn't have permission for that change.":"Firebase sync problem: "+String(e&&e.message||e).slice(0,200)}
+async function syncNow(){
+ if(!sbOn()){status("Sign in with an approved account first.");return}
+ if(!navigator.onLine){status("Offline \u2014 your songs remain saved on this device.");return}
+ if(syncBusy){syncAgain=true;return} syncBusy=true;status("\u2601 Syncing with Firebase\u2026");var ids=[];
+ try{
+  if(!SB.role){var okp=await refreshProfile(FBAUTH.currentUser);if(!okp)throw new Error("insufficient permission")}
+  var rm=await sbList(),rmap={},mx=0;rm.forEach(function(r){rmap[r.id]=r.u||0;if(!(r.data&&r.data.g)&&(r.u||0)>mx)mx=r.u||0});if(mx)setSince(mx);markFull();
+  rm.forEach(function(r){var d=r.data;if(!d||!d.id||!syncable(d))return;var l=songs.find(function(x){return x.id===d.id});if(!l||(r.u||0)>(l.u||0)){d.u=r.u;var j=songs.findIndex(function(x){return x.id===d.id});if(j>=0)songs[j]=d;else songs.push(d);sent[d.id]=sig(d);ids.push(d.id)}});
+  if(isAdmin()){
+   var pending=songs.filter(function(l){return pushable(l)&&(!(l.id in rmap)||(l.u||0)>(rmap[l.id]||0))});
+   if(pending.length)await pushSongs(pending);
+  }
+  songs.forEach(function(x){sent[x.id]=sig(x)});store();status(syncedStamp()+(isAdmin()?"":" \u00b7 view-only account"));if(ids.length)afterRemote(ids);
+ }catch(e){store();status(syncErr(e))}
+ syncBusy=false;if(syncAgain){syncAgain=false;schedule(500)}
+}
+var pushBusy=false,pushAgain=false,liveUnsubs=[],liveCh="";
+function syncedStamp(){return "\u2601 Synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
 async function pushPending(){
   if(!sbOn()||!isAdmin()||!navigator.onLine)return;
   if(pushBusy){pushAgain=true;return}
   pushBusy=true;
   try{
-    var pending=songs.filter(function(l){return syncable(l)&&sent[l.id]!==sig(l)});
-    if(pending.length){
-      status("☁ Syncing…");
-      await pushSongs(pending);
-      pending.forEach(function(l){sent[l.id]=sig(l)});
-      store();
-    }
+    var pending=songs.filter(function(l){return pushable(l)&&sent[l.id]!==sig(l)});
+    if(pending.length){status("\u2601 Syncing\u2026");await pushSongs(pending);pending.forEach(function(l){sent[l.id]=sig(l)});store()}
     status(syncedStamp());
-  }catch(e){status(/permission|insufficient/i.test(String(e&&e.message||e))?"Firebase denied access. Check the published Firestore rules and approved UID.":"Firebase sync problem: "+String(e&&e.message||e).slice(0,160))}
+  }catch(e){status(syncErr(e))}
   pushBusy=false;
   if(pushAgain){pushAgain=false;schedule(500)}
 }
 function startLive(){
-  if(!FBDB||!sbOn()||liveUnsub)return;
-  liveFirst=true;
-  liveUnsub=FBDB.collection("songs").onSnapshot(function(snap){
-    var ids=[],first=liveFirst;liveFirst=false;
+  if(!FBDB||!sbOn()||liveUnsubs.length||!SB.role)return;
+  liveCh=SB.ch||"";
+  var seen={songs:false,groups:false},full=needFull(),since=getSince();
+  function apply(snap,isGroup){
+    var ids=[],maxU=0,name=isGroup?"groups":"songs",first=!seen[name];seen[name]=true;
     snap.docChanges().forEach(function(ch){
       if(ch.type==="removed"||ch.doc.metadata.hasPendingWrites)return;
-      var d=fbDec(ch.doc.data()||{});if(!d.id)return;if(!syncable(d))return;
+      if(!isGroup){var du=(ch.doc.data()||{}).u||0;if(du>maxU)maxU=du}
+      var d=fbDec(ch.doc.data()||{});if(!d.id)return;
+      if(isGroup){if(!d.g||d.ch!==SB.ch)return}else if(d.g)return;
+      if(!syncable(d))return;
       var j=songs.findIndex(function(x){return x.id===d.id}),l=j>=0?songs[j]:null;
       if(l&&(d.u||0)<=(l.u||0))return;
       if(l&&view==="song"&&cur===l.id&&(mode==="edit"||isCreatingSong))return; /* never overwrite a song being edited right now */
@@ -2401,32 +2512,166 @@ function startLive(){
       if(j>=0)songs[j]=d;else songs.push(d);
       sent[d.id]=sig(d);ids.push(d.id);
     });
+    if(!isGroup){if(maxU>getSince())setSince(maxU);if(first&&full)markFull()}
     if(ids.length){store();afterRemote(ids)}
-    if(first&&isAdmin()){
-      /* first load: also upload anything that exists only on this device or is newer here */
+    if(first&&isAdmin()&&(isGroup||full)){
       var rmap={};snap.docs.forEach(function(x){rmap[x.id]=(x.data()||{}).u||0});
-      var pend=songs.filter(function(l){return syncable(l)&&(!(l.id in rmap)||(l.u||0)>(rmap[l.id]||0))});
-      if(pend.length)pushSongs(pend).then(function(){pend.forEach(function(l){sent[l.id]=sig(l)});store()}).catch(function(e){status(syncErr(e))});
+      var pend=songs.filter(function(l){return pushable(l)&&!!l.g===isGroup&&(!(l.id in rmap)||(l.u||0)>(rmap[l.id]||0))});
+      /* every church always has its own Sunday group */
+      if(isGroup&&canGroups()&&SB.ch&&!sundayKeeper()&&!pend.some(isSundayG)){var sd={id:"sunday-"+SB.ch,g:1,title:"Sunday",members:[],u:Date.now()};songs.push(sd);pend.push(sd)}
+      if(pend.length)pushSongs(pend).then(function(){pend.forEach(function(l){sent[l.id]=sig(l)});store();if(isGroup)redrawSafe()}).catch(function(e){status(syncErr(e))});
     }
     status(syncedStamp());
-  },function(e){
-    liveUnsub=null;
-    status(/permission|insufficient/i.test(String(e&&e.message||e))?"Firebase denied access. Check the published Firestore rules and approved UID.":syncErr(e));
-  });
+  }
+  function fail(e){stopLive();status(syncErr(e))}
+  var sq=FBDB.collection("songs");if(!full)sq=sq.where("u",">=",Math.max(0,since-SINCE_MARGIN));
+  liveUnsubs.push(sq.onSnapshot(function(s){apply(s,false)},fail));
+  if(SB.ch)liveUnsubs.push(FBDB.collection("groups").where("ch","==",SB.ch).onSnapshot(function(s){apply(s,true)},fail));
 }
-function stopLive(){if(liveUnsub){try{liveUnsub()}catch(e){}liveUnsub=null}}
-try{if(FBAUTH)FBAUTH.onAuthStateChanged(function(u){if(u&&sbOn())startLive();else if(!u)stopLive()})}catch(e){}
-window.addEventListener("online",function(){startLive();pushPending()});
-document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){startLive();pushPending()}});
+function stopLive(){liveUnsubs.forEach(function(u){try{u()}catch(e){}});liveUnsubs=[]}
+try{if(FBAUTH)FBAUTH.onAuthStateChanged(function(u){if(!u){stopLive();return}if(isSignedIn())reverify()})}catch(e){}
+window.addEventListener("online",function(){reverify();pushPending()});
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){reverify();pushPending()}});
 
 async function sbSign(mode){
  var $=function(i){return document.getElementById(i)},em=$("sbem").value.trim(),pw=$("sbpw").value;
  if(!FBAUTH||!em||!pw){status("Enter your email and password.");return}
- status("Signing in with Firebase…");
- try{var cred=await FBAUTH.signInWithEmailAndPassword(em,pw);var user=cred.user;
-  if(MEMBER_UIDS.indexOf(user.uid)<0){await FBAUTH.signOut();SB={};sbSave();status("This Firebase account is not approved for Chordbook.");draw();return}
-  SB.uid=user.uid;SB.email=user.email||em;SB.at="";SB.rt="firebase";sbSave();syncMsg=isAdmin()?"Signed in as administrator":"Signed in · view only";draw();startLive();
- }catch(e){status(/wrong-password|invalid-credential|user-not-found/i.test(e.code||"")?"Wrong email or password.":"Firebase sign-in failed: "+String(e.message||e).slice(0,160))}
+ status("Signing in\u2026");
+ try{
+  var cred=await FBAUTH.signInWithEmailAndPassword(em,pw),user=cred.user;
+  SB={uid:user.uid,email:user.email||em,rt:"firebase"};
+  var ok=await refreshProfile(user);
+  if(!ok){try{await FBAUTH.signOut()}catch(x){}SB={};sbSave();status("This account isn't approved for Chordbook, or it was disabled. Ask your administrator.");draw();return}
+  sbSave();syncMsg=roleLabel();draw();startLive();
+ }catch(e){status(/wrong-password|invalid-credential|user-not-found/i.test(e.code||"")?"Wrong email or password.":"Sign-in failed: "+String(e.message||e).slice(0,160))}
+}
+
+/* ---------- Super-admin account manager ---------- */
+var AM={users:[],ch:[],edit:null,msg:""},FB2=null;
+function amEl(){return document.getElementById("acctOv")}
+function amAuth2(){if(!FB2)FB2=firebase.initializeApp(FIREBASE_CONFIG,"acct-admin");return FB2.auth()}
+function amMsg(m){AM.msg=m;var e=document.getElementById("amMsg");if(e)e.textContent=m}
+async function openAcctMgr(){
+  if(!isSuper())return;
+  var ov=amEl();
+  if(!ov){ov=document.createElement("div");ov.className="ov";ov.id="acctOv";ov.style.zIndex="120";ov.style.alignItems="center";document.body.appendChild(ov);ov.addEventListener("click",amClick);ov.addEventListener("change",amChange)}
+  AM.msg="Loading\u2026";amRender();await amLoad();amRender();
+}
+function closeAcctMgr(){var ov=amEl();if(ov)ov.remove();AM.edit=null}
+async function amLoad(){
+  try{
+    var u=await FBDB.collection("users").get();AM.users=u.docs.map(function(d){var x=d.data()||{};x.uid=d.id;return x});
+    AM.users.sort(function(a,b){return String(a.name||a.email).localeCompare(String(b.name||b.email))});
+    var c=await FBDB.collection("churches").get();AM.ch=c.docs.map(function(d){return {id:d.id,name:(d.data()||{}).name||d.id}}).sort(function(a,b){return a.name.localeCompare(b.name)});
+    CHURCHES=AM.ch.slice();AM.msg="";
+  }catch(e){AM.msg="Couldn't load accounts: "+String(e&&e.message||e).slice(0,140)}
+}
+function amChName(id){var c=AM.ch.find(function(x){return x.id===id});return c?c.name:"No church"}
+function amChOpts(sel){return AM.ch.map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===sel?' selected':'')+'>'+esc(c.name)+'</option>'}).join("")||'<option value="">(add a church first)</option>'}
+function amRoleOpts(sel){return [["viewer","Viewer (guest \u2013 view only)"],["editor","Editor (can change songs)"],["super","Super admin (everything)"]].map(function(r){return '<option value="'+r[0]+'"'+(r[0]===sel?' selected':'')+'>'+r[1]+'</option>'}).join("")}
+function amPerms(pre,p,role){
+  p=p||{};var gOn=p.g!==undefined?!!p.g:!!(p.a||p.e||p.d);
+  return '<div class="am-perms'+(role==="editor"?'':' am-hide')+'" id="'+pre+'Perms"><label><input type="checkbox" data-perm="a" id="'+pre+'A"'+(p.a?' checked':'')+'> Add songs</label><label><input type="checkbox" data-perm="e" id="'+pre+'E"'+(p.e?' checked':'')+'> Edit songs</label><label><input type="checkbox" data-perm="d" id="'+pre+'D"'+(p.d?' checked':'')+'> Delete songs</label><label><input type="checkbox" data-perm="g" id="'+pre+'G"'+(gOn?' checked':'')+'> Add / edit / delete groups</label></div>';
+}
+function amBadge(u){var t=u.role==="super"?"Super admin":u.role==="editor"?("Editor: "+(["a","e","d","g"].filter(function(k){return k==="g"&&u.p&&u.p.g===undefined?!!(u.p.a||u.p.e||u.p.d):u.p&&u.p[k]}).map(function(k){return {a:"add songs",e:"edit songs",d:"delete songs",g:"groups"}[k]}).join(", ")||"none")):"Viewer";return '<span class="am-badge">'+esc(t)+'</span>'+(u.active===false?'<span class="am-badge am-off">Disabled</span>':'')}
+function amRender(){
+  var ov=amEl();if(!ov)return;
+  var h='<div class="modal" role="dialog" aria-label="Accounts and churches" style="max-width:640px"><div class="mh"><b>Accounts &amp; churches</b><button type="button" data-act="close">Done</button></div><p class="mut" id="amMsg">'+esc(AM.msg||"")+'</p>';
+  h+='<div class="box"><b>Churches</b><p class="mut">Every church has its own Sunday and group lineups. Songs are shared by all churches.</p>';
+  AM.ch.forEach(function(c){var n=AM.users.filter(function(u){return u.ch===c.id}).length;h+='<div class="row" style="align-items:center"><span style="flex:1 1 140px"><b>'+esc(c.name)+'</b> <small class="mut">'+n+' account'+(n===1?'':'s')+'</small></span><button type="button" data-act="chren" data-id="'+esc(c.id)+'">Rename</button><button type="button" class="d" data-act="chdel" data-id="'+esc(c.id)+'">Delete</button></div>'});
+  h+='<div class="row"><input id="amNewCh" placeholder="New church name" maxlength="60"><button type="button" class="p" data-act="chadd">Add church</button></div></div>';
+  h+='<div class="box"><b>Add an account</b><div class="row"><input id="amNm" placeholder="Name" maxlength="60"><input id="amEm" type="email" placeholder="Email address" autocomplete="off"></div><div class="row"><input id="amPw" type="text" placeholder="Temporary password (min 6 characters)" autocomplete="off"></div><div class="row"><select id="amCh">'+amChOpts(SB.ch)+'</select><select id="amRole" data-role="am">'+amRoleOpts("viewer")+'</select></div>'+amPerms("am",{a:1,e:1,g:1},"viewer")+'<div class="row"><button type="button" class="p" data-act="create">Create account</button></div></div>';
+  h+='<div class="box"><b>Accounts</b>';
+  if(!AM.users.length)h+='<p class="mut">No accounts yet.</p>';
+  AM.users.forEach(function(u){
+    var owner=u.uid===ADMIN_UID,me=u.uid===SB.uid;
+    h+='<div class="am-user"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div style="flex:1 1 180px;min-width:0"><b>'+esc(u.name||u.email||u.uid)+'</b>'+(owner?'<span class="am-badge">Owner</span>':'')+'<br><small class="mut">'+esc(u.email||"")+' \u00b7 '+esc(amChName(u.ch))+'</small></div>'+amBadge(u)+'<button type="button" data-act="edit" data-id="'+esc(u.uid)+'">'+(AM.edit===u.uid?'Close':'Edit')+'</button></div>';
+    if(AM.edit===u.uid){
+      h+='<div style="margin-top:10px"><div class="row"><input id="edNm" value="'+esc(u.name||"")+'" placeholder="Name" maxlength="60"></div><div class="row"><select id="edCh">'+amChOpts(u.ch)+'</select>'+(owner?'':'<select id="edRole" data-role="ed">'+amRoleOpts(u.role||"viewer")+'</select>')+'</div>'+(owner?'':amPerms("ed",u.p,u.role||"viewer")+'<label class="am-act"><input type="checkbox" id="edActive"'+(u.active===false?'':' checked')+'> Account active</label>')+'<div class="row"><button type="button" class="p" data-act="save" data-id="'+esc(u.uid)+'">Save</button>'+(u.email&&u.email.indexOf("@")>0?'<button type="button" data-act="reset" data-id="'+esc(u.uid)+'">Send password reset</button>':'')+(owner||me?'':'<button type="button" class="d" data-act="del" data-id="'+esc(u.uid)+'">Remove</button>')+'</div></div>';
+    }
+    h+='</div>';
+  });
+  h+='<p class="mut">Remove takes away all access to the app. Use Edit \u2192 uncheck "Account active" if you only want to pause someone.</p></div></div>';
+  ov.innerHTML=h;
+}
+function amChange(e){
+  var t=e.target;if(!t)return;
+  if(t.dataset&&t.dataset.role){var box=document.getElementById(t.dataset.role+"Perms");if(box)box.classList.toggle("am-hide",t.value!=="editor")}
+  if(t.dataset&&t.dataset.perm){var pre=t.id.slice(0,2),E=document.getElementById(pre+"E"),D=document.getElementById(pre+"D");
+    if(t.dataset.perm==="d"&&t.checked&&E)E.checked=true;
+    if(t.dataset.perm==="e"&&!t.checked&&D)D.checked=false}
+}
+function amReadPerms(pre,role){
+  if(role!=="editor")return {};
+  var g=function(k){var el=document.getElementById(pre+k);return !!(el&&el.checked)};
+  return {a:g("A"),e:g("E"),d:g("D"),g:g("G")};
+}
+function amErr(e){
+  var c=e&&e.code||"",m=String(e&&e.message||e);
+  if(c==="auth/weak-password")return "Password must be at least 6 characters.";
+  if(c==="auth/invalid-email")return "That email address isn't valid.";
+  if(c==="auth/wrong-password"||c==="auth/invalid-credential")return "That email already has a login. Enter its current password to link it, or ask the person to use the password reset.";
+  if(/permission|insufficient/i.test(m))return "Firebase denied this. Publish the new Firestore rules first.";
+  return m.slice(0,160);
+}
+async function amClick(e){
+  var ov=amEl(),t=e.target;
+  if(t===ov){closeAcctMgr();return}
+  var b=t.closest&&t.closest("[data-act]");if(!b)return;
+  var act=b.dataset.act,id=b.dataset.id,g=function(i){var el=document.getElementById(i);return el?el.value:""};
+  try{
+  if(act==="close"){closeAcctMgr();return}
+  if(act==="edit"){AM.edit=AM.edit===id?null:id;amRender();return}
+  if(act==="chadd"){
+    var nm=g("amNewCh").trim();if(!nm)return amMsg("Enter a church name.");
+    var cid=nm.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40)||("church-"+Date.now().toString(36));
+    if(AM.ch.some(function(c){return c.id===cid}))cid+="-"+Math.random().toString(36).slice(2,5);
+    await FBDB.collection("churches").doc(cid).set({name:nm,created:Date.now()});await amLoad();amRender();amMsg("Church added.");return;
+  }
+  if(act==="chren"){
+    var cur0=AM.ch.find(function(c){return c.id===id}),nn=window.prompt("Church name",cur0?cur0.name:"");if(!nn||!nn.trim())return;
+    await FBDB.collection("churches").doc(id).update({name:nn.trim().slice(0,60)});await amLoad();if(SB.ch===id){SB.chName=nn.trim();sbSave()}amRender();return;
+  }
+  if(act==="chdel"){
+    if(AM.users.some(function(u){return u.ch===id}))return amMsg("Move or remove this church's accounts first.");
+    if(id===SB.ch)return amMsg("Switch your working church before deleting this one.");
+    if(!window.confirm("Delete this church and its Sunday/group lineups? Songs are not affected."))return;
+    var gs=await FBDB.collection("groups").where("ch","==",id).get(),bt=FBDB.batch();gs.docs.forEach(function(d){bt.delete(d.ref)});bt.delete(FBDB.collection("churches").doc(id));await bt.commit();
+    await amLoad();amRender();amMsg("Church deleted.");return;
+  }
+  if(act==="create"){
+    var em=g("amEm").trim(),pw=g("amPw"),nm2=g("amNm").trim(),ch=g("amCh"),role=g("amRole");
+    if(!em||pw.length<6)return amMsg("Enter an email and a password of at least 6 characters.");
+    if(!ch)return amMsg("Add a church first, then choose it.");
+    var p=amReadPerms("am",role);
+    if(role==="editor"&&!p.a&&!p.e&&!p.d&&!p.g)return amMsg("Tick at least one permission, or choose Viewer.");
+    amMsg("Creating account\u2026");
+    var a2=amAuth2(),uidN;
+    try{var cr=await a2.createUserWithEmailAndPassword(em,pw);uidN=cr.user.uid}
+    catch(er){if(er.code==="auth/email-already-in-use"){var si=await a2.signInWithEmailAndPassword(em,pw);uidN=si.user.uid}else throw er}
+    try{await a2.signOut()}catch(x){}
+    await FBDB.collection("users").doc(uidN).set({email:em,name:nm2||em.split("@")[0],role:role,ch:ch,p:p,active:true,created:Date.now()});
+    await amLoad();amRender();amMsg("Account ready for "+em+". Share the email and temporary password with them.");return;
+  }
+  if(act==="save"){
+    var u=AM.users.find(function(x){return x.uid===id});if(!u)return;
+    var owner=id===ADMIN_UID,rl=owner?"super":g("edRole"),pp=amReadPerms("ed",rl);
+    if(rl==="editor"&&!pp.a&&!pp.e&&!pp.d&&!pp.g)return amMsg("Tick at least one permission, or choose Viewer.");
+    var upd={name:g("edNm").trim().slice(0,60),ch:g("edCh"),role:rl,p:pp,active:owner?true:!!document.getElementById("edActive").checked};
+    await FBDB.collection("users").doc(id).update(upd);
+    if(id===SB.uid){SB.ch=upd.ch;SB.role=upd.role;SB.p=upd.p;sbSave();syncChurchCache();draw()}
+    AM.edit=null;await amLoad();amRender();amMsg("Saved. Changes apply the next time that person opens the app.");return;
+  }
+  if(act==="reset"){
+    var ru=AM.users.find(function(x){return x.uid===id});if(!ru)return;
+    await FBAUTH.sendPasswordResetEmail(ru.email);amMsg("Password reset email sent to "+ru.email+".");return;
+  }
+  if(act==="del"){
+    var du=AM.users.find(function(x){return x.uid===id});if(!du)return;
+    if(!window.confirm("Remove "+(du.name||du.email)+"? They will no longer be able to open Chordbook."))return;
+    await FBDB.collection("users").doc(id).delete();AM.edit=null;await amLoad();amRender();amMsg("Access removed.");return;
+  }
+  }catch(er){amMsg(amErr(er))}
 }
 
 /* ---------- Chord font (device-local; uploaded fonts never leave this device) ---------- */
@@ -2564,8 +2809,17 @@ function bindAccordion(){
 }
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&cloudOpen){cloudOpen=false;draw()}else if(e.key==="Escape"&&sidebarOpen){sidebarOpen=false;draw()}else if(e.key==="Escape"&&toolsPage&&scaleToolOpen){exitToolsToSongs()}else if(e.key==="Escape"&&toolsPage&&tunerOpen){exitToolsToSongs()}else if(e.key==="Escape"&&toolsPage&&metronomeOpen){exitToolsToSongs()}else if(e.key==="Escape"&&toolsPage&&chordToolStage!=="home"){if(chordToolStage==="guitar"||chordToolStage==="piano"||chordToolStage==="bass"){chordToolStage="choose";draw()}else{exitToolsToSongs()}}});
 function loginBox(){
-  if(isSignedIn()) return accBox("login","Account login",'<p class="mut">Signed in as '+esc(SB.email||'')+'. '+(isAdmin()?"Administrator access.":"View and practice access.")+'</p><p class="mut" id="dst">'+esc(syncMsg)+'</p><div class="row"><button id="dsync" class="p">Sync Now</button><button id="dout" class="d">Log out</button></div>');
-  return accBox("login","Account login",'<input id="sbem" type="email" placeholder="Email address" autocomplete="username" value="'+esc(SB.email||'')+'"><input id="sbpw" type="password" placeholder="Password" autocomplete="current-password"><div class="row"><button id="sin" class="p">Sign in</button><button id="sup" disabled aria-disabled="true" title="Account creation is disabled">Create account</button></div><p class="mut">Not signed in.</p><p class="mut" id="loginmsg"></p>');
+  if(isSignedIn()){
+    var who=esc(SB.email||'')+'. '+(isSuper()?"Super admin access.":isAdmin()?"Editor access ("+permText()+").":"View and practice access.");
+    var chl=(SB.chName||SB.ch)?'<p class="mut">Church: <b>'+esc(SB.chName||SB.ch)+'</b></p>':'<p class="mut">No church assigned yet.</p>';
+    var sup="";
+    if(isSuper()){
+      chl="";
+      sup='<label class="mut" for="chSwitch">Working church</label><select id="chSwitch">'+(CHURCHES.length?CHURCHES:[{id:SB.ch,name:SB.chName||SB.ch||"(none)"}]).map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===SB.ch?' selected':'')+'>'+esc(c.name)+'</option>'}).join("")+'</select><div class="row"><button id="amOpen" class="p">Manage accounts &amp; churches</button></div>';
+    }
+    return accBox("login","Account login",'<p class="mut">Signed in as '+who+'</p>'+chl+sup+'<p class="mut" id="dst">'+esc(syncMsg)+'</p><div class="row"><button id="dsync" class="p">Sync Now</button><button id="dout" class="d">Log out</button></div>');
+  }
+  return accBox("login","Account login",'<input id="sbem" type="email" placeholder="Email address" autocomplete="username" value="'+esc(SB.email||'')+'"><input id="sbpw" type="password" placeholder="Password" autocomplete="current-password"><div class="row"><button id="sin" class="p">Sign in</button></div><p class="mut">Not signed in. Accounts are created by your church administrator.</p><p class="mut" id="loginmsg"></p>');
 }
 function backupBox(){
   return accBox("backup","Backup to file",'<p class="mut">Export your songs as a file and keep it anywhere. Import merges by song, so newer edits replace older copies.</p><div class="row"><button id="exp" class="p">Export to file</button><button id="imp">Import file</button></div><input type="file" id="file" accept=".json,application/json" class="hide"><textarea id="paste" class="hide" style="min-height:90px" placeholder="Or paste exported text here"></textarea><div class="row hide" id="pasterow"><button id="doPaste">Import pasted text</button></div><p class="mut" id="msg">'+esc(msg)+'</p>');
@@ -2605,10 +2859,10 @@ function bindCloud(){
   bindInstall();
   var $=function(i){return document.getElementById(i)};
   if($("sin"))$("sin").onclick=function(){sbSign("in")};
-  if($("sup"))$("sup").onclick=function(e){e.preventDefault()};
+  if($("amOpen"))$("amOpen").onclick=openAcctMgr;if($("chSwitch"))$("chSwitch").onchange=function(){setWorkingChurch(this.value)};
   if($("dsync"))$("dsync").onclick=function(){syncNow()};
 
-  if($("dout"))$("dout").onclick=async function(){stopLive();try{if(FBAUTH)await FBAUTH.signOut()}catch(e){} SB={};sbSave();syncMsg="Signed out. Saved on this device.";draw()};
+  if($("dout"))$("dout").onclick=async function(){stopLive();try{if(FBAUTH)await FBAUTH.signOut()}catch(e){} purgeChurchCache();try{localStorage.setItem(LS+":chcache","")}catch(e){}CHURCHES=[];SB={};sbSave();syncMsg="Signed out. Saved on this device.";draw()};
 }
 /* Automatic cloud sync is intentionally disabled. Sync only with the Sync Now button. */
 
@@ -2726,9 +2980,10 @@ function groups(){
   // Personal groups are device-local drafts. The admin sees a published group via its local draft, not twice.
   var keep=sundayKeeper(),list=keep?[keep]:[],haveSunday=!!keep,linked={};
   personalGroups.forEach(function(p){if(p.liveId)linked[p.liveId]=1});
-  songs.forEach(function(x){if(x.g&&x.live&&!x.del&&!x.localGroup&&!isSundayG(x)){if(isAdmin()&&linked[x.id])return;list.push(x)}});
+  songs.forEach(function(x){if(x.g&&x.live&&!x.del&&!x.localGroup&&!isSundayG(x)){if(canGroups()&&linked[x.id])return;list.push(x)}});
   personalGroups.forEach(function(p){
     if(!p.g||p.del)return;
+    if(p.ch&&SB.ch&&p.ch!==SB.ch)return;
     if(isSundayG(p)){if(haveSunday)return;haveSunday=true}
     list.push(p)});
   function pos(x){var i=groupOrder.indexOf(x.id);return i<0?1e9:i}
@@ -2736,13 +2991,13 @@ function groups(){
 }
 // One-time/idempotent cleanup: merge duplicate Sunday groups into one and remove the extras.
 function cleanDupSunday(){
-  var changed=false,keep=sundayKeeper(),admin=isAdmin();
+  var changed=false,keep=sundayKeeper(),admin=canGroups();
   function merge(t,from){var m=t.members=t.members||[];(from.members||[]).forEach(function(id){if(m.indexOf(id)<0)m.push(id)})}
   if(keep){
     if(admin){
       songs.forEach(function(x){if(x!==keep&&x.g&&!x.del&&!x.localGroup&&isSundayG(x)){merge(keep,x);killItem(x.id);changed=true}});
       var before=personalGroups.length;
-      personalGroups=personalGroups.filter(function(p){if(isSundayG(p)){merge(keep,p);return false}return true});
+      personalGroups=personalGroups.filter(function(p){if(isSundayG(p)&&(!p.ch||p.ch===SB.ch)){merge(keep,p);return false}return true});
       if(personalGroups.length!==before){savePersonalGroups();changed=true}
     }
     return changed;
@@ -2759,7 +3014,7 @@ function isFixedGroup(g){return !g||!isPersonalGroup(g)}
 
 var groupsMgrOpen=false,groupOrder=[],MAX_BAR_GROUPS=10;
 function saveGroupOrder(){try{localStorage.setItem(LS+":groupOrder",JSON.stringify(groupOrder))}catch(e){}}
-function groupTag(x){return isLiveG(x)?(isAdmin()?"Live":"Shared"):((isAdmin()&&isPersonalGroup(x)&&liveDoc(x.liveId))?"Live":"")}
+function groupTag(x){return isLiveG(x)?(canGroups()?"Live":"Shared"):((canGroups()&&isPersonalGroup(x)&&liveDoc(x.liveId))?"Live":"")}
 function groupBarHTML(){
   var shown=groups().slice(0,MAX_BAR_GROUPS);
   var h='<div class="gbar" id="gbar"><div class="gscroll" id="gscroll">';
@@ -2772,7 +3027,7 @@ function groupsMgrListHTML(){
   var gs=groups(),mv=gs.filter(function(x){return !isSundayG(x)});
   if(!gs.length)return '<div class="group-picker-empty">No groups yet. Add one below.</div>';
   return gs.map(function(x,ix){
-    var sun=isSundayG(x),k=mv.indexOf(x),t=groupTag(x),canDel=!sun&&(isPersonalGroup(x)||(isAdmin()&&isLiveG(x)));
+    var sun=isSundayG(x),k=mv.indexOf(x),t=groupTag(x),canDel=!sun&&(isPersonalGroup(x)||(canGroups()&&isLiveG(x)));
     var off=ix>=MAX_BAR_GROUPS;
     return '<div class="gm-row'+(off?' gm-off':'')+'"><button type="button" class="gm-name" data-gm-open="'+x.id+'"><b>'+esc(x.title||"Untitled")+'</b><small>'+(sun?'Pinned at the top':(t?t+' group':'My group'))+(off?' \u00B7 only in More':'')+'</small></button>'
       +(sun?'':'<button type="button" class="gm-btn" data-gm-up="'+x.id+'" aria-label="Move up"'+(k<=0?' disabled':'')+'>\u2191</button><button type="button" class="gm-btn" data-gm-down="'+x.id+'" aria-label="Move down"'+(k>=mv.length-1?' disabled':'')+'>\u2193</button>')
@@ -2794,7 +3049,7 @@ function moveGroup(id,dir){
 function addGroupFromMgr(){
   var inp=document.getElementById("gmNew"),n=inp?inp.value.trim().slice(0,60):"";if(!n)return;
   if(n.toLowerCase()==="sunday"&&groups().some(isSundayG)){toast("A Sunday group already exists");return}
-  var ng={id:"local-group-"+uid(),g:1,localGroup:1,title:n,members:[]};
+  var ng={id:"local-group-"+uid(),g:1,localGroup:1,ch:SB.ch||"",title:n,members:[]};
   var ids=groups().filter(function(x){return !isSundayG(x)}).map(function(x){return x.id});
   personalGroups.push(ng);savePersonalGroups();ids.push(ng.id);groupOrder=ids;saveGroupOrder();
   inp.value="";refreshGroupUI();toast('Added "'+n+'"');
@@ -2808,7 +3063,7 @@ function removeGroupFromMgr(id){
     groupOrder=groupOrder.filter(function(x){return x!==g.id});saveGroupOrder();
     if(grp===g.id)grp=null;
     save();draw();toast("Deleted "+name+(hadLive?" (the live copy is still online)":""),hadLive?3500:undefined);
-  }else if(isAdmin()&&isLiveG(g)){takeGroupOffline(g)}
+  }else if(canGroups()&&isLiveG(g)){takeGroupOffline(g)}
 }
 function bindGroupsMgrList(){
   document.querySelectorAll("[data-gm-up]").forEach(function(b){b.onclick=function(){moveGroup(b.dataset.gmUp,-1)}});
@@ -2834,17 +3089,17 @@ function bindGroupsMgr(){
 /* ---------- Floating "+" button (bottom-right) with add-song sheet ---------- */
 var fabOpen=false;
 function addBlankChart(){
-  if(!isAdmin())return toast('Sign in as Admin to add songs.',2500);
+  if(!canAdd())return noPerm("add songs");
   fabOpen=false;addOpen=false;addView='picker';sheetOpen=false;
   var s={id:uid(),title:'',artist:'',key:'C',chart:''};
   songs.push(s);save();cur=s.id;view='song';mode='edit';isCreatingSong=true;draw();window.scrollTo(0,0);
 }
 function addUploadSheet(){
-  if(!isAdmin())return toast('Sign in as Admin to upload a music sheet.',2500);
+  if(!canAdd())return noPerm("upload a music sheet");
   fabOpen=false;sidebarOpen=false;sheetOpen=false;resetMusicSheetTool();addView='sheet';addOpen=true;draw();
 }
 function addXmlScores(){
-  if(!isAdmin())return toast('Sign in as Admin to add songs.',2500);
+  if(!canAdd())return noPerm("add songs");
   fabSet(false,false);
   var inp=document.createElement('input');inp.type='file';inp.multiple=true;
   inp.accept='.xml,.musicxml,.mxl,application/vnd.recordare.musicxml,application/vnd.recordare.musicxml+xml,application/xml,text/xml';
@@ -2854,7 +3109,7 @@ function addXmlScores(){
   document.body.appendChild(inp);inp.click();
 }
 function addPasteSongs(){
-  if(!isAdmin())return toast('Sign in as Admin to add songs.',2500);
+  if(!canAdd())return noPerm("add songs");
   fabOpen=false;sidebarOpen=false;sheetOpen=false;addView='paste';addOpen=true;draw();
 }
 function fabHTML(){
@@ -2900,14 +3155,14 @@ function bindFab(){
 }
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&fabOpen){e.preventDefault();fabSet(false,true)}});
 function isLiveG(g){return !!(g&&g.live&&!g.localGroup)}
-function canEditGroup(g){return !!g&&(isPersonalGroup(g)||(isAdmin()&&!isLiveG(g)))}
+function canEditGroup(g){return !!g&&(isPersonalGroup(g)||(canGroups()&&!isLiveG(g)))}
 function liveDoc(id){return id?(songs.find(function(x){return x.id===id&&x.g&&x.live&&!x.del&&!x.localGroup})||null):null}
 function pubMembers(g){var have={};realSongs().forEach(function(x){have[x.id]=1});return (g.members||[]).filter(function(id){return have[id]})}
 /* Notes belong to the live group: a private draft ("Edit a Copy") always mirrors the live notes so it never shows or re-publishes stale ones. */
 function pullLiveNotes(g){if(!g||!isPersonalGroup(g)||!g.liveId)return;var lv=liveDoc(g.liveId);if(!lv)return;var n=String(lv.notes||"");if(n!==String(g.notes||"")){if(n)g.notes=n;else delete g.notes;savePersonalGroups()}}
 function liveUpToDate(g,lv){pullLiveNotes(g);return !!lv&&String(lv.title||"")===String(g.title||"")&&JSON.stringify(lv.members||[])===JSON.stringify(pubMembers(g))&&String(lv.notes||"")===String(g.notes||"")}
 function publishGroup(g){
-  if(!isAdmin()||!isPersonalGroup(g))return;
+  if(!canGroups()||!isPersonalGroup(g))return;
   pullLiveNotes(g);
   if(isSundayG(g)){toast("Sunday is a reserved group name. Rename this group first.",3200);return}
   var mem=pubMembers(g),first=!liveDoc(g.liveId);
@@ -2918,15 +3173,15 @@ function publishGroup(g){
   toast(first?"Group is now live for everyone":"Live group updated",2500);
 }
 function takeGroupOffline(g){
-  var id=isLiveG(g)?g.id:g.liveId;if(!isAdmin()||!id)return;
+  var id=isLiveG(g)?g.id:g.liveId;if(!canGroups()||!id)return;
   if(!window.confirm('Take "'+(g.title||"Untitled")+'" offline? Users will no longer see it.'))return;
   killItem(id);
   if(isPersonalGroup(g)){delete g.liveId;savePersonalGroups()}else grp=null;
   save();schedule(200);draw();toast("Group taken offline",2500);
 }
 function copyLiveToDraft(lv){
-  if(!isAdmin()||!isLiveG(lv))return;
-  var ng={id:"local-group-"+uid(),g:1,localGroup:1,title:lv.title||"Untitled",members:(lv.members||[]).slice(),liveId:lv.id};if(lv.notes)ng.notes=lv.notes;
+  if(!canGroups()||!isLiveG(lv))return;
+  var ng={id:"local-group-"+uid(),g:1,localGroup:1,ch:SB.ch||"",title:lv.title||"Untitled",members:(lv.members||[]).slice(),liveId:lv.id};if(lv.notes)ng.notes=lv.notes;
   personalGroups.push(ng);grp=ng.id;managing=false;gedit=false;savePersonalGroups();draw();
   toast("Copy created. Edit it, then press Update Live Group.",3500);
 }
@@ -3146,7 +3401,7 @@ function gboxHTML(){
   var g=grp?gById(grp):null;
   if(gform==="new")return ""; // New-group entry lives in the sidebar.
   if(!g)return "";
-  if(isLiveG(g))return isAdmin()?liveOnlyBoxHTML(g):"";
+  if(isLiveG(g))return canGroups()?liveOnlyBoxHTML(g):"";
   if(!canEditGroup(g))return "";
   return "";
 }
@@ -3179,7 +3434,7 @@ function bindGroupNotes(){
     if(v)g.notes=v;else delete g.notes;
     if(isPersonalGroup(g))savePersonalGroups();
     /* Announcements are time-sensitive: if this group is already published, push the notes to the live copy right away (songs/title stay private until "Update for everyone"). */
-    var lvn=isPersonalGroup(g)&&isAdmin()&&g.liveId?liveDoc(g.liveId):null;
+    var lvn=isPersonalGroup(g)&&canGroups()&&g.liveId?liveDoc(g.liveId):null;
     if(lvn){if(v)lvn.notes=v;else delete lvn.notes;lvn.u=Date.now()}
     save();if(lvn)schedule(200);notesEditId=null;notesDraft="";draw();toast(lvn?(v?"Notes saved and live for everyone":"Notes cleared for everyone"):(v?"Notes saved":"Notes cleared"));
   };
@@ -3188,7 +3443,7 @@ function groupManageHTML(){
   var g=grp?gById(grp):null;if(!gedit||!canEditGroup(g))return "";
   var count=(g.members||[]).length;
   var sharing='';
-  if(isAdmin()&&isPersonalGroup(g)){
+  if(canGroups()&&isPersonalGroup(g)){
     var lv=liveDoc(g.liveId),same=liveUpToDate(g,lv);
     sharing='<div class="group-manage-section"><div class="group-manage-share-head"><div class="group-manage-share-copy"><b>Sharing</b><p>'+(lv?(same?'Everyone can see the latest version of this group.':'You have private changes that are not live yet.'):'This group is currently only available on this device.')+'</p></div><span class="group-share-status'+(lv?' live':'')+'">'+(lv?'Live':'Private')+'</span></div><div class="group-manage-share-actions">'+(lv&&same?'<button type="button" disabled>Published and up to date</button>':'<button type="button" class="p" id="gpub">'+(lv?'Update for everyone':'Publish for everyone')+'</button>')+(lv?'<button type="button" class="share-offline" id="gunpub">Take offline</button>':'')+'</div></div>';
   }
@@ -3254,7 +3509,7 @@ function bindChips(){
       var v=b.dataset.g;
       stopTuner(false);stopMetronome(false);toolsPage=false;tunerOpen=false;metronomeOpen=false;chordToolStage="home";grp=v||null;managing=false;gedit=false;gform=null;sidebarOpen=false;draw()};
   });
-  if($("gedit")&&isAdmin())$("gedit").onclick=function(){gedit=true;sidebarOpen=false;draw()};
+  if($("gedit")&&canGroups())$("gedit").onclick=function(){gedit=true;sidebarOpen=false;draw()};
   if($("gedone"))$("gedone").onclick=function(){gedit=false;draw()};
   if($("gadd"))$("gadd").onclick=function(){managing=!managing;if(!managing)gedit=false;draw()};
 }
@@ -3285,9 +3540,9 @@ function bindBox(){
     var ok=function(){
       var n=$("gn").value.trim().slice(0,60);if(!n)return;
       if(n.toLowerCase()==="sunday"&&groups().some(isSundayG)&&!(g&&isSundayG(g)&&gform==="rename")){toast("A Sunday group already exists");return}
-      if(gform==="new"){var ng={id:"local-group-"+uid(),g:1,localGroup:1,title:n,members:[]};personalGroups.push(ng);grp=ng.id;managing=false;gedit=false;sidebarOpen=false;savePersonalGroups()}
+      if(gform==="new"){var ng={id:"local-group-"+uid(),g:1,localGroup:1,ch:SB.ch||"",title:n,members:[]};personalGroups.push(ng);grp=ng.id;managing=false;gedit=false;sidebarOpen=false;savePersonalGroups()}
       else if(g&&isPersonalGroup(g)){g.title=n;savePersonalGroups()}
-      else if(g&&isAdmin())g.title=n;
+      else if(g&&canGroups())g.title=n;
       gform=null;save();draw()};
     $("gok").onclick=ok;
     $("gn").onkeydown=function(e){if(e.key==="Enter")ok()};
@@ -3298,18 +3553,18 @@ function bindBox(){
   if($("gpub"))$("gpub").onclick=function(){publishGroup(g)};
   if($("gunpub"))$("gunpub").onclick=function(){takeGroupOffline(g)};
   if($("gcopy"))$("gcopy").onclick=function(){copyLiveToDraft(g)};
-  if($("gedit")&&(isAdmin()||isPersonalGroup(g)))$("gedit").onclick=function(){gedit=true;sidebarOpen=false;draw()};
+  if($("gedit")&&(canGroups()||isPersonalGroup(g)))$("gedit").onclick=function(){gedit=true;sidebarOpen=false;draw()};
   if($("gedone"))$("gedone").onclick=function(){gedit=false;draw()};
   if($("gadd"))$("gadd").onclick=function(){managing=!managing;if(!managing)gedit=false;draw()};
   if($("gren"))$("gren").onclick=function(){
-    if(!isPersonalGroup(g)&&!isAdmin()){toast("This group is permanent");return}
+    if(!isPersonalGroup(g)&&!canGroups()){toast("This group is permanent");return}
     if(!isPersonalGroup(g)&&String(g.title||"").toLowerCase()==="sunday"){toast("Sunday is a permanent shared group");return}
     gform="rename";draw()};
   var delBtn=$("gdel");
   if(delBtn){
     var armed=false,armTimer=null;
     delBtn.onclick=function(){
-      if(!isPersonalGroup(g)&&!isAdmin()){toast("This group is permanent");return}
+      if(!isPersonalGroup(g)&&!canGroups()){toast("This group is permanent");return}
       if(!isPersonalGroup(g)&&String(g.title||"").toLowerCase()==="sunday"){toast("Sunday is a permanent shared group");return}
       if(!armed){
         armed=true;this.textContent="Tap again to confirm";
@@ -3525,7 +3780,7 @@ async function sheetCreateOcrWorker(OCR,logger){
   throw lastErr||new Error('Could not start the OCR engine.');
 }
 async function processMusicSheet(){
-  if(!isAdmin()){setSheetStatus('Sign in as Admin to create a song draft.');return}
+  if(!canAdd()){setSheetStatus("You don't have permission to add songs.");return}
   if(!sheetFile){setSheetStatus('Choose a music sheet image or PDF first.');return}
   if(sheetFile.size>15*1024*1024){setSheetStatus('The selected file is larger than 15 MB. Choose a smaller file.');return}
   sheetTitle=(document.getElementById('sheettitle')||{}).value||sheetTitle;sheetArtist=(document.getElementById('sheetartist')||{}).value||sheetArtist;
@@ -3566,7 +3821,7 @@ function bindMusicSheet(){
   if($('sheetextract'))$('sheetextract').onclick=processMusicSheet;
   if($('sheetcancel'))$('sheetcancel').onclick=function(){if(sheetBusy)return;sheetOpen=false;sheetFile=null;sheetStatus='';addOpen=false;addView='picker';draw()};if($('sheetchart'))$('sheetchart').oninput=function(){sheetDraft=this.value};
   if($('sheetcreate'))$('sheetcreate').onclick=function(){
-    if(!isAdmin())return toast('Sign in as Admin to save songs.',2500);var chart=$('sheetchart')?$('sheetchart').value.trim():sheetDraft.trim();if(!chart)return toast('The chart is empty. Enter or extract some chords first.',3000);
+    if(!(canAdd()||canEdit()))return noPerm("save songs");var chart=$('sheetchart')?$('sheetchart').value.trim():sheetDraft.trim();if(!chart)return toast('The chart is empty. Enter or extract some chords first.',3000);
     var title=($('sheettitle')?$('sheettitle').value:'').trim()||sheetTitle.trim()||String(sheetFile&&sheetFile.name||'Imported Sheet').replace(/\.[^.]+$/,'');var artist=($('sheetartist')?$('sheetartist').value:'').trim()||sheetArtist.trim()||'Unknown artist';
     var safeSheetKey=/^[A-G](?:#|b)?m?$/.test(sheetDetectedKey||'')?sheetDetectedKey:'C';var safeSheetTime=/^\d{1,2}\/\d{1,2}$/.test(sheetTimeSignature||'')?sheetTimeSignature:'4/4';var s={id:uid(),title:title,artist:artist,key:safeSheetKey,chart:'',ts:safeSheetTime,pl:4,sourceType:'music-sheet',sourceFileName:sheetFile?sheetFile.name:'',viewMode:'standard'};s.standardText=chart;songs.push(s);save();cur=s.id;view='song';mode='edit';isCreatingSong=true;sheetOpen=false;sheetFile=null;sheetProcessed=false;sheetDraft='';sheetRaw='';addOpen=false;addView='picker';draw();window.scrollTo(0,0);
   };
@@ -3695,7 +3950,7 @@ function bindBulkPaste(){
   ta.oninput=function(){bulkPasteText=ta.value;count()};count();
   if($("bulkClear"))$("bulkClear").onclick=function(){bulkPasteText="";ta.value="";count()};
   if($("bulkImport"))$("bulkImport").onclick=function(){
-    if(!isAdmin())return toast("Sign in as Admin to add songs.",2500);
+    if(!canAdd())return noPerm("add songs");
     var list=parseBulkSongs(ta.value);
     if(!list.length)return toast("Nothing to import yet. Paste your songs first.",2500);
     list.forEach(function(s){songs.push(s)});
@@ -4398,11 +4653,11 @@ function drawMain(){
     h+='<div class="sticky-tools"><input id="q" type="search" placeholder="Search songs by title, artist or key" value="'+esc(qry)+'" aria-label="Search songs" style="margin-bottom:10px">'+groupBarHTML()+'</div>';
     h+=allSortBarHTML()+gboxHTML()+groupNotesHTML()+'<div id="sl">'+listHTML()+'</div>';
     if(cloudOpen)h+=modalHTML();
-    if(addOpen&&isAdmin())h+=addModalHTML();
+    if(addOpen&&canAdd())h+=addModalHTML();
     if(groupSongPickerOpen&&canEditGroup(grp?gById(grp):null))h+=groupSongPickerHTML();
     if(gedit&&canEditGroup(grp?gById(grp):null))h+=groupManageHTML();
     if(groupsMgrOpen)h+=groupsMgrHTML();
-    if(isAdmin()&&!addOpen&&!cloudOpen&&!sidebarOpen&&!groupsMgrOpen&&!groupSongPickerOpen&&!gedit)h+=fabHTML();else fabOpen=false;
+    if(canAdd()&&!addOpen&&!cloudOpen&&!sidebarOpen&&!groupsMgrOpen&&!groupSongPickerOpen&&!gedit)h+=fabHTML();else fabOpen=false;
     h+=sidebarHTML();
     a.innerHTML=h;
     bindTop();bindFS();bindTheme();bindCloud();bindModal();bindMusicSheet();bindAddModal();bindSidebar();bindGroupBar();bindGroupsMgr();bindGroupManage();bindGroupNotes();bindFab();
@@ -4413,12 +4668,12 @@ function drawMain(){
     var groupPickerSortEl=document.getElementById("groupPickerSort");if(groupPickerSortEl)groupPickerSortEl.onchange=function(){groupPickerSort=this.value;draw()};
     document.querySelectorAll("[data-group-picker-tab]").forEach(function(b){b.onclick=function(){groupPickerTab=b.dataset.groupPickerTab;draw()}});
     document.querySelectorAll("[data-group-toggle-existing]").forEach(function(b){b.onclick=function(){var g=grp?gById(grp):null;if(!canEditGroup(g))return;var wasAdded=inG(g,b.dataset.groupToggleExisting);toggleG(g,b.dataset.groupToggleExisting);save();draw();toast(wasAdded?"Song removed from "+(g.title||"group"):"Song added to "+(g.title||"group"))}});
-    var addBtn=document.getElementById("add");if(addBtn)addBtn.onclick=function(){if(!isAdmin())return;sidebarOpen=false;addOpen=false;addView="picker";sheetOpen=false;fabOpen=true;draw()};
+    var addBtn=document.getElementById("add");if(addBtn)addBtn.onclick=function(){if(!canAdd())return;sidebarOpen=false;addOpen=false;addView="picker";sheetOpen=false;fabOpen=true;draw()};
     return;
   }
   var s=song();if(!s){view="list";return draw()}
   if(window.__lastSongRendered!==s.id){settingsOpen=false;window.__lastSongRendered=s.id}
-  if(!isAdmin()&&mode==="edit")mode="view";
+  if(!canEdit()&&!(isCreatingSong&&canAdd())&&mode==="edit")mode="view";
   var h,practiceOriginAttr=practiceHeaderOrigin?' style="--practice-shift-x:'+practiceHeaderOrigin.shiftX+'px;--practice-wave-size:'+practiceHeaderOrigin.waveSize+'px;--practice-start-scale:'+practiceHeaderOrigin.startScale+'"':'';
   if(isCreatingSong)h='<div class="top create-song-top"><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>';
   else if(mode==="edit")h='<div class="top create-song-top"><h1>'+esc(s.title||"Untitled")+'</h1><div class="create-song-actions"><button type="button" id="cancelEdit">Cancel</button><button type="button" id="saveEdit" class="p">Save</button></div></div>';
@@ -4456,11 +4711,11 @@ function drawMain(){
     // Always rendered inside a collapsible wrapper so opening and closing can be animated.
     h+='<div class="settings-collapse'+(settingsOpen?' open':'')+'" id="settingsCollapse"'+(settingsOpen?'':' inert aria-hidden="true"')+'><div class="settings-collapse-inner">';
     h+='<div class="setting-panel" id="settings">';
-    h+='<section class="setting-section setting-chart-section"><div class="setting-quick-head"><div class="setting-section-title">Chart Layout</div>'+(isAdmin()&&!practiceMode?'<button type="button" class="setting-edit-action" id="tog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.8 4.8L8 20l11-11-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Edit song</button>':'')+'</div><div class="setting-layout-controls">';
+    h+='<section class="setting-section setting-chart-section"><div class="setting-quick-head"><div class="setting-section-title">Chart Layout</div>'+(canEdit()&&!practiceMode?'<button type="button" class="setting-edit-action" id="tog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.8 4.8L8 20l11-11-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>Edit song</button>':'')+'</div><div class="setting-layout-controls">';
     var vOpts=[];if(songHasStandard(s))vOpts.push(["standard","Lyrics"]);if(songHasChord(s))vOpts.push(["chord","Chords"]);if(s.score)vOpts.push(["score","Score"]);
     var vCur=scoreViewOn(s)?"score":(standardMode?"standard":"chord");
     h+='<div class="setting-field" style="grid-column:1/-1"><label>View</label><div class="chord-style-switch'+(vOpts.length<2?' disabled':'')+'" id="viewModeSwitch" role="group" aria-label="View">'+vOpts.map(function(o){return '<button type="button" data-view="'+o[0]+'" class="'+(o[0]===vCur?'active':'')+'" aria-pressed="'+(o[0]===vCur?'true':'false')+'"'+(vOpts.length<2?' disabled':'')+'>'+o[1]+'</button>'}).join('')+'</div>'+(vOpts.length<2?'<p class="setting-help">'+(songHasChord(s)?'Only a Chord chart is saved for this song.':songHasStandard(s)?'Only a Lyrics chart is saved for this song.':'No chart is saved for this song yet.')+'</p>':'')+'</div>';
-    if(vCur==="score"){var pdp=getDisplayPrefs(s).scorePaper||"a4",PPL=[["a3","A3 (297 \u00D7 420 mm)"],["a4","A4 (210 \u00D7 297 mm)"],["a5","A5 (148 \u00D7 210 mm)"],["b4","B4 (250 \u00D7 353 mm)"],["b5","B5 (176 \u00D7 250 mm)"],["letter","Letter (8.5 \u00D7 11 in)"],["legal","Legal (8.5 \u00D7 14 in)"],["tabloid","Tabloid (11 \u00D7 17 in)"],["executive","Executive (7.25 \u00D7 10.5 in)"],["max","Max height (fit device screen)"]];h+='<div class="setting-field" style="grid-column:1/-1"><label for="scorePaper">Page size</label><select id="scorePaper">'+PPL.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===pdp?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>';var ssz=Math.round((getDisplayPrefs(s).scoreSize||defScoreSize())*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreSize">Note size <span id="scoreSizeVal" style="font-weight:500;color:var(--mut)">'+ssz+'%</span></label><input type="range" id="scoreSize" min="60" max="180" step="5" value="'+ssz+'" style="width:100%;min-height:32px"></div>';var ssp=Math.round((getDisplayPrefs(s).scoreSpacing||1)*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreSpacing">Note spacing <span id="scoreSpacingVal" style="font-weight:500;color:var(--mut)">'+ssp+'%</span></label><input type="range" id="scoreSpacing" min="60" max="200" step="5" value="'+ssp+'" style="width:100%;min-height:32px"></div>';var srg=Math.round((getDisplayPrefs(s).scoreRowGap||1)*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreRowGap">Row spacing <span id="scoreRowGapVal" style="font-weight:500;color:var(--mut)">'+srg+'%</span></label><input type="range" id="scoreRowGap" min="80" max="200" step="5" value="'+srg+'" style="width:100%;min-height:32px"><p class="setting-help">Space between each row of measures. Increase it if lyrics crowd the next row.</p></div>';var slb=Math.round(getDisplayPrefs(s).scoreLabelY||0);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreLabelY">Label height <span id="scoreLabelYVal" style="font-weight:500;color:var(--mut)">'+(slb>0?'+':'')+slb+'</span></label><input type="range" id="scoreLabelY" min="-15" max="80" step="1" value="'+slb+'" style="width:100%;min-height:32px"><p class="setting-help">Moves section labels such as Chorus up or down.</p></div>';h+='<div class="setting-field" style="grid-column:1/-1"><label class="ck" for="scoreNames" style="display:flex;align-items:center;gap:10px;min-height:36px;cursor:pointer"><input type="checkbox" id="scoreNames"'+(getDisplayPrefs(s).noteNames?' checked':'')+' style="width:20px;height:20px;flex:none"><span>Show note names</span></label><p class="setting-help">Writes the note letter (C, D, E\u2026) inside each notehead.</p></div>';}
+    if(vCur==="score"){var pdp=getDisplayPrefs(s).scorePaper||"a4",PPL=[["a3","A3 (297 \u00D7 420 mm)"],["a4","A4 (210 \u00D7 297 mm)"],["a5","A5 (148 \u00D7 210 mm)"],["b4","B4 (250 \u00D7 353 mm)"],["b5","B5 (176 \u00D7 250 mm)"],["letter","Letter (8.5 \u00D7 11 in)"],["legal","Legal (8.5 \u00D7 14 in)"],["tabloid","Tabloid (11 \u00D7 17 in)"],["executive","Executive (7.25 \u00D7 10.5 in)"],["max","Max height (fit device screen)"]];h+='<div class="setting-field" style="grid-column:1/-1"><label for="scorePaper">Page size</label><select id="scorePaper">'+PPL.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===pdp?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>';var ssz=Math.round((getDisplayPrefs(s).scoreSize||defScoreSize())*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreSize">Note size <span id="scoreSizeVal" style="font-weight:500;color:var(--mut)">'+ssz+'%</span></label><input type="range" id="scoreSize" min="60" max="180" step="5" value="'+ssz+'" style="width:100%;min-height:32px"></div>';var ssp=Math.round((getDisplayPrefs(s).scoreSpacing||1)*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreSpacing">Note spacing <span id="scoreSpacingVal" style="font-weight:500;color:var(--mut)">'+ssp+'%</span></label><input type="range" id="scoreSpacing" min="60" max="200" step="5" value="'+ssp+'" style="width:100%;min-height:32px"></div>';var srg=Math.round((getDisplayPrefs(s).scoreRowGap||1)*100);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreRowGap">Row spacing <span id="scoreRowGapVal" style="font-weight:500;color:var(--mut)">'+srg+'%</span></label><input type="range" id="scoreRowGap" min="80" max="200" step="5" value="'+srg+'" style="width:100%;min-height:32px"><p class="setting-help">Space between each row of measures. Increase it if lyrics crowd the next row.</p></div>';var slb=Math.round(getDisplayPrefs(s).scoreLabelY||0);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreLabelY">Label height <span id="scoreLabelYVal" style="font-weight:500;color:var(--mut)">'+(slb>0?'+':'')+slb+'</span></label><input type="range" id="scoreLabelY" min="-15" max="80" step="1" value="'+slb+'" style="width:100%;min-height:32px"><p class="setting-help">Moves section labels such as Chorus up or down.</p></div>';var sly=Math.round(getDisplayPrefs(s).scoreLyricY||0);h+='<div class="setting-field" style="grid-column:1/-1"><label for="scoreLyricY">Lyrics height <span id="scoreLyricYVal" style="font-weight:500;color:var(--mut)">'+(sly>0?'+':'')+sly+'</span></label><input type="range" id="scoreLyricY" min="-20" max="60" step="1" value="'+sly+'" style="width:100%;min-height:32px"><p class="setting-help">Moves the lyrics up or down under the notes.</p></div>';h+='<div class="setting-field" style="grid-column:1/-1"><label class="ck" for="scoreNames" style="display:flex;align-items:center;gap:10px;min-height:36px;cursor:pointer"><input type="checkbox" id="scoreNames"'+(getDisplayPrefs(s).noteNames?' checked':'')+' style="width:20px;height:20px;flex:none"><span>Show note names</span></label><p class="setting-help">Writes the note letter (C, D, E\u2026) inside each notehead.</p></div>';}
     if(vCur==="chord")h+='<div class="setting-field" style="grid-column:1/-1"><label>Chord view</label><div class="chord-style-switch" role="group" aria-label="Chord view"><button type="button" id="chordViewSimple" class="'+(effChordView(s)==="simple"?"active":"")+'" aria-pressed="'+(effChordView(s)==="simple"?'true':'false')+'">Simple</button><button type="button" id="chordViewStandard" class="'+(effChordView(s)==="standard"?"active":"")+'" aria-pressed="'+(effChordView(s)==="standard"?'true':'false')+'">Standard</button></div></div>';
     if(vCur==="chord")h+='<div class="setting-field"><label>Chord detail</label><div class="chord-style-switch" role="group" aria-label="Chord view detail"><button type="button" id="chordStyleStandard" class="'+(effChordStyle(s)==="standard"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="standard"?'true':'false')+'">Standard</button><button type="button" id="chordStyleDetailed" class="'+(effChordStyle(s)==="detailed"?"active":"")+'" aria-pressed="'+(effChordStyle(s)==="detailed"?'true':'false')+'">Detailed</button></div></div>';
     if(vCur==="chord")h+='<div class="setting-field"><label for="pl">Measures per row</label><select id="pl"><option value="auto"'+(shownBars==="auto"?' selected':'')+'>Auto</option><option value="line"'+(shownBars==="line"?' selected':'')+'>As written</option>'+[1,2,3,4,5,6,8].map(function(k){return '<option'+(k===shownBars?' selected':'')+'>'+k+'</option>'}).join('')+'</select></div>';
@@ -4537,18 +4792,23 @@ function drawMain(){
   var vmC=document.getElementById("viewModeChord");if(vmC)vmC.onclick=function(){getDisplayPrefs(s).viewMode="chord";saveDisplayPrefs();draw()};
   var slc=document.getElementById("showLyricsChords");if(slc)slc.onclick=function(){getDisplayPrefs(s).lyricsOnly=false;saveDisplayPrefs();draw()};
   var slo=document.getElementById("showLyricsOnly");if(slo)slo.onclick=function(){getDisplayPrefs(s).lyricsOnly=true;saveDisplayPrefs();draw()};
-  var ssp0=document.getElementById("scoreSpacing");if(ssp0){ssp0.oninput=function(){var v=(+this.value)/100,lb=document.getElementById("scoreSpacingVal");if(lb)lb.textContent=this.value+"%";getDisplayPrefs(s).scoreSpacing=v;SW.setSpacing(v)};ssp0.onchange=function(){saveDisplayPrefs()}}
-  var srg0=document.getElementById("scoreRowGap");if(srg0){srg0.oninput=function(){var v=(+this.value)/100,lb=document.getElementById("scoreRowGapVal");if(lb)lb.textContent=this.value+"%";getDisplayPrefs(s).scoreRowGap=v;SW.setRowGap(v)};srg0.onchange=function(){saveDisplayPrefs()}}
-  var slb0=document.getElementById("scoreLabelY");if(slb0){slb0.oninput=function(){var v=+this.value,lb=document.getElementById("scoreLabelYVal");if(lb)lb.textContent=(v>0?"+":"")+v;getDisplayPrefs(s).scoreLabelY=v;SW.setLabelY(v)};slb0.onchange=function(){saveDisplayPrefs()}}
+  if(!window.__sliderFloat){(function(){var cur=null;function col(){return document.getElementById("settingsCollapse")}
+function end(){if(!cur)return;var f=cur.closest(".setting-field");if(f)f.classList.remove("sl-active");cur=null;var c=col();if(c)c.classList.remove("slider-dragging")}
+window.__sliderFloat=function(el){if(!el)return;el.addEventListener("pointerdown",function(){cur=el;var f=el.closest(".setting-field"),c=col();if(f)f.classList.add("sl-active");if(c)c.classList.add("slider-dragging")});el.addEventListener("blur",end)};
+["pointerup","pointercancel","touchend","touchcancel","mouseup"].forEach(function(t){window.addEventListener(t,end,true)})})()}
+  var ssp0=document.getElementById("scoreSpacing");if(ssp0){ssp0.oninput=function(){var v=(+this.value)/100,lb=document.getElementById("scoreSpacingVal");if(lb)lb.textContent=this.value+"%";getDisplayPrefs(s).scoreSpacing=v;SW.setSpacing(v)};ssp0.onchange=function(){saveDisplayPrefs()};window.__sliderFloat(ssp0)}
+  var srg0=document.getElementById("scoreRowGap");if(srg0){srg0.oninput=function(){var v=(+this.value)/100,lb=document.getElementById("scoreRowGapVal");if(lb)lb.textContent=this.value+"%";getDisplayPrefs(s).scoreRowGap=v;SW.setRowGap(v)};srg0.onchange=function(){saveDisplayPrefs()};window.__sliderFloat(srg0)}
+  var slb0=document.getElementById("scoreLabelY");if(slb0){slb0.oninput=function(){var v=+this.value,lb=document.getElementById("scoreLabelYVal");if(lb)lb.textContent=(v>0?"+":"")+v;getDisplayPrefs(s).scoreLabelY=v;SW.setLabelY(v)};slb0.onchange=function(){saveDisplayPrefs()};window.__sliderFloat(slb0)}
+  var sly0=document.getElementById("scoreLyricY");if(sly0){sly0.oninput=function(){var v=+this.value,lb=document.getElementById("scoreLyricYVal");if(lb)lb.textContent=(v>0?"+":"")+v;getDisplayPrefs(s).scoreLyricY=v;SW.setLyricY(v)};sly0.onchange=function(){saveDisplayPrefs()};window.__sliderFloat(sly0)}
   var spp=document.getElementById("scorePaper");if(spp){spp.onchange=function(){getDisplayPrefs(s).scorePaper=this.value;SW.setPaper(this.value);saveDisplayPrefs()}}
   var snm=document.getElementById("scoreNames");if(snm){snm.onchange=function(){getDisplayPrefs(s).noteNames=this.checked;SW.setNames(this.checked);saveDisplayPrefs()}}
-  var ssl=document.getElementById("scoreSize");if(ssl){ssl.oninput=function(){var v=(+this.value)/100,lb=document.getElementById("scoreSizeVal");if(lb)lb.textContent=this.value+"%";getDisplayPrefs(s).scoreSize=v;SW.setScale(v)};ssl.onchange=function(){saveDisplayPrefs()}}
+  var ssl=document.getElementById("scoreSize");if(ssl){ssl.oninput=function(){var v=(+this.value)/100,lb=document.getElementById("scoreSizeVal");if(lb)lb.textContent=this.value+"%";getDisplayPrefs(s).scoreSize=v;SW.setScale(v)};ssl.onchange=function(){saveDisplayPrefs()};window.__sliderFloat(ssl)}
   var cv0=document.getElementById("chordViewSimple");if(cv0)cv0.onclick=function(){getDisplayPrefs(s).chordView="simple";saveDisplayPrefs();draw()};
   var cv1=document.getElementById("chordViewStandard");if(cv1)cv1.onclick=function(){getDisplayPrefs(s).chordView="standard";saveDisplayPrefs();draw()};
   var cs0=document.getElementById("chordStyleStandard");if(cs0)cs0.onclick=function(){setChordStyle(s,"standard");draw()};
   var cs1=document.getElementById("chordStyleDetailed");if(cs1)cs1.onclick=function(){setChordStyle(s,"detailed");draw()};
   var backBtn=document.getElementById("back");if(backBtn)backBtn.onclick=function(){view="list";draw()};
-  var tog=document.getElementById("tog");if(tog)tog.onclick=function(){if(!isAdmin())return;if(mode==="view"){editScoreTab=scoreViewOn(s);editSnapshot=JSON.parse(JSON.stringify(s));mode="edit";if(s.viewMode==="standard"&&!songHasStandard(s)&&songHasChord(s))s.viewMode="chord";else if(s.viewMode!=="standard"&&!songHasChord(s)&&songHasStandard(s))s.viewMode="standard";}else{mode="view";editSnapshot=null;editScoreTab=false;}draw()};
+  var tog=document.getElementById("tog");if(tog)tog.onclick=function(){if(!canEdit())return;if(mode==="view"){editScoreTab=scoreViewOn(s);editSnapshot=JSON.parse(JSON.stringify(s));mode="edit";if(s.viewMode==="standard"&&!songHasStandard(s)&&songHasChord(s))s.viewMode="chord";else if(s.viewMode!=="standard"&&!songHasChord(s)&&songHasStandard(s))s.viewMode="standard";}else{mode="view";editSnapshot=null;editScoreTab=false;}draw()};
   function setKey(r,m){var prefs=getDisplayPrefs(s);prefs.key=r+(m?"m":"");saveDisplayPrefs();draw()}
   function shift(d){var o=parseKey(displayKey(s)),n=N[((idx(o.r)+d)%12+12)%12];setKey(n,o.m)}
   if(1){
@@ -4576,7 +4836,7 @@ function drawMain(){
         ta.value=ta.value.slice(0,st)+t+ta.value.slice(en);ta.selectionStart=ta.selectionEnd=st+t.length;ta.focus();ta.oninput()}});
     }
     var del=document.getElementById("del");if(del)del.onclick=function(){
-      if(!isAdmin())return toast("Sign in as Admin to delete songs.",2500);
+      if(!canDel())return noPerm("delete songs");
       var songTitle=String(s.title||"Untitled").trim()||"Untitled";
       if(!window.confirm('Are you sure you want to delete "'+songTitle+'"? This action cannot be undone.'))return;
       killItem(s.id);
@@ -5196,7 +5456,7 @@ if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add("
 load();
 if(songs.length===1&&songs[0].id==="sample-1"&&!songs[0].u&&!sent["sample-1"]){songs[0].u=1;sent["sample-1"]=sig(songs[0]);store()}
 try{var th=localStorage.getItem(LS+":theme");if(th)applyTheme(th)}catch(e){}
-syncMsg=sbOn()?(isAdmin()?"Signed in as administrator":"Signed in · view only"):"Saved on this device";
+syncMsg=roleLabel();
 history.replaceState({chordbook:mobileNavState()},"");
 var navResumeY=0,navResumePractice=false;
 try{
@@ -5325,7 +5585,7 @@ if("serviceWorker" in navigator)window.addEventListener("load",function(){naviga
 (function(){
 
 
-const EMB=false,$=id=>document.getElementById('sw_'+id),L='CDEFGAB',SEMI=[0,2,4,5,7,9,11];let SH=170,SRG=1,LBY=0,W=1000,NZ=1,NS=1,SPR=1,SPF=1,NN=false;const stemX=()=>RO&&NN?8.6:5.6;
+const EMB=false,$=id=>document.getElementById('sw_'+id),L='CDEFGAB',SEMI=[0,2,4,5,7,9,11];let SH=170,SRG=1,LBY=0,LYY=0,W=1000,NZ=1,NS=1,SPR=1,SPF=1,NN=false;const stemX=()=>RO&&NN?8.6:5.6;
 const KEYS={Cb:-7,Gb:-6,Db:-5,Ab:-4,Eb:-3,Bb:-2,F:-1,C:0,G:1,D:2,A:3,E:4,B:5,'F#':6,'C#':7},SH_O=[38,35,39,36,33,37,34],FL_O=[34,37,33,36,32,35,31];
 /* Engraved notation glyphs as vector paths (outlines from GNU FreeSerif, 1000 units/em, y-up).
    Drawn as paths so they look identical on every device instead of depending on installed fonts. */
@@ -5371,8 +5631,8 @@ function layout(){const [nu,de]=TS(),cap=nu*4/de,A=S.L,multi=A.some((a,i)=>i&&a.
 function noteSvg(it,top,bd){const e=it.e,x=it.x,nmv=RO&&NN&&!e.rest,hrx=nmv?9:6.3,hry=nmv?6.8:4.7,lw=nmv?14:10,stx=nmv?8.6:5.6,on=((it.i==sel&&it.ly==cl)||(it.i==pi&&it.ly==0));const sup=e.rest&&it.ly>0;if(sup&&RO&&!on)return'';let o=`<g style="color:${on?'var(--sw-acc)':LC[it.ly||0]}${sup&&!on?';opacity:.28':''}">`;
  if(on)o+=`<rect x="${x-it.w/2}" y="${top-40}" width="${it.w}" height="150" fill="currentColor" opacity=".09" rx="4"/>`;
  if(e.chord)o+=`<text x="${x}" y="${top-24}" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" font-family="Georgia,serif">${esc(e.chord)}</text>`;
- if(e.lyric)o+=`<text x="${x}" y="${top+92}" text-anchor="middle" font-size="15" fill="#1d1b18" font-family="Georgia,serif">${esc(e.lyric)}</text>`;
- if(e.lyric2)o+=`<text x="${x}" y="${top+110}" text-anchor="middle" font-size="15" fill="#1d1b18" font-family="Georgia,serif">${esc(e.lyric2)}</text>`;
+ if(e.lyric)o+=`<text x="${x}" y="${top+92+(RO?LYY:0)}" text-anchor="middle" font-size="15" fill="#1d1b18" font-family="Georgia,serif">${esc(e.lyric)}</text>`;
+ if(e.lyric2)o+=`<text x="${x}" y="${top+110+(RO?LYY:0)}" text-anchor="middle" font-size="15" fill="#1d1b18" font-family="Georgia,serif">${esc(e.lyric2)}</text>`;
  const dy=top+20;let dotY;
  if(e.rest){const d=e.dur;top+=it.fd===undefined?0:(it.fd?-8:8);
   if(d==4)o+=`<rect x="${x-7}" y="${top+10}" width="14" height="5" fill="currentColor"/>`;
@@ -5792,6 +6052,7 @@ window.SW={onChange:null,onBar:null,onEnd:null,isPlaying:()=>playing,
  setScale(v,quiet){NS=Math.max(.5,Math.min(2,+v||1));if(!quiet&&RO&&S&&$('host'))render()},
  setRowGap(v,quiet){SRG=Math.max(.8,Math.min(2,+v||1));if(!quiet&&RO&&S&&$('host'))render()},
  setLabelY(v,quiet){LBY=Math.max(-15,Math.min(80,+v||0));if(!quiet&&RO&&S&&$('host'))render()},
+ setLyricY(v,quiet){LYY=Math.max(-20,Math.min(60,+v||0));if(!quiet&&RO&&S&&$('host'))render()},
  setNames(v,quiet){NN=!!v;if(!quiet&&RO&&S&&$('host'))render()},
  refit(){if(paperKey==='max'&&RO&&S&&$('host')&&Math.abs(maxPH()-PHU)>8)render()},
  setPaper(k,quiet){paperKey=(k==='max'||PAPERS[k])?k:'a4';if(paperKey==='max'){PWU=1000;PHU=maxPH();if(!quiet&&RO&&S&&$('host'))render();return}k=paperKey;const d=PAPERS[k]||PAPERS.a4;PWU=k==='a4'||!PAPERS[k]?1000:Math.round(d[0]/210*1000);PHU=k==='a4'||!PAPERS[k]?1414:Math.round(d[1]/210*1000);if(!quiet&&RO&&S&&$('host'))render()},
@@ -5885,7 +6146,7 @@ var loadedId=null;
 var __refitT=null;window.addEventListener('resize',function(){clearTimeout(__refitT);__refitT=setTimeout(function(){try{SW.refit()}catch(e){}},200)});
 /* The score is editable only on the Music Score tab of Edit song (original key). Everywhere else it is read-only. */
 function lk(s){var ed=scoreTabOn(s);return s.id+':'+(ed?0:displayTranspose(s))+':'+(ed?'e':'v')}
-function ensure(s){var ed=scoreTabOn(s),k=lk(s);if(loaded===k)return;loaded=k;loadedId=s.id;try{SW.setPaper(getDisplayPrefs(s).scorePaper||'a4',true);SW.setScale(getDisplayPrefs(s).scoreSize||defScoreSize(),true);SW.setSpacing(getDisplayPrefs(s).scoreSpacing||1,true);SW.setRowGap(getDisplayPrefs(s).scoreRowGap||1,true);SW.setLabelY(getDisplayPrefs(s).scoreLabelY||0,true);SW.setNames(!!getDisplayPrefs(s).noteNames,true)}catch(e){}SW.load(Object.assign({},s.score,{title:s.title||s.score.title||'',composer:s.artist||s.score.composer||''}),!ed,ed?0:displayTranspose(s))}
+function ensure(s){var ed=scoreTabOn(s),k=lk(s);if(loaded===k)return;loaded=k;loadedId=s.id;try{SW.setPaper(getDisplayPrefs(s).scorePaper||'a4',true);SW.setScale(getDisplayPrefs(s).scoreSize||defScoreSize(),true);SW.setSpacing(getDisplayPrefs(s).scoreSpacing||1,true);SW.setRowGap(getDisplayPrefs(s).scoreRowGap||1,true);SW.setLabelY(getDisplayPrefs(s).scoreLabelY||0,true);SW.setLyricY(getDisplayPrefs(s).scoreLyricY||0,true);SW.setNames(!!getDisplayPrefs(s).noteNames,true)}catch(e){}SW.load(Object.assign({},s.score,{title:s.title||s.score.title||'',composer:s.artist||s.score.composer||''}),!ed,ed?0:displayTranspose(s))}
 SW.onChange=function(S){var s=songs.filter(function(x){return x.id===loadedId})[0];if(!s)return;var g=gen(S);
   if(S.title)s.title=S.title;if(S.composer!=null)s.artist=S.composer;
   s.key=normKey(g.key);s.chart=g.chart;s.standardText=g.std;s.tempo=String(S.tempo);s.ts=S.ts;s.score=S;save()};
@@ -5901,17 +6162,17 @@ function post(){var s=cs();if(SW.isPlaying()&&(view!=='song'||!s||!s.score)){SW.
   if(scoreTabOn(s)&&s.score){var es=document.getElementById('swEditSlot');if(es){es.appendChild(root());cw.style.display='none';ensure(s)}}
   else if(!isCreatingSong&&scoreViewOn(s)){var slot=document.createElement('div');slot.id='swSlot';cw.parentNode.insertBefore(slot,cw);slot.appendChild(root());try{root().style.setProperty('--z',zoom)}catch(e){}cw.style.display='none';ensure(s);try{SW.refit()}catch(e){}try{perfApply()}catch(e){}}
   else if(s.score&&mode==='edit'){var n=document.createElement('div');n.className='mut';n.style.cssText='margin:8px 0;font-size:13px';n.textContent='This song has a music score. Chart changes here are replaced when the score changes. Open the Music Score tab to edit the notes.';cw.parentNode.insertBefore(n,cw)}}
-function makeScore(s){if(s.score)return true;if(!isAdmin()){toast('No score for this song.',2200);return false}
+function makeScore(s){if(s.score)return true;if(!(canAdd()||canEdit())){toast('No score for this song.',2200);return false}
     if(s.chart&&!confirm('Create a score from this chart? You can then edit the notes, and the chart will be rebuilt from the score.'))return false;
     s.score=s.chart?toScore(s):{title:s.title||'',composer:s.artist||'',clef:'treble',key:'C',ts:'4/4',tempo:100,inst:'piano',L:[[],[],[],[]]};loaded=null;save();return true}
 function chooseScore(s){if(!makeScore(s)){draw();return}
   getDisplayPrefs(s).viewMode='score';saveDisplayPrefs();draw()}
 return{gen:gen,plainLyrics:function(S){try{return gen(S).ly||''}catch(e){return ''}},toScore:toScore,chooseScore:chooseScore,createScore:makeScore,
  flush:function(){if(window.SW&&SW.flush)SW.flush()},discard:function(){if(window.SW&&SW.discard)SW.discard()},reset:function(){loaded=null},
- openNew:function(){if(!isAdmin())return toast('Sign in as Admin to add songs.',2500);
+ openNew:function(){if(!canAdd())return noPerm("add songs");
    var s={id:uid(),title:'',artist:'',key:'C',chart:'',score:{title:'',composer:'',clef:'treble',key:'C',ts:'4/4',tempo:100,inst:'piano',L:[[],[],[],[]]}};
    songs.push(s);save();cur=s.id;view='song';mode='edit';isCreatingSong=true;editScoreTab=true;loaded=null;getDisplayPrefs(s).viewMode='score';saveDisplayPrefs();draw();window.scrollTo(0,0)},
- importFiles:async function(files){if(!isAdmin())return toast('Sign in as Admin to add songs.',2500);
+ importFiles:async function(files){if(!canAdd())return noPerm("add songs");
    var ok=[],bad=[],i,f,S0,g,base,tick=function(){return new Promise(function(r){setTimeout(r,0)})};
    for(i=0;i<files.length;i++){f=files[i];toast('Importing '+(i+1)+' of '+files.length+': '+f.name,60000);await tick();
      try{S0=await SW.parseFile(f);g=gen(S0);base=f.name.replace(/\.(musicxml|xml|mxl)$/i,'');
