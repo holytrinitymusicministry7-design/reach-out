@@ -5448,7 +5448,7 @@ window.addEventListener("popstate",function(e){
   var y=window.scrollY||0;
   navRestoring=true;restoreMobileNav(target);
   if(closingPractice)cur=current.cur; /* the song on screen may differ from the one saved in the entry */
-  baseDraw();navRestoring=false;
+  /* draw() (not baseDraw) so the score container is parked safely before the page is rebuilt; navRestoring stops it from adding history entries. */draw();navRestoring=false;
   updatePracticeButtonVisibility();
   if(closingPractice){practiceNotice(false);window.scrollTo(0,y)}
   else window.scrollTo(0,0);
@@ -6194,7 +6194,18 @@ function toScore(s){var it=parseChart(s.chart||''),ts=/^\d{1,2}\/\d{1,2}$/.test(
     if(sec!==null){sub[0].sec=sec;sec=null}ev.push.apply(ev,sub)})});
   return{title:s.title||'',composer:s.artist||'',clef:'treble',key:maj,mode:kp.m?'minor':'major',ts:ts,tempo:+s.tempo||100,inst:'piano',L:[ev,[],[],[]]}}
 var loadedId=null;
-var __refitT=null;window.addEventListener('resize',function(){clearTimeout(__refitT);__refitT=setTimeout(function(){try{SW.refit()}catch(e){}},200)});
+var __refitT=null;
+function scheduleScoreRefit(){clearTimeout(__refitT);__refitT=setTimeout(function(){
+  try{
+    var s=cs();
+    if(view==='song'&&s&&(scoreViewOn(s)||scoreTabOn(s))&&root()&&root().parentNode&&root().parentNode!==stash()){
+      SW.refit();try{perfApply()}catch(e){}
+    }
+  }catch(e){}
+},220)}
+window.addEventListener('resize',scheduleScoreRefit);
+window.addEventListener('orientationchange',scheduleScoreRefit);
+if(window.visualViewport)window.visualViewport.addEventListener('resize',scheduleScoreRefit);
 /* The score is editable only on the Music Score tab of Edit song (original key). Everywhere else it is read-only. */
 function lk(s){var ed=scoreTabOn(s);return s.id+':'+(ed?0:displayTranspose(s))+':'+(ed?'e':'v')}
 function ensure(s){var ed=scoreTabOn(s),k=lk(s);if(loaded===k)return;loaded=k;loadedId=s.id;try{SW.setTabMode(ed?'score':(getDisplayPrefs(s).scoreLayout||'both'),true);SW.setTabOctave(ed?0:+(getDisplayPrefs(s).scoreTabOctave||0),true);SW.setPaper(getDisplayPrefs(s).scorePaper||'a4',true);SW.setScale(getDisplayPrefs(s).scoreSize||defScoreSize(),true);SW.setSpacing(getDisplayPrefs(s).scoreSpacing||1,true);SW.setRowGap(getDisplayPrefs(s).scoreRowGap||1,true);SW.setLabelY(getDisplayPrefs(s).scoreLabelY||0,true);SW.setLyricY(getDisplayPrefs(s).scoreLyricY||0,true);SW.setNames(!!getDisplayPrefs(s).noteNames,true)}catch(e){}SW.load(Object.assign({},s.score,{title:s.title||s.score.title||'',composer:s.artist||s.score.composer||''}),!ed,ed?0:displayTranspose(s))}
@@ -6208,11 +6219,42 @@ window.SWHOST={ctx:function(){var AC=window.AudioContext||window.webkitAudioCont
   note:function(m,t,d,v,to){var i=pbVoice('c');return !!i&&pbSample(i,t,m,d,Math.max(.04,v*.3),to||pbG.c)}};
 var stash=function(){return document.getElementById('swStash')},root=function(){return document.getElementById('swRoot')};
 var _d=draw;draw=function(){var r=root(),st=stash();if(r&&r.parentNode!==st)st.appendChild(r);_d.apply(this,arguments);try{post()}catch(e){}};
-function post(){var s=cs();if(SW.isPlaying()&&(view!=='song'||!s||!s.score)){SW.stop()}
-  if(view!=='song'||!s)return;var cw=document.getElementById('cw');if(!cw)return;
-  if(scoreTabOn(s)&&s.score){var es=document.getElementById('swEditSlot');if(es){es.appendChild(root());cw.style.display='none';ensure(s)}}
-  else if(!isCreatingSong&&scoreViewOn(s)){var slot=document.createElement('div');slot.id='swSlot';cw.parentNode.insertBefore(slot,cw);slot.appendChild(root());try{root().style.setProperty('--z',zoom)}catch(e){}cw.style.display='none';ensure(s);try{SW.refit()}catch(e){}try{perfApply()}catch(e){}}
-  else if(s.score&&mode==='edit'){var n=document.createElement('div');n.className='mut';n.style.cssText='margin:8px 0;font-size:13px';n.textContent='This song has a music score. Chart changes here are replaced when the score changes. Open the Music Score tab to edit the notes.';cw.parentNode.insertBefore(n,cw)}}
+function post(){
+  var s=cs();
+  /* A score may be detached into the stash while the list, another tool, or a
+     non-score chart is drawn. Invalidate the renderer cache here: otherwise
+     reopening the same song can hit ensure()'s cache and leave the score stale
+     after mobile Back / playback / orientation transitions. */
+  if(view!=='song'||!s){
+    if(SW.isPlaying())SW.stop();
+    loaded=null;loadedId=null;
+    return;
+  }
+  var cw=document.getElementById('cw');if(!cw)return;
+  if(scoreTabOn(s)&&s.score){
+    var es=document.getElementById('swEditSlot');
+    if(es){es.appendChild(root());cw.style.display='none';ensure(s);try{SW.refit()}catch(e){}}
+  }
+  else if(!isCreatingSong&&scoreViewOn(s)){
+    var slot=document.createElement('div');slot.id='swSlot';cw.parentNode.insertBefore(slot,cw);
+    slot.appendChild(root());
+    try{root().style.setProperty('--z',zoom)}catch(e){}
+    cw.style.display='none';
+    ensure(s);try{SW.refit()}catch(e){}try{perfApply()}catch(e){}
+  }
+  else{
+    /* Leaving the score view (including the Score/Chords layout switch) must
+       invalidate the cached score so the next visit always reloads cleanly. */
+    if(SW.isPlaying())SW.stop();
+    loaded=null;loadedId=null;
+    if(s.score&&mode==='edit'){
+      var n=document.createElement('div');n.className='mut';
+      n.style.cssText='margin:8px 0;font-size:13px';
+      n.textContent='This song has a music score. Chart changes here are replaced when the score changes. Open the Music Score tab to edit the notes.';
+      cw.parentNode.insertBefore(n,cw);
+    }
+  }
+}
 function makeScore(s){if(s.score)return true;if(!(canAdd()||canEdit())){toast('No score for this song.',2200);return false}
     if(s.chart&&!confirm('Create a score from this chart? You can then edit the notes, and the chart will be rebuilt from the score.'))return false;
     s.score=s.chart?toScore(s):{title:s.title||'',composer:s.artist||'',clef:'treble',key:'C',ts:'4/4',tempo:100,inst:'piano',L:[[],[],[],[]]};loaded=null;save();return true}
